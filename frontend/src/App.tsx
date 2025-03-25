@@ -52,6 +52,7 @@ const App = () => {
         spotifyUrl: "#",
         youtubeUrl: "#"
       }
+    ]);
   };
 
   return (
