@@ -3,10 +3,10 @@ import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import AuthPage from "./AuthPage.tsx";
 import { useState } from "react";
 import { Song } from "./models/Song.ts";
-
+import { useAuth } from "./context/AuthContext.tsx";
 
 const App = () => {
-  const [isSignedIn, setIsSignedIn] = useState(true);
+  const { isAuthenticated, user } = useAuth();
   const [playlistLink, setPlaylistLink] = useState("");
   const [songs, setSongs] = useState<Song[]>([]);
 
@@ -65,7 +65,7 @@ const App = () => {
               className="bg-black min-h-screen flex flex-col items-center justify-center relative overflow-hidden p-6">
 
               <div className="absolute inset-0 flex items-center justify-center">
-                { isSignedIn ? (
+                { isAuthenticated ? (
                   <div
                     className="w-[600px] h-[600px] bg-red-500 opacity-20 blur-3xl rounded-full"></div>
                 ) : (
@@ -73,14 +73,15 @@ const App = () => {
                 ) }
               </div>
 
-              { isSignedIn && (
+              { isAuthenticated && (
                 <div className="absolute top-4 right-4 text-white">
-                  <FaUser className="text-2xl cursor-pointer"/>
+                  { user?.email }
                 </div>
               ) }
 
-              <div className="relative z-10 flex flex-col items-center text-white w-full max-w-lg">
-                { isSignedIn ? (
+              <div
+                className="relative z-10 flex flex-col items-center text-white w-full max-w-lg">
+                { isAuthenticated ? (
                   <>
                     <h1 className="text-5xl font-extrabold text-red-400">ListPort</h1>
                     <div className="mt-6 w-full space-y-4">
