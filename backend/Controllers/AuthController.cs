@@ -4,7 +4,6 @@ using backend.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace backend.Controllers;
 
@@ -49,28 +48,38 @@ public class AuthController : ControllerBase {
       }
 
       return StatusCode(500, createdUser.Errors);
-    } catch (Exception ex) {
+    }
+    catch (Exception ex) {
       return StatusCode(500, ex);
     }
   }
 
   [HttpPost("login")]
   public async Task<IActionResult> Login(LoginDto loginDto) {
-    if (!ModelState.IsValid) return BadRequest(ModelState);
+    if (!ModelState.IsValid)
+      return BadRequest(ModelState);
 
-    User? user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == loginDto.Email);
+    var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == loginDto.Email);
+    if (user == null)
+      return Unauthorized("Invalid login information.");
 
-    if (user == null) return Unauthorized("Invalid login information.");
+    var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
+    if (!result.Succeeded)
+      return Unauthorized("Invalid login information.");
 
-    SignInResult result =
-      await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
+    var token = _tokenService.CreateToken(user);
 
-    if (!result.Succeeded) return Unauthorized("Invalid login information.");
+    Response.Cookies.Append("jwt", token, new CookieOptions {
+      HttpOnly = true,
+      Secure = true,
+      SameSite = SameSiteMode.Lax,
+      Expires = DateTimeOffset.UtcNow.AddDays(14)
+    });
 
     return Ok(new AuthorizedUserDto {
       UserName = user.UserName,
       Email = user.Email,
-      Token = _tokenService.CreateToken(user)
+      Token = token
     });
   }
 }

@@ -12,8 +12,17 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
-string connectionString = "server=localhost;user=root;password=pass123;database=listport";
+string connectionString = "server=localhost;user=root;password=pass123.;database=listport";
 MySqlServerVersion mysqlVersion = new(new Version(8, 0, 40));
+
+builder.Services.AddCors(options => {
+  options.AddPolicy("AllowFrontend",
+    builder => builder
+      .WithOrigins("http://localhost:5173")
+      .AllowAnyMethod()
+      .AllowAnyHeader()
+      .AllowCredentials());
+});
 
 builder.Services.AddDbContext<AppDbContext>(options =>
   options.UseMySql(connectionString, mysqlVersion)
@@ -43,14 +52,25 @@ builder.Services.AddAuthentication(options => {
     IssuerSigningKey = new SymmetricSecurityKey(
       Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"]))
   };
+
+  options.Events = new JwtBearerEvents {
+    OnMessageReceived = context => {
+      if (context.Request.Cookies.ContainsKey("jwt")) {
+        context.Token = context.Request.Cookies["jwt"];
+      }
+
+      return Task.CompletedTask;
+    }
+  };
 });
 
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 WebApplication app = builder.Build();
 
 app.UseHttpsRedirection();
-
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
