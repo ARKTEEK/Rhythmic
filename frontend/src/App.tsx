@@ -6,11 +6,12 @@ import {
   FaYoutube,
 } from "react-icons/fa";
 import { Link, Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import AuthPage from "./AuthPage.tsx";
 import { useAuth } from "./context/AuthContext.tsx";
-import GoogleOAuthCallback from "./GoogleOAuthCallback.tsx";
+import GoogleOAuthCallback from "./pages/oauth/GoogleOAuthCallback.tsx";
 import { Song } from "./models/Song.ts";
-import OAuthComplete from "./OAuthComplete.tsx";
+import OAuthComplete from "./pages/oauth/OAuthComplete.tsx";
+import OAuthError from "./pages/oauth/OAuthError.tsx";
+import AuthPage from "./pages/AuthPage.tsx";
 
 const App = () => {
   const { isAuthenticated, user } = useAuth();
@@ -201,10 +202,7 @@ const App = () => {
           element={<GoogleOAuthCallback />}
         />
         <Route path="/oauth/complete" element={<OAuthComplete />} />
-        <Route
-          path="/api/oauth/google/error"
-          element={<div>OAuth failed.</div>}
-        />
+        <Route path="/oauth/error" element={<OAuthError />} />
       </Routes>
     </Router>
   );

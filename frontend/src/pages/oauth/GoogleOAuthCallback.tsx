@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { handleGoogleOAuthCallback } from "./services/AuthService";
+import { handleGoogleOAuthCallback } from "../../services/AuthService";
 
 const GoogleOAuthCallback = () => {
   const navigate = useNavigate();
@@ -9,7 +9,6 @@ const GoogleOAuthCallback = () => {
 
   useEffect(() => {
     if (alreadyCalled.current) return;
-
     alreadyCalled.current = true;
 
     const params = new URLSearchParams(window.location.search);
@@ -41,7 +40,19 @@ const GoogleOAuthCallback = () => {
     return () => controller.abort();
   }, [navigate]);
 
-  return <div>{error ?? "Linking your Google account..."}</div>;
+  return (
+    <div className="bg-black min-h-screen flex flex-col items-center justify-center relative overflow-hidden p-6">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-96 h-96 bg-red-500 opacity-20 blur-3xl rounded-full"></div>
+      </div>
+
+      <div className="relative z-10 w-full max-w-lg text-white text-center">
+        <p className="text-xl font-medium">
+          {error ?? "Linking your Google account..."}
+        </p>
+      </div>
+    </div>
+  );
 };
 
 export default GoogleOAuthCallback;
