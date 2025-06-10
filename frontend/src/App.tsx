@@ -7,9 +7,11 @@ import {
 } from "react-icons/fa";
 import { Link, Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import ProfilePopup from "./components/ProfilePopup.tsx";
+import PublicRoute from "./components/PublicRoute.tsx";
 import { useAuth } from "./context/AuthContext.tsx";
 import { Song } from "./models/Song.ts";
 import AuthPage from "./pages/AuthPage.tsx";
+import NotFound from "./pages/NotFound.tsx";
 import GoogleOAuthCallback from "./pages/oauth/GoogleOAuthCallback.tsx";
 import OAuthComplete from "./pages/oauth/OAuthComplete.tsx";
 import OAuthError from "./pages/oauth/OAuthError.tsx";
@@ -167,7 +169,7 @@ const App = () => {
                       Your gateway to seamless playlist management
                     </p>
                     <Link
-                      to="/auth/signin"
+                      to="/auth"
                       className="mt-6 flex items-center space-x-3 bg-red-600 px-8 py-3 rounded-full shadow-lg hover:bg-red-500 transition text-white font-medium text-lg"
                     >
                       <FaSignInAlt className="text-2xl" />
@@ -201,13 +203,23 @@ const App = () => {
           }
         />
 
-        <Route path="/auth/:action" element={<AuthPage />} />
+        <Route
+          path="/auth"
+          element={
+            <PublicRoute>
+              <AuthPage />
+            </PublicRoute>
+          }
+        />
+
         <Route
           path="/api/oauth/google/callback"
           element={<GoogleOAuthCallback />}
         />
         <Route path="/oauth/complete" element={<OAuthComplete />} />
         <Route path="/api/oauth/error" element={<OAuthError />} />
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );
