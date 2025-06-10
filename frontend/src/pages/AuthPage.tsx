@@ -3,7 +3,7 @@ import { FaEye, FaEyeSlash, FaSignInAlt, FaUserPlus } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { loginUser, registerUser } from "../services/AuthService";
-import { AuthData } from "../entities/User";
+import { AuthData } from "../models/User";
 
 const AuthPage = () => {
   const { login } = useAuth();

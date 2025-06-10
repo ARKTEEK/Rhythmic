@@ -1,5 +1,5 @@
 import { jwtDecode } from "jwt-decode";
-import { UserDto } from "../entities/User.ts";
+import { UserDto } from "../models/User.ts";
 import {
   createContext,
   ReactNode,

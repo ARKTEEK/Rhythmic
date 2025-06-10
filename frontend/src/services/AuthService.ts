@@ -1,6 +1,6 @@
 import axios from "axios";
 import { API_BASE_URL } from "../configs/Config.ts";
-import { AuthData, AuthResponse } from "../entities/User.ts";
+import { AuthData, AuthResponse } from "../models/User.ts";
 
 export const registerUser = async (data: AuthData): Promise<AuthResponse> => {
   const response = await axios.post<AuthResponse>(
