@@ -1,4 +1,4 @@
-import { Dialog } from "@headlessui/react";
+import { Dialog, DialogPanel } from "@headlessui/react";
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash, FaSpotify, FaYoutube } from "react-icons/fa";
 import { FaX } from "react-icons/fa6";
@@ -31,7 +31,7 @@ const ProfilePopup: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
         aria-hidden="true"
       />
 
-      <Dialog.Panel className="relative bg-white/10 border border-white/30 shadow-2xl backdrop-blur-xl rounded-2xl w-full max-w-2xl p-6 text-white">
+      <DialogPanel className="relative bg-white/10 border border-white/30 shadow-2xl backdrop-blur-xl rounded-2xl w-full max-w-2xl p-6 text-white">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-white hover:text-red-400 transition"
@@ -130,7 +130,7 @@ const ProfilePopup: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
             </button>
           </div>
         </div>
-      </Dialog.Panel>
+      </DialogPanel>
     </Dialog>
   );
 };
