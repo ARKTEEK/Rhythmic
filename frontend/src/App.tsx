@@ -6,6 +6,7 @@ import {
   FaYoutube,
 } from "react-icons/fa";
 import { Link, Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import ProfileDropdown from "./components/ProfileDropdown.tsx";
 import ProfilePopup from "./components/ProfilePopup.tsx";
 import PublicRoute from "./components/PublicRoute.tsx";
 import { useAuth } from "./context/AuthContext.tsx";
@@ -21,6 +22,7 @@ const App = () => {
   const [playlistLink, setPlaylistLink] = useState("");
   const [songs, setSongs] = useState<Song[]>([]);
   const [showPopup, setShowPopup] = useState(false);
+  const { logout } = useAuth();
 
   const handleConvert = () => {
     setSongs([
@@ -84,12 +86,11 @@ const App = () => {
 
               {isAuthenticated && (
                 <div className="absolute top-4 right-4 text-white text-right">
-                  <button
-                    onClick={() => setShowPopup(true)}
-                    className="font-semibold hover:text-red-400"
-                  >
-                    {user?.email}
-                  </button>
+                  <ProfileDropdown
+                    user={user}
+                    onSettings={() => setShowPopup(true)}
+                    onLogout={logout}
+                  />
                   <ProfilePopup
                     isOpen={showPopup}
                     onClose={() => setShowPopup(false)}
