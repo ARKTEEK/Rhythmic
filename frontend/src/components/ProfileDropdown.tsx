@@ -23,28 +23,20 @@ const ProfileDropdown = ({
       <MenuItems className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-48 origin-top bg-white/10 border-2 border-gray-700 rounded-xl backdrop-blur-xl shadow-lg ring-black/5 focus:outline-none z-50">
         <div className="p-1 text-white">
           <MenuItem>
-            {({ active }) => (
-              <button
-                onClick={onSettings}
-                className={`${
-                  active ? "bg-white/20" : ""
-                } w-full text-left px-4 py-2 rounded-md transition`}
-              >
-                Settings
-              </button>
-            )}
+            <button
+              onClick={onSettings}
+              className="w-full text-left px-4 py-2 rounded-md transition data-[focus]:bg-white/20"
+            >
+              Settings
+            </button>
           </MenuItem>
           <MenuItem>
-            {({ active }) => (
-              <button
-                onClick={onLogout}
-                className={`${
-                  active ? "bg-white/20" : ""
-                } w-full text-left px-4 py-2 rounded-md transition`}
-              >
-                Logout
-              </button>
-            )}
+            <button
+              onClick={onLogout}
+              className="w-full text-left px-4 py-2 rounded-md transition data-[focus]:bg-white/20"
+            >
+              Logout
+            </button>
           </MenuItem>
         </div>
       </MenuItems>
