@@ -6,21 +6,19 @@ import {
   FaYoutube,
 } from "react-icons/fa";
 import { Link, Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import ProfilePopup from "./components/ProfilePopup.tsx";
 import { useAuth } from "./context/AuthContext.tsx";
-import GoogleOAuthCallback from "./pages/oauth/GoogleOAuthCallback.tsx";
 import { Song } from "./models/Song.ts";
+import AuthPage from "./pages/AuthPage.tsx";
+import GoogleOAuthCallback from "./pages/oauth/GoogleOAuthCallback.tsx";
 import OAuthComplete from "./pages/oauth/OAuthComplete.tsx";
 import OAuthError from "./pages/oauth/OAuthError.tsx";
-import AuthPage from "./pages/AuthPage.tsx";
 
 const App = () => {
   const { isAuthenticated, user } = useAuth();
   const [playlistLink, setPlaylistLink] = useState("");
   const [songs, setSongs] = useState<Song[]>([]);
-
-  const handleLink = () => {
-    window.location.href = "https://localhost:7184/api/oauth/google/login";
-  };
+  const [showPopup, setShowPopup] = useState(false);
 
   const handleConvert = () => {
     setSongs([
@@ -83,10 +81,17 @@ const App = () => {
               </div>
 
               {isAuthenticated && (
-                <div className="absolute top-4 right-4 text-white">
-                  {user?.email}
-
-                  <button onClick={handleLink}>Link YouTube Account</button>
+                <div className="absolute top-4 right-4 text-white text-right">
+                  <button
+                    onClick={() => setShowPopup(true)}
+                    className="font-semibold hover:text-red-400"
+                  >
+                    {user?.email}
+                  </button>
+                  <ProfilePopup
+                    isOpen={showPopup}
+                    onClose={() => setShowPopup(false)}
+                  />
                 </div>
               )}
 
@@ -202,7 +207,7 @@ const App = () => {
           element={<GoogleOAuthCallback />}
         />
         <Route path="/oauth/complete" element={<OAuthComplete />} />
-        <Route path="/oauth/error" element={<OAuthError />} />
+        <Route path="/api/oauth/error" element={<OAuthError />} />
       </Routes>
     </Router>
   );
