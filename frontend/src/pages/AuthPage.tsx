@@ -7,15 +7,22 @@ import { AuthData } from "../entities/User";
 
 const AuthPage = () => {
   const { login } = useAuth();
-  const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [isSignUp, setIsSignUp] = useState(false);
   const [username, setUsername] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const navigate = useNavigate();
+
+  const handleTypeChange = () => {
+    setPassword("");
+    setUsername("");
+    setEmail("");
+    setIsSignUp(!isSignUp);
+  };
 
   const handleAuth = async () => {
     setLoading(true);
@@ -119,7 +126,7 @@ const AuthPage = () => {
               Already have an account?{" "}
               <button
                 className="text-red-400 hover:underline"
-                onClick={() => setIsSignUp(false)}
+                onClick={handleTypeChange}
               >
                 Sign In
               </button>
@@ -129,7 +136,7 @@ const AuthPage = () => {
               Don't have an account?{" "}
               <button
                 className="text-red-400 hover:underline"
-                onClick={() => setIsSignUp(true)}
+                onClick={handleTypeChange}
               >
                 Sign Up
               </button>
