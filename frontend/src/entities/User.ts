@@ -3,6 +3,7 @@ export interface UserDto {
   username?: string;
   email?: string;
   password?: string;
+  exp?: number;
 }
 
 export interface AuthData {

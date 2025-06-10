@@ -21,7 +21,8 @@ export const loginUser = async (data: AuthData): Promise<AuthResponse> => {
 export const handleGoogleOAuthCallback = async (
   code: string,
   state: string,
-  jwt: string
+  jwt: string,
+  signal?: AbortSignal
 ): Promise<void> => {
   await axios.post(
     `${API_BASE_URL}/oauth/google/callback`,
@@ -31,6 +32,7 @@ export const handleGoogleOAuthCallback = async (
         "Content-Type": "application/json",
         Authorization: `Bearer ${jwt}`,
       },
+      signal,
     }
   );
 };
