@@ -16,7 +16,7 @@ const ProfileDropdown = ({
   return (
     <Menu as="div" className="relative inline-block text-left">
       <MenuButton className="flex items-center gap-2 px-4 py-1 bg-white/10 border-2 border-gray-700 rounded-full backdrop-blur-xl text-white hover:bg-white/20 transition">
-        <span>{user?.email || "User"}</span>
+        <span>{user?.username || "User"}</span>
         <FaChevronDown className="text-sm" />
       </MenuButton>
 
