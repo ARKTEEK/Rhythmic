@@ -20,7 +20,7 @@ const ProfileDropdown = ({
         <FaChevronDown className="text-sm" />
       </MenuButton>
 
-      <MenuItems className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-48 origin-top bg-white/10 border-2 border-gray-700 rounded-xl backdrop-blur-xl shadow-lg ring-black/5 focus:outline-none z-50">
+      <MenuItems className="absolute left-1/2 transform -translate-x-1/2 mt-2 origin-top bg-white/10 border-2 border-gray-700 rounded-xl backdrop-blur-xl shadow-lg ring-black/5 focus:outline-none z-50">
         <div className="p-1 text-white">
           <MenuItem>
             <button
