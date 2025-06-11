@@ -1,5 +1,5 @@
+import axios from "axios";
 import { jwtDecode } from "jwt-decode";
-import { UserDto } from "../models/User.ts";
 import {
   createContext,
   ReactNode,
@@ -7,7 +7,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import axios from "axios";
+import { UserDto } from "../models/User.ts";
 
 interface AuthContextType {
   user: UserDto | null;
