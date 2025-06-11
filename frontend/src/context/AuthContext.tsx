@@ -8,10 +8,10 @@ import {
   useState,
 } from "react";
 import { UserDto } from "../models/User.ts";
-
 interface AuthContextType {
   user: UserDto | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   login: (token: string) => void;
   logout: () => void;
 }
@@ -21,6 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserDto | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // <-- New
 
   const login = (token: string) => {
     try {
@@ -72,7 +73,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
           setUser(normalizedUser);
           setIsAuthenticated(true);
-          axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+          axios.defaults.headers.common["Authorization"] = `Bearer token`;
         } else {
           console.log("Token from localStorage expired. Logging out.");
           logout();
@@ -82,10 +83,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         logout();
       }
     }
+    setIsLoading(false);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, isAuthenticated, isLoading, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

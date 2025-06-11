@@ -1,9 +1,14 @@
 import { useAuth } from "../../context/AuthContext";
+import Spinner from "../common/Spinner";
 import AuthenticatedHomeContent from "./AuthenticatedHomeContent";
 import UnauthenticatedHomeContent from "./UnauthenticatedHomeContent";
 
 const HomePageContent = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <Spinner />;
+  }
 
   return isAuthenticated ? (
     <AuthenticatedHomeContent />
