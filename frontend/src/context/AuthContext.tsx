@@ -24,16 +24,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = (token: string) => {
     try {
-      const decodedUser = jwtDecode<UserDto>(token);
+      const rawUser = jwtDecode<any>(token);
 
       const currentTime = Date.now() / 1000;
-      if (decodedUser.exp && decodedUser.exp < currentTime) {
+      if (rawUser.exp && rawUser.exp < currentTime) {
         console.warn("Attempted to log in with an expired token. Logging out.");
         logout();
         return;
       }
 
-      setUser(decodedUser);
+      const normalizedUser: UserDto = {
+        email: rawUser.email,
+        username: rawUser.given_name,
+        exp: rawUser.exp,
+      };
+
+      setUser(normalizedUser);
       setIsAuthenticated(true);
       localStorage.setItem("token", token);
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
@@ -54,11 +60,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
-        const decodedUser = jwtDecode<UserDto>(token);
+        const rawUser = jwtDecode<any>(token);
         const currentTime = Date.now() / 1000;
 
-        if (decodedUser.exp && decodedUser.exp > currentTime) {
-          setUser(decodedUser);
+        if (rawUser.exp && rawUser.exp > currentTime) {
+          const normalizedUser: UserDto = {
+            email: rawUser.email,
+            username: rawUser.given_name,
+            exp: rawUser.exp,
+          };
+
+          setUser(normalizedUser);
           setIsAuthenticated(true);
           axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         } else {
