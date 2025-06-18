@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { UserDto } from "../models/User.ts";
+
 interface AuthContextType {
   user: UserDto | null;
   isAuthenticated: boolean;
@@ -21,7 +22,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserDto | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // <-- New
+  const [isLoading, setIsLoading] = useState(true);
 
   const login = (token: string) => {
     try {

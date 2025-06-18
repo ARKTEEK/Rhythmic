@@ -1,5 +1,5 @@
 import { FaSpotify, FaYoutube } from "react-icons/fa";
-import { Song } from "../models/Song";
+import { Song } from "../../models/Song";
 
 const SongItem = ({ song }: { song: Song }) => {
   return (

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FaArrowRight } from "react-icons/fa";
 import { mockSongs } from "../../data/MockSongs";
 import { Song } from "../../models/Song";
-import SongItem from "../SongItem";
+import SongItem from "../playlists/SongItem";
 
 const AuthenticatedHomeContent = () => {
   const [playlistLink, setPlaylistLink] = useState("");

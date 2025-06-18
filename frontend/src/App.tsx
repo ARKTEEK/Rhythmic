@@ -4,8 +4,7 @@ import {
   BrowserRouter as Router,
   Routes,
 } from "react-router-dom";
-import HomePageContent from "./components/home/HomePageContent.tsx";
-import Layout from "./components/Layout.tsx";
+import Layout from "./components/common/Layout.tsx";
 import PlaylistPage from "./pages/PlaylistPage.tsx";
 import PublicRoute from "./components/route/PublicRoute.tsx";
 import { useAuth } from "./context/AuthContext.tsx";
@@ -14,6 +13,7 @@ import NotFound from "./pages/NotFound.tsx";
 import GoogleOAuthCallback from "./pages/oauth/GoogleOAuthCallback.tsx";
 import OAuthComplete from "./pages/oauth/OAuthComplete.tsx";
 import OAuthError from "./pages/oauth/OAuthError.tsx";
+import HomePage from "./pages/HomePage.tsx";
 
 const LayoutWrapper = () => {
   const { isAuthenticated } = useAuth();
@@ -32,7 +32,7 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<LayoutWrapper />}>
-          <Route index element={<HomePageContent />} />
+          <Route index element={<HomePage />} />
           <Route
             path="auth"
             element={
