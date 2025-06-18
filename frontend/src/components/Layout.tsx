@@ -36,7 +36,9 @@ const Layout = ({ children, showProfile = true }: LayoutProps) => {
         </div>
       )}
 
-      <div className="relative z-10 w-full max-w-lg text-white">{children}</div>
+      <div className="relative z-10 w-[70vw] flex justify-center items-center text-white overflow-auto">
+        {children}
+      </div>
     </div>
   );
 };

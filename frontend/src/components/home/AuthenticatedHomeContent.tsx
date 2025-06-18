@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FaArrowRight } from "react-icons/fa";
+import { mockSongs } from "../../data/MockSongs";
 import { Song } from "../../models/Song";
 import SongItem from "../SongItem";
 
@@ -9,33 +10,7 @@ const AuthenticatedHomeContent = () => {
 
   const handleConvert = () => {
     if (!playlistLink.trim()) return;
-
-    setSongs([
-      {
-        id: 1,
-        title: "Song One",
-        artist: "Artist One",
-        length: "3:45",
-        spotifyUrl: "#",
-        youtubeUrl: "#",
-      },
-      {
-        id: 2,
-        title: "Song Two",
-        artist: "Artist Two",
-        length: "4:20",
-        spotifyUrl: "#",
-        youtubeUrl: "#",
-      },
-      {
-        id: 3,
-        title: "Song Three",
-        artist: "Artist Three",
-        length: "3:30",
-        spotifyUrl: "#",
-        youtubeUrl: "#",
-      },
-    ]);
+    setSongs(mockSongs);
   };
 
   return (
