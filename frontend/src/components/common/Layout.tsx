@@ -1,5 +1,6 @@
 import { ReactNode, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import NavigationSidebar from "./Navigation";
 import ProfileDropdown from "./ProfileDropdown";
 import ProfilePopup from "./ProfilePopup";
 
@@ -38,6 +39,7 @@ const Layout = ({ children, showProfile = true }: LayoutProps) => {
 
       <div className="relative z-10 w-[70vw] flex justify-center items-center text-white overflow-auto">
         {children}
+        <NavigationSidebar />
       </div>
     </div>
   );

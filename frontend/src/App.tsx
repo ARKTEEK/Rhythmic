@@ -1,19 +1,10 @@
-import {
-  Outlet,
-  Route,
-  BrowserRouter as Router,
-  Routes,
-} from "react-router-dom";
+import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import Layout from "./components/common/Layout.tsx";
-import PlaylistPage from "./pages/PlaylistPage.tsx";
+import { AppRoutes } from "./components/route/AppRoutes.tsx";
+import PrivateRoute from "./components/route/PrivateRoute.tsx";
 import PublicRoute from "./components/route/PublicRoute.tsx";
 import { useAuth } from "./context/AuthContext.tsx";
-import AuthPage from "./pages/AuthPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
-import GoogleOAuthCallback from "./pages/oauth/GoogleOAuthCallback.tsx";
-import OAuthComplete from "./pages/oauth/OAuthComplete.tsx";
-import OAuthError from "./pages/oauth/OAuthError.tsx";
-import HomePage from "./pages/HomePage.tsx";
 
 const LayoutWrapper = () => {
   const { isAuthenticated } = useAuth();
@@ -29,29 +20,25 @@ const LayoutWrapper = () => {
 
 const App = () => {
   return (
-    <Router>
+    <BrowserRouter>
       <Routes>
-        <Route path="/" element={<LayoutWrapper />}>
-          <Route index element={<HomePage />} />
-          <Route
-            path="auth"
-            element={
-              <PublicRoute>
-                <AuthPage />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="api/oauth/google/callback"
-            element={<GoogleOAuthCallback />}
-          />
-          <Route path="/playlists" element={<PlaylistPage />} />
-          <Route path="oauth/complete" element={<OAuthComplete />} />
-          <Route path="api/oauth/error" element={<OAuthError />} />
+        <Route element={<LayoutWrapper />}>
+          {AppRoutes.map(({ path, element, private: isPriv, publicOnly }) => {
+            const wrapped = isPriv ? (
+              <PrivateRoute>{element}</PrivateRoute>
+            ) : publicOnly ? (
+              <PublicRoute>{element}</PublicRoute>
+            ) : (
+              element
+            );
+
+            return <Route key={path} path={path} element={wrapped} />;
+          })}
+
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
-    </Router>
+    </BrowserRouter>
   );
 };
 
