@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash, FaSignInAlt, FaUserPlus } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import useAuthForm from "../hooks/useAuthForm.tsx";
+import useAuthForm from "../../hooks/useAuthForm.tsx";
 
 const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(false);

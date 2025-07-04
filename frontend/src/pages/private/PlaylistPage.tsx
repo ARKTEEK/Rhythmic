@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
-import PlaylistGrid from "../components/playlists/PlaylistGrid";
-import PlaylistSortControls from "../components/playlists/PlaylistSordControls";
-import { mockPlaylists } from "../data/MockPlaylists";
-import { Playlist } from "../models/Playlist";
+import PlaylistGrid from "../../components/playlists/PlaylistGrid.tsx";
+import PlaylistSortControls from "../../components/playlists/PlaylistSordControls.tsx";
+import { mockPlaylists } from "../../data/MockPlaylists.ts";
+import { Playlist } from "../../models/Playlist.ts";
 
 const PlaylistPage = () => {
   const [playlists, setPlaylists] = useState<Playlist[]>(mockPlaylists);
@@ -43,21 +43,22 @@ const PlaylistPage = () => {
 
   return (
     <div className="w-full mx-auto py-8 flex flex-col space-y-8 overflow-hidden">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 flex-shrink-0">
+      <div
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 flex-shrink-0">
         <h1 className="text-5xl font-extrabold text-red-400">Your Playlists</h1>
         <PlaylistSortControls
-          sortKey={sortKey}
-          sortAsc={sortAsc}
-          setSortKey={setSortKey}
-          toggleSortOrder={() => setSortAsc((p) => !p)}
+          sortKey={ sortKey }
+          sortAsc={ sortAsc }
+          setSortKey={ setSortKey }
+          toggleSortOrder={ () => setSortAsc((p) => !p) }
         />
       </div>
 
       <PlaylistGrid
-        playlists={sortedPlaylists}
-        onEdit={editPlaylist}
-        onDelete={deletePlaylist}
-        onClick={setActivePl}
+        playlists={ sortedPlaylists }
+        onEdit={ editPlaylist }
+        onDelete={ deletePlaylist }
+        onClick={ setActivePl }
       />
     </div>
   );

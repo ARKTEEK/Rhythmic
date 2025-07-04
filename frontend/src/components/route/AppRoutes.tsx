@@ -1,12 +1,12 @@
-import { lazy } from "react";
-import AuthPage from "../../pages/AuthPage";
-import HomePage from "../../pages/HomePage";
-import PlaylistPage from "../../pages/PlaylistPage";
+import React, { lazy } from "react";
+import AuthPage from "../../pages/public/AuthPage.tsx";
+import HomePage from "../../pages/public/HomePage.tsx";
+import PlaylistPage from "../../pages/private/PlaylistPage.tsx";
 
-const ImportPage = lazy(() => import("../../pages/ImportPage"));
-const SettingsPage = lazy(() => import("../../pages/SettingsPage"));
-const BrowsePage = lazy(() => import("../../pages/BrowsePage"));
-const HelpPage = lazy(() => import("../../pages/HelpPage"));
+const ImportPage = lazy(() => import("../../pages/private/ImportPage.tsx"));
+const SettingsPage = lazy(() => import("../../pages/private/SettingsPage.tsx"));
+const BrowsePage = lazy(() => import("../../pages/private/BrowsePage.tsx"));
+const HelpPage = lazy(() => import("../../pages/public/HelpPage.tsx"));
 
 export interface AppRoute {
   path: string;
@@ -17,21 +17,21 @@ export interface AppRoute {
 }
 
 export const AppRoutes: AppRoute[] = [
-  { path: "/", element: <HomePage />, label: "Home" },
+  { path: "/", element: <HomePage/>, label: "Home" },
   {
     path: "/playlists",
-    element: <PlaylistPage />,
+    element: <PlaylistPage/>,
     label: "Playlists",
     private: true,
   },
-  { path: "/import", element: <ImportPage />, label: "Import", private: true },
-  { path: "/settings", element: <SettingsPage />, label: "Settings" },
+  { path: "/import", element: <ImportPage/>, label: "Import", private: true },
+  { path: "/settings", element: <SettingsPage/>, label: "Settings", private: true },
   {
     path: "/browse",
-    element: <BrowsePage />,
+    element: <BrowsePage/>,
     label: "Browse",
     private: true,
   },
-  { path: "/help", element: <HelpPage />, label: "Help" },
-  { path: "/auth", element: <AuthPage />, publicOnly: true },
+  { path: "/help", element: <HelpPage/>, label: "Help" },
+  { path: "/auth", element: <AuthPage/>, publicOnly: true },
 ];
