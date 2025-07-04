@@ -3,14 +3,13 @@ import Layout from "./components/common/Layout.tsx";
 import { AppRoutes } from "./components/route/AppRoutes.tsx";
 import PrivateRoute from "./components/route/PrivateRoute.tsx";
 import PublicRoute from "./components/route/PublicRoute.tsx";
-import { useAuth } from "./context/AuthContext.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import { useAuth } from "./hooks/useAuth.tsx";
 
 const LayoutWrapper = () => {
   const { isAuthenticated } = useAuth();
 
   const showProfile = isAuthenticated;
-
   return (
     <Layout showProfile={showProfile}>
       <Outlet />

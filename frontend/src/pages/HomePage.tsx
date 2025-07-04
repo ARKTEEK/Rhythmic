@@ -1,7 +1,7 @@
 import Spinner from "../components/common/Spinner";
 import AuthenticatedHomeContent from "../components/home/AuthenticatedHomeContent";
 import UnauthenticatedHomeContent from "../components/home/UnauthenticatedHomeContent";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth.tsx";
 
 const HomePage = () => {
   const { isAuthenticated, isLoading } = useAuth();

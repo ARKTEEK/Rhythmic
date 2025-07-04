@@ -2,7 +2,7 @@ import { Dialog, DialogPanel } from "@headlessui/react";
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash, FaSpotify, FaYoutube } from "react-icons/fa";
 import { FaX } from "react-icons/fa6";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../hooks/useAuth.tsx";
 
 const ProfilePopup: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
   isOpen,

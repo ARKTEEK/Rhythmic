@@ -1,8 +1,8 @@
 import { ReactNode, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
 import NavigationSidebar from "./Navigation";
 import ProfileDropdown from "./ProfileDropdown";
 import ProfilePopup from "./ProfilePopup";
+import { useAuth } from "../../hooks/useAuth.tsx";
 
 interface LayoutProps {
   children: ReactNode;

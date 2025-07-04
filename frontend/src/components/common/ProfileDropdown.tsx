@@ -1,6 +1,6 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { FaChevronDown } from "react-icons/fa";
-import { UserDto } from "../models/User";
+import { UserDto } from "../../models/User.ts";
 
 interface ProfileDropdownProps {
   onSettings: () => void;

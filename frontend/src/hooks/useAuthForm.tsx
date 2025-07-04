@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthData } from "../models/User.ts";
-import { useAuth } from "../context/AuthContext.tsx";
 import { loginUser, registerUser } from "../services/AuthService.ts";
+import { useAuth } from "./useAuth.tsx";
 
 interface UseAuthFormProps {
   isSignUp: boolean;
