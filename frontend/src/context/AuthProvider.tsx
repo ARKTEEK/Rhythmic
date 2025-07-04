@@ -3,6 +3,7 @@ import { AuthContext, AuthContextType } from "./AuthContext";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { ReactNode, useEffect, useState } from "react";
+import { JwtPayload } from "../models/JwtPayload.ts";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserDto | null>(null);
@@ -11,7 +12,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = (token: string) => {
     try {
-      const rawUser = jwtDecode<any>(token);
+      const rawUser = jwtDecode<JwtPayload>(token);
 
       const currentTime = Date.now() / 1000;
       if (rawUser.exp && rawUser.exp < currentTime) {
@@ -47,7 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
-        const rawUser = jwtDecode<any>(token);
+        const rawUser = jwtDecode<JwtPayload>(token);
         const currentTime = Date.now() / 1000;
 
         if (rawUser.exp && rawUser.exp > currentTime) {
