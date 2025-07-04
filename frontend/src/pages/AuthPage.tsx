@@ -1,51 +1,36 @@
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash, FaSignInAlt, FaUserPlus } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { loginUser, registerUser } from "../services/AuthService";
-import { AuthData } from "../models/User";
+import { Link } from "react-router-dom";
+import useAuthForm from "../hooks/useAuthForm.tsx";
 
 const AuthPage = () => {
-  const { login } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
   const [isSignUp, setIsSignUp] = useState(false);
-  const [username, setUsername] = useState<string>("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const navigate = useNavigate();
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    username,
+    setUsername,
+    loading,
+    error,
+    setError,
+    handleAuthSubmit,
+  } = useAuthForm({ isSignUp });
 
   const handleTypeChange = () => {
     setPassword("");
     setUsername("");
     setEmail("");
     setIsSignUp(!isSignUp);
+    setError("");
   };
 
-  const handleAuth = async (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      const authData: AuthData = {
-        email,
-        password,
-        username: isSignUp ? username : undefined,
-      };
-
-      const service = isSignUp ? registerUser : loginUser;
-
-      const { token } = await service(authData);
-      login(token);
-      navigate("/");
-    } catch (err) {
-      setError("Authentication failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    await handleAuthSubmit();
   };
 
   return (
@@ -67,7 +52,7 @@ const AuthPage = () => {
 
         { error && <div className="text-red-500 mt-4">{ error }</div> }
 
-        <form onSubmit={ handleAuth } className="mt-6 w-96 space-y-4">
+        <form onSubmit={ handleSubmit } className="mt-6 w-96 space-y-4">
           { isSignUp && (
             <input
               type="text"
