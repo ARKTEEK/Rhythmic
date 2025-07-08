@@ -12,11 +12,8 @@ const OAuthComplete = () => {
   }, [navigate]);
 
   return (
-    <div className="bg-black min-h-screen flex flex-col items-center justify-center relative overflow-hidden p-6">
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-96 h-96 bg-red-500 opacity-20 blur-3xl rounded-full"></div>
-      </div>
-
+    <div
+      className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden p-6">
       <div className="relative z-10 w-full max-w-lg text-white text-center">
         <h1 className="text-4xl font-extrabold text-red-400 mb-2">
           Your Account was Linked!

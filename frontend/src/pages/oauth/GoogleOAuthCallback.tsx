@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { handleGoogleOAuthCallback } from "../../services/AuthService";
+import { useOAuthAccess } from "../../context/OAuthFlowContext.tsx";
 
 const GoogleOAuthCallback = () => {
   const navigate = useNavigate();
+  const { setAllowAccess } = useOAuthAccess();
   const [error, setError] = useState<string | null>(null);
   const alreadyCalled = useRef(false);
 
@@ -17,41 +19,38 @@ const GoogleOAuthCallback = () => {
     const jwt = localStorage.getItem("token");
 
     if (!code || !state || !jwt) {
-      console.warn("Missing code, state, or JWT!");
       setError("Missing required parameters.");
-      navigate("/oauth/error");
+      setAllowAccess(true);
+      navigate("/oauth/error", { state: { allowOAuth: true } });
       return;
     }
 
-    const controller = new AbortController();
-
     const doCallback = async () => {
       try {
-        await handleGoogleOAuthCallback(code, state, jwt, controller.signal);
-        navigate("/oauth/complete");
+        await handleGoogleOAuthCallback(code, state, jwt);
+        setAllowAccess(true);
+        navigate("/oauth/complete", { state: { allowOAuth: true } });
       } catch (err) {
         console.error("OAuth callback failed:", err);
-        navigate("/oauth/error");
+        setAllowAccess(true);
+        navigate("/oauth/error", { state: { allowOAuth: true } });
       }
     };
 
     doCallback();
-
-    return () => controller.abort();
-  }, [navigate]);
+  }, []);
 
   return (
-    <div className="bg-black min-h-screen flex flex-col items-center justify-center relative overflow-hidden p-6">
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="w-96 h-96 bg-red-500 opacity-20 blur-3xl rounded-full"></div>
-      </div>
-
+    <div
+      className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden p-6">
       <div className="relative z-10 w-full max-w-lg text-white text-center">
-        <p className="text-xl font-medium">
-          {error ?? "Linking your Google account..."}
-        </p>
+        <h1 className="text-4xl font-extrabold text-red-400 mb-2">
+          Linking your Account...
+        </h1>
+        <p className="text-gray-300 mb-6">Wait a few seconds for redirect...</p>
       </div>
     </div>
+
   );
 };
 

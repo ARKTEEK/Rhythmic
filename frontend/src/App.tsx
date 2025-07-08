@@ -5,6 +5,7 @@ import PrivateRoute from "./components/route/PrivateRoute.tsx";
 import PublicRoute from "./components/route/PublicRoute.tsx";
 import NotFound from "./pages/public/NotFound.tsx";
 import { useAuth } from "./hooks/useAuth.tsx";
+import { OAuthAccessProvider } from "./context/OAuthFlowContext.tsx";
 
 const LayoutWrapper = () => {
   const { isAuthenticated } = useAuth();
@@ -18,25 +19,27 @@ const LayoutWrapper = () => {
 
 const App = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={ <LayoutWrapper/> }>
-          { AppRoutes.map(({ path, element, private: isPriv, publicOnly }) => {
-            const wrapped = isPriv ? (
-              <PrivateRoute>{ element }</PrivateRoute>
-            ) : publicOnly ? (
-              <PublicRoute>{ element }</PublicRoute>
-            ) : (
-              element
-            );
+    <OAuthAccessProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route element={ <LayoutWrapper/> }>
+            { AppRoutes.map(({ path, element, private: isPriv, publicOnly }) => {
+              const wrapped = isPriv ? (
+                <PrivateRoute>{ element }</PrivateRoute>
+              ) : publicOnly ? (
+                <PublicRoute>{ element }</PublicRoute>
+              ) : (
+                element
+              );
 
-            return <Route key={ path } path={ path } element={ wrapped }/>;
-          }) }
+              return <Route key={ path } path={ path } element={ wrapped }/>;
+            }) }
 
-          <Route path="*" element={ <NotFound/> }/>
-        </Route>
-      </Routes>
-    </BrowserRouter>
+            <Route path="*" element={ <NotFound/> }/>
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </OAuthAccessProvider>
   );
 };
 
