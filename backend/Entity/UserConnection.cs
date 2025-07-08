@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using backend.Enums;
 
 namespace backend.Entity;
 
@@ -8,7 +9,7 @@ public class UserConnection {
   [Required] public string UserId { get; set; }
   public User User { get; set; }
 
-  [Required] public string Provider { get; set; }
+  [Required] public OAuthProvider Provider { get; set; }
   public string AccessToken { get; set; }
   public string RefreshToken { get; set; }
   public DateTime ExpiresAt { get; set; }

@@ -1,27 +1,34 @@
-﻿using backend.DataEntity.Auth;
+﻿using System.Text.Json;
+using backend.DataEntity.Auth;
 using backend.Entity;
+using backend.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;
 
 public class UserService : IUserService {
+  private readonly IConfiguration _configuration;
   private readonly UserManager<User> _userManager;
   private readonly AppDbContext _dbContext;
 
-  public UserService(UserManager<User> userManager, AppDbContext dbContext) {
+  public UserService(IConfiguration configuration, UserManager<User> userManager,
+    AppDbContext dbContext) {
+    _configuration = configuration;
     _userManager = userManager;
     _dbContext = dbContext;
   }
 
   public async Task SaveGoogleTokens(string userId, GoogleTokenResponse response) {
+    Console.WriteLine("------------ REACHED SAVE GOOGLE TOKENS ----------");
     var user = await _userManager.FindByIdAsync(userId);
 
-    if (user == null)
+    if (user == null) {
       throw new Exception("User not found");
+    }
 
     var existingConnection = await _dbContext.UserConnections
-      .FirstOrDefaultAsync(c => c.UserId == userId && c.Provider == "Google");
+      .FirstOrDefaultAsync(c => c.UserId == userId && c.Provider == OAuthProvider.Google);
 
     if (existingConnection != null) {
       existingConnection.AccessToken = response.AccessToken;
@@ -31,11 +38,10 @@ public class UserService : IUserService {
       existingConnection.ExpiresAt = DateTime.UtcNow.AddSeconds(response.ExpiresIn);
       existingConnection.Scope = response.Scope;
       existingConnection.TokenType = response.TokenType;
-    }
-    else {
+    } else {
       var connection = new UserConnection {
         UserId = userId,
-        Provider = "Google",
+        Provider = OAuthProvider.Google,
         AccessToken = response.AccessToken,
         RefreshToken = response.RefreshToken,
         ExpiresAt = DateTime.UtcNow.AddSeconds(response.ExpiresIn),

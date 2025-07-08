@@ -31,7 +31,7 @@ public class AppDbContext : IdentityDbContext<User> {
       .HasForeignKey(uc => uc.UserId);
 
     builder.Entity<UserConnection>()
-      .HasIndex(uc => new { uc.UserId, uc.Provider })
-      .IsUnique();
+      .Property(uc => uc.Provider)
+      .HasConversion<string>();
   }
 }
