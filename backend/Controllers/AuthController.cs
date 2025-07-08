@@ -4,6 +4,7 @@ using backend.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace backend.Controllers;
 
@@ -24,7 +25,9 @@ public class AuthController : ControllerBase {
   [HttpPost("register")]
   public async Task<IActionResult> Register([FromBody] RegisterDto registerDto) {
     try {
-      if (!ModelState.IsValid) return BadRequest(ModelState);
+      if (!ModelState.IsValid) {
+        return BadRequest(ModelState);
+      }
 
       User user = new() {
         UserName = registerDto.Username,
@@ -36,38 +39,42 @@ public class AuthController : ControllerBase {
       if (createdUser.Succeeded) {
         IdentityResult roleResult = await _userManager.AddToRoleAsync(user, "User");
 
-        if (roleResult.Succeeded)
+        if (roleResult.Succeeded) {
           return Ok(
             new AuthorizedUserDto {
               UserName = user.UserName,
               Email = user.Email,
               Token = _tokenService.CreateToken(user)
             });
+        }
 
         return StatusCode(500, roleResult.Errors);
       }
 
       return StatusCode(500, createdUser.Errors);
-    }
-    catch (Exception ex) {
+    } catch (Exception ex) {
       return StatusCode(500, ex);
     }
   }
 
   [HttpPost("login")]
   public async Task<IActionResult> Login(LoginDto loginDto) {
-    if (!ModelState.IsValid)
+    if (!ModelState.IsValid) {
       return BadRequest(ModelState);
+    }
 
-    var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == loginDto.Email);
-    if (user == null)
+    User? user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == loginDto.Email);
+    if (user == null) {
       return Unauthorized("Invalid login information.");
+    }
 
-    var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
-    if (!result.Succeeded)
+    SignInResult result =
+      await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
+    if (!result.Succeeded) {
       return Unauthorized("Invalid login information.");
+    }
 
-    var token = _tokenService.CreateToken(user);
+    string token = _tokenService.CreateToken(user);
 
     Response.Cookies.Append("jwt", token, new CookieOptions {
       HttpOnly = true,

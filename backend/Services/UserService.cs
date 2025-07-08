@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using backend.DataEntity.Auth;
+﻿using backend.DataEntity.Auth;
 using backend.Entity;
 using backend.Enums;
 using Microsoft.AspNetCore.Identity;
@@ -9,8 +8,8 @@ namespace backend.Services;
 
 public class UserService : IUserService {
   private readonly IConfiguration _configuration;
-  private readonly UserManager<User> _userManager;
   private readonly AppDbContext _dbContext;
+  private readonly UserManager<User> _userManager;
 
   public UserService(IConfiguration configuration, UserManager<User> userManager,
     AppDbContext dbContext) {
@@ -21,13 +20,13 @@ public class UserService : IUserService {
 
   public async Task SaveGoogleTokens(string userId, GoogleTokenResponse response) {
     Console.WriteLine("------------ REACHED SAVE GOOGLE TOKENS ----------");
-    var user = await _userManager.FindByIdAsync(userId);
+    User? user = await _userManager.FindByIdAsync(userId);
 
     if (user == null) {
       throw new Exception("User not found");
     }
 
-    var existingConnection = await _dbContext.UserConnections
+    UserConnection? existingConnection = await _dbContext.UserConnections
       .FirstOrDefaultAsync(c => c.UserId == userId && c.Provider == OAuthProvider.Google);
 
     if (existingConnection != null) {
@@ -39,7 +38,7 @@ public class UserService : IUserService {
       existingConnection.Scope = response.Scope;
       existingConnection.TokenType = response.TokenType;
     } else {
-      var connection = new UserConnection {
+      UserConnection connection = new() {
         UserId = userId,
         Provider = OAuthProvider.Google,
         AccessToken = response.AccessToken,

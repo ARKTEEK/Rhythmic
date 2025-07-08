@@ -1,9 +1,7 @@
-﻿using backend.Controllers;
-
-namespace backend.Enums;
+﻿namespace backend.Enums;
 
 public enum OAuthProvider {
   None = 0,
   Google,
-  Spotify,
+  Spotify
 }

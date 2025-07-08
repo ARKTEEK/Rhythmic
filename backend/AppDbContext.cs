@@ -15,11 +15,11 @@ public class AppDbContext : IdentityDbContext<User> {
     base.OnModelCreating(builder);
 
     builder.Entity<IdentityRole>().HasData(new List<IdentityRole> {
-      new IdentityRole {
+      new() {
         Name = "Admin",
         NormalizedName = "ADMIN"
       },
-      new IdentityRole {
+      new() {
         Name = "User",
         NormalizedName = "USER"
       }
