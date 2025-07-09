@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthData } from "../models/User.ts";
 import { loginUser, registerUser } from "../services/AuthService.ts";
 import { useAuth } from "./useAuth.tsx";
+import { useMutation } from "@tanstack/react-query";
 
 interface UseAuthFormProps {
   isSignUp: boolean;
@@ -12,17 +13,13 @@ const useAuthForm = ({ isSignUp }: UseAuthFormProps) => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [username, setUsername] = useState<string>('');
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const handleAuthSubmit = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
+  const authMutation = useMutation({
+    mutationFn: async () => {
       const authData: AuthData = {
         email,
         password,
@@ -30,15 +27,20 @@ const useAuthForm = ({ isSignUp }: UseAuthFormProps) => {
       };
 
       const service = isSignUp ? registerUser : loginUser;
-
-      const { token } = await service(authData);
+      return await service(authData);
+    },
+    onSuccess: ({ token }) => {
       login(token);
       navigate('/');
-    } catch {
+    },
+    onError: () => {
       setError('Authentication failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    },
+  });
+
+  const handleAuthSubmit = () => {
+    setError(null);
+    authMutation.mutate();
   };
 
   return {
@@ -48,11 +50,12 @@ const useAuthForm = ({ isSignUp }: UseAuthFormProps) => {
     setPassword,
     username,
     setUsername,
-    loading,
+    loading: authMutation.isPending,
     error,
     setError,
     handleAuthSubmit,
   };
 };
+
 
 export default useAuthForm;
