@@ -15,12 +15,14 @@ public class GoogleOAuthController : ControllerBase {
   private readonly IConfiguration _configuration;
   private readonly UserManager<User> _userManager;
   private readonly IUserService _userService;
+  private readonly IHttpClientFactory _httpClientFactory;
 
   public GoogleOAuthController(IConfiguration configuration, IUserService userService,
-    UserManager<User> userManager) {
+    UserManager<User> userManager, IHttpClientFactory httpClientFactory) {
     _configuration = configuration;
     _userService = userService;
     _userManager = userManager;
+    _httpClientFactory = httpClientFactory;
   }
 
   [HttpGet("login")]
@@ -44,14 +46,26 @@ public class GoogleOAuthController : ControllerBase {
     User? appUser = await _userManager.FindByNameAsync(username);
 
     if (appUser == null) {
-      return Unauthorized("User not found");
+      return Unauthorized("User is unauthorized or not found.");
     }
 
     string? clientId = _configuration["Google:ClientId"];
     string? clientSecret = _configuration["Google:ClientSecret"];
     string? redirectUri = _configuration["Google:RedirectUri"];
 
-    HttpClient httpClient = new();
+    if (string.IsNullOrWhiteSpace(clientId)) {
+      throw new InvalidOperationException("Google:ClientId configuration is missing or empty.");
+    }
+
+    if (string.IsNullOrWhiteSpace(clientSecret)) {
+      throw new InvalidOperationException("Google:ClientSecret configuration is missing or empty.");
+    }
+
+    if (string.IsNullOrWhiteSpace(redirectUri)) {
+      throw new InvalidOperationException("Google:RedirectUri configuration is missing or empty.");
+    }
+
+    HttpClient httpClient = _httpClientFactory.CreateClient();
     FormUrlEncodedContent tokenContent = new(new Dictionary<string, string> {
       ["code"] = response.Code,
       ["client_id"] = clientId,
