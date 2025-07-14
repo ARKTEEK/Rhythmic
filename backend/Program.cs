@@ -68,6 +68,7 @@ builder.Services.AddHttpClient();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
 
 WebApplication app = builder.Build();
 
