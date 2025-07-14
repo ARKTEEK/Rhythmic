@@ -66,4 +66,43 @@ public class GoogleAuthService : IGoogleAuthService {
 
     return tokens;
   }
+
+  public async Task<GoogleTokenResponse> RefreshTokenAsync(string refreshToken) {
+    string? clientId = _configuration["Google:ClientId"];
+    string? clientSecret = _configuration["Google:ClientSecret"];
+
+    if (string.IsNullOrWhiteSpace(clientId) || string.IsNullOrWhiteSpace(clientSecret)) {
+      throw new InvalidOperationException("Google client ID or secret is not configured.");
+    }
+
+    Dictionary<string, string> requestBody = new() {
+      ["client_id"] = clientId,
+      ["client_secret"] = clientSecret,
+      ["refresh_token"] = refreshToken,
+      ["grant_type"] = "refresh_token"
+    };
+
+    FormUrlEncodedContent content = new(requestBody);
+    HttpClient httpClient = _httpClientFactory.CreateClient();
+
+    HttpResponseMessage response =
+      await httpClient.PostAsync("https://oauth2.googleapis.com/token", content);
+
+    string responseContent = await response.Content.ReadAsStringAsync();
+
+    if (!response.IsSuccessStatusCode) {
+      throw new HttpRequestException(
+        $"Google token refresh failed with status code {response.StatusCode}: {responseContent}");
+    }
+
+    GoogleTokenResponse? newTokenResponse =
+      JsonSerializer.Deserialize<GoogleTokenResponse>(responseContent);
+
+    if (newTokenResponse == null || string.IsNullOrWhiteSpace(newTokenResponse.AccessToken)) {
+      throw new InvalidOperationException(
+        "Failed to deserialize Google token response or the new access token is missing.");
+    }
+
+    return newTokenResponse;
+  }
 }
