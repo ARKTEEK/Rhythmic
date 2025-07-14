@@ -43,7 +43,7 @@ public class GoogleOAuthController : ControllerBase {
     try {
       GoogleTokenResponse tokens =
         await _googleAuthService.ExchangeCodeForTokenAsync(response.Code);
-      await _userService.SaveGoogleTokens(appUser.Id, tokens);
+      await _userService.SaveGoogleTokensAsync(appUser.Id, tokens);
       return Ok(new { success = true });
     } catch (Exception ex) {
       return BadRequest("Google Token exchange failed.");

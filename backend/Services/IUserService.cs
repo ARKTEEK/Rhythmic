@@ -3,5 +3,5 @@
 namespace backend.Services;
 
 public interface IUserService {
-  Task SaveGoogleTokens(string userId, GoogleTokenResponse response);
+  Task SaveGoogleTokensAsync(string userId, GoogleTokenResponse response);
 }
