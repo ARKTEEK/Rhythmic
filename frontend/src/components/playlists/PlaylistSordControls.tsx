@@ -10,27 +10,26 @@ interface SortControlsProps {
 }
 
 const PlaylistSortControls = ({
-  sortKey,
-  sortAsc,
-  setSortKey,
-  toggleSortOrder,
-}: SortControlsProps) => (
+                                sortKey,
+                                sortAsc,
+                                setSortKey,
+                                toggleSortOrder,
+                              }: SortControlsProps) => (
   <div className="flex items-center gap-3 text-gray-300">
     <select
-      value={sortKey}
-      onChange={(e) => setSortKey(e.target.value as SortKey)}
-      className="bg-transparent border border-gray-600 rounded px-3 py-1 focus:outline-none text-sm"
-    >
+      value={ sortKey }
+      onChange={ (e) => setSortKey(e.target.value as SortKey) }
+      className="bg-gray-800 border border-gray-600 text-gray-300 rounded px-3 py-1 focus:outline-none text-sm">
       <option value="title">Name</option>
       <option value="itemCount">Songs</option>
       <option value="privacyStatus">Privacy</option>
     </select>
     <button
-      onClick={toggleSortOrder}
+      onClick={ toggleSortOrder }
       title="Toggle ascending / descending"
       className="hover:text-red-400"
     >
-      {sortAsc ? <FaSortAlphaDown /> : <FaSortAmountDown />}
+      { sortAsc ? <FaSortAlphaDown/> : <FaSortAmountDown/> }
     </button>
   </div>
 );
