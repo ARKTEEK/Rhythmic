@@ -36,6 +36,11 @@ public class UserService : IUserService {
 
     UserConnection? connection =
       await _userConnectionService.GetUserConnectionAsync(userId, OAuthProvider.Google);
+
+    if (connection.ExpiresAt > DateTime.UtcNow.AddSeconds(60)) {
+      return;
+    }
+
     if (connection?.RefreshToken == null) {
       throw new Exception("Refresh token is missing.");
     }
