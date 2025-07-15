@@ -15,7 +15,7 @@ public class GoogleAuthService : IGoogleAuthService {
   public string GetGoogleLoginUrl() {
     string? clientId = _configuration["Google:ClientId"];
     string? redirectUrl = _configuration["Google:RedirectUri"];
-    string scope = "https://www.googleapis.com/auth/youtube.force-ssl";
+    string scope = "https://www.googleapis.com/auth/youtube";
     string state = Guid.NewGuid().ToString();
 
     return $"https://accounts.google.com/o/oauth2/v2/auth?" +
