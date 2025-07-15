@@ -12,20 +12,19 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
-string connectionString = "server=localhost;user=root;password=Pass321..;database=listport";
 MySqlServerVersion mysqlVersion = new(new Version(8, 0, 40));
 
 builder.Services.AddCors(options => {
   options.AddPolicy("AllowFrontend",
-    builder => builder
-      .WithOrigins("https://localhost:5173")
+    b => b
+      .WithOrigins(builder.Configuration["FrontendUrl"])
       .AllowAnyMethod()
       .AllowAnyHeader()
       .AllowCredentials());
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-  options.UseMySql(connectionString, mysqlVersion)
+  options.UseMySql(builder.Configuration["DatabaseConnection"], mysqlVersion)
     .LogTo(Console.WriteLine, LogLevel.Information)
     .EnableDetailedErrors());
 
