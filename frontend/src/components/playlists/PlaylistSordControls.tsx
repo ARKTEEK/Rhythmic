@@ -1,6 +1,6 @@
 import { FaSortAlphaDown, FaSortAmountDown } from "react-icons/fa";
 
-export type SortKey = "name" | "songCount" | "lengthMin";
+export type SortKey = "title" | "itemCount" | "privacyStatus";
 
 interface SortControlsProps {
   sortKey: SortKey;
@@ -21,9 +21,9 @@ const PlaylistSortControls = ({
       onChange={(e) => setSortKey(e.target.value as SortKey)}
       className="bg-transparent border border-gray-600 rounded px-3 py-1 focus:outline-none text-sm"
     >
-      <option value="name">Name</option>
-      <option value="songCount"># Songs</option>
-      <option value="lengthMin">Length</option>
+      <option value="title">Name</option>
+      <option value="itemCount">Songs</option>
+      <option value="privacyStatus">Privacy</option>
     </select>
     <button
       onClick={toggleSortOrder}

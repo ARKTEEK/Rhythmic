@@ -1,30 +1,36 @@
 import { useMemo, useState } from "react";
 import PlaylistGrid from "../../components/playlists/PlaylistGrid.tsx";
 import PlaylistSortControls from "../../components/playlists/PlaylistSordControls.tsx";
-import { mockPlaylists } from "../../data/MockPlaylists.ts";
 import { Playlist } from "../../models/Playlist.ts";
+import { useQuery } from "@tanstack/react-query";
+import createPlaylistsQueryOptions from "../../queries/createPlaylistsQueryOptions.ts";
 
 const PlaylistPage = () => {
-  const [playlists, setPlaylists] = useState<Playlist[]>(mockPlaylists);
+  const { isLoading, isError, error, data: playlists } = useQuery(createPlaylistsQueryOptions());
 
-  type SortKey = "name" | "songCount" | "lengthMin";
-  const [sortKey, setSortKey] = useState<SortKey>("name");
+  type SortKey = "title" | "itemCount" | "privacyStatus";
+  const [sortKey, setSortKey] = useState<SortKey>("title");
   const [sortAsc, setSortAsc] = useState(true);
 
   const sortedPlaylists = useMemo(() => {
+    if (!playlists) {
+      return [];
+    }
+
     const copy = [...playlists];
     copy.sort((a, b) => {
       let cmp = 0;
       switch (sortKey) {
-        case "songCount":
-          cmp = a.songCount - b.songCount;
+        case "itemCount":
+          cmp = a.itemCount - b.itemCount;
           break;
-        case "lengthMin":
-          cmp = a.lengthMin - b.lengthMin;
+        case "privacyStatus":
+          cmp = a.privacyStatus.localeCompare(b.privacyStatus);
           break;
-        case "name":
+        case "title":
         default:
-          cmp = a.name.localeCompare(b.name);
+          cmp = a.title.localeCompare(b.title);
+          break;
       }
       return sortAsc ? cmp : -cmp;
     });
@@ -38,8 +44,16 @@ const PlaylistPage = () => {
   };
 
   const deletePlaylist = (id: number) => {
-    setPlaylists((prev) => prev.filter((p) => p.id !== id));
+    console.log("Delete", id);
   };
+
+  if (isLoading) {
+    return <div>Loading playlists...</div>;
+  }
+
+  if (isError) {
+    return <div>Error fetching playlists: { (error as Error).message }</div>;
+  }
 
   return (
     <div className="w-full mx-auto py-8 flex flex-col space-y-8 overflow-hidden">

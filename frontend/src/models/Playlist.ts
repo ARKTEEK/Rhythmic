@@ -1,8 +1,8 @@
 export interface Playlist {
   id: number;
-  name: string;
-  source: "spotify" | "youtube";
-  songCount: number;
-  lengthMin: number;
-  imageUrl: string;
+  title: string;
+  description: string;
+  coverImageUrl: string;
+  itemCount: number;
+  privacyStatus: "private" | "public" | "unlisted";
 }
