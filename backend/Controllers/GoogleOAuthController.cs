@@ -1,6 +1,6 @@
-﻿using System.Text.Json;
-using backend.DataEntity.Auth;
+﻿using backend.DataEntity.Auth;
 using backend.Entity;
+using backend.Enums;
 using backend.Extensions;
 using backend.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -13,12 +13,13 @@ namespace backend.Controllers;
 [Route("api/oauth/google")]
 public class GoogleOAuthController : ControllerBase {
   private readonly UserManager<User> _userManager;
-  private readonly IUserService _userService;
+  private readonly IUserConnectionService _userConnectionService;
   private readonly IGoogleAuthService _googleAuthService;
 
-  public GoogleOAuthController(IUserService userService, IGoogleAuthService googleAuthService,
+  public GoogleOAuthController(IUserConnectionService userConnectionService,
+    IGoogleAuthService googleAuthService,
     UserManager<User> userManager) {
-    _userService = userService;
+    _userConnectionService = userConnectionService;
     _userManager = userManager;
     _googleAuthService = googleAuthService;
   }
@@ -29,24 +30,31 @@ public class GoogleOAuthController : ControllerBase {
     return Redirect(url);
   }
 
+  [Authorize]
+  [HttpDelete("logout")]
+  public async Task<IActionResult> Logout() {
+    User? user = await this.GetCurrentUserAsync(_userManager);
+    if (user == null) {
+      return Unauthorized();
+    }
+
+    await _userConnectionService.DeleteUserConnectionAsync(user.Id, OAuthProvider.Google);
+
+    return Ok(new { success = true });
+  }
 
   [Authorize]
   [HttpPost("callback")]
   public async Task<IActionResult> Callback([FromBody] OAuthCallbackDto response) {
-    string username = User.GetUsername();
-    User? appUser = await _userManager.FindByNameAsync(username);
-
-    if (appUser == null) {
-      return Unauthorized("User is unauthorized or not found.");
+    User? user = await this.GetCurrentUserAsync(_userManager);
+    if (user == null) {
+      return Unauthorized();
     }
 
-    try {
-      GoogleTokenResponse tokens =
-        await _googleAuthService.ExchangeCodeForTokenAsync(response.Code);
-      await _userService.SaveGoogleTokensAsync(appUser.Id, tokens);
-      return Ok(new { success = true });
-    } catch (Exception ex) {
-      return BadRequest("Google Token exchange failed.");
-    }
+    GoogleTokenResponse tokens =
+      await _googleAuthService.ExchangeCodeForTokenAsync(response.Code);
+    await _userConnectionService.SaveUserConnectionAsync(user.Id, tokens);
+
+    return Ok(new { success = true });
   }
 }

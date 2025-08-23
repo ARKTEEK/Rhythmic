@@ -6,10 +6,12 @@ using Microsoft.EntityFrameworkCore;
 namespace backend.Services;
 
 public class UserConnectionService : IUserConnectionService {
+  private readonly IGoogleAuthService _googleAuthService;
   private readonly AppDbContext _dbContext;
 
-  public UserConnectionService(AppDbContext dbContext) {
+  public UserConnectionService(AppDbContext dbContext, IGoogleAuthService googleAuthService) {
     _dbContext = dbContext;
+    _googleAuthService = googleAuthService;
   }
 
   public async Task<UserConnection?> GetUserConnectionAsync(string userId, OAuthProvider provider) {
@@ -17,8 +19,39 @@ public class UserConnectionService : IUserConnectionService {
       .FirstOrDefaultAsync(c => c != null && c.UserId == userId && c.Provider == provider);
   }
 
-  public async Task SaveOrUpdateUserConnectionAsync(string userId, GoogleTokenResponse response) {
-    var existingConnection = await GetUserConnectionAsync(userId, OAuthProvider.Google);
+  public async Task DeleteUserConnectionAsync(string userId, OAuthProvider provider) {
+    UserConnection? existingConnection = await GetUserConnectionAsync(userId, OAuthProvider.Google);
+
+    if (existingConnection == null) {
+      return;
+    }
+
+    _dbContext.UserConnections.Remove(existingConnection);
+  }
+
+  public async Task RefreshGoogleTokenAsync(string userId) {
+    UserConnection? userConnection = await GetUserConnectionAsync(userId, OAuthProvider.Google);
+
+    if (userConnection == null) {
+      return;
+    }
+
+    if (userConnection.ExpiresAt > DateTime.UtcNow.AddSeconds(60)) {
+      return;
+    }
+
+    if (userConnection.RefreshToken == null) {
+      throw new Exception("Refresh token is missing");
+    }
+
+    GoogleTokenResponse newToken =
+      await _googleAuthService.RefreshTokenAsync(userConnection.RefreshToken);
+
+    await SaveUserConnectionAsync(userId, newToken);
+  }
+
+  public async Task SaveUserConnectionAsync(string userId, GoogleTokenResponse response) {
+    UserConnection? existingConnection = await GetUserConnectionAsync(userId, OAuthProvider.Google);
 
     if (existingConnection != null) {
       existingConnection.AccessToken = response.AccessToken;
