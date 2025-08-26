@@ -11,10 +11,13 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   const location = useLocation();
 
   if (!isAuthenticated) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+    return <Navigate
+      to="/auth"
+      state={ { from: location } }
+      replace/>;
   }
 
-  return <>{children}</>;
+  return <>{ children }</>;
 };
 
 export default PrivateRoute;

@@ -23,8 +23,8 @@ const OAuthComplete = () => {
         </p>
         <Link
           to="/"
-          className="bg-red-600 px-8 py-3 rounded-full shadow-lg hover:bg-red-500 transition text-white font-medium text-lg"
-        >
+          className="bg-red-600 px-8 py-3 rounded-full shadow-lg hover:bg-red-500 transition
+          text-white font-medium text-lg">
           Go Back Home
         </Link>
       </div>

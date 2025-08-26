@@ -6,11 +6,12 @@ const OAuthRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const { allowAccess } = useOAuthAccess();
 
-  const allow =
-    location.state?.allowOAuth === true || allowAccess;
+  const allow = location.state?.allowOAuth === true || allowAccess;
 
   if (!allow) {
-    return <Navigate to="/" replace/>;
+    return <Navigate
+      to="/"
+      replace/>;
   }
 
   return <>{ children }</>;

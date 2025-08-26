@@ -52,7 +52,7 @@ const PlaylistPage = () => {
   }
 
   if (isError) {
-    return <div>Error fetching playlists: { (error as Error).message }</div>;
+    return <div>{ (error as Error).message }</div>;
   }
 
   return (
@@ -64,16 +64,14 @@ const PlaylistPage = () => {
           sortKey={ sortKey }
           sortAsc={ sortAsc }
           setSortKey={ setSortKey }
-          toggleSortOrder={ () => setSortAsc((p) => !p) }
-        />
+          toggleSortOrder={ () => setSortAsc((p) => !p) }/>
       </div>
 
       <PlaylistGrid
         playlists={ sortedPlaylists }
         onEdit={ editPlaylist }
         onDelete={ deletePlaylist }
-        onClick={ setActivePl }
-      />
+        onClick={ setActivePl }/>
     </div>
   );
 };

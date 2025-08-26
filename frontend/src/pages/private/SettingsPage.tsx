@@ -1,5 +1,5 @@
-const BrowsePage = () => {
+const SettingsPage = () => {
   return <div>Placeholder Page</div>;
 };
 
-export default BrowsePage;
+export default SettingsPage;

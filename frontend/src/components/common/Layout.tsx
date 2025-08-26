@@ -38,7 +38,6 @@ const Layout = ({ children, showProfile = true }: LayoutProps) => {
             />
           </div>
         </div>
-
       ) }
 
       <div

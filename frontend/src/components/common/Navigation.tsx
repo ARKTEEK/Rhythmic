@@ -80,14 +80,13 @@ const NavigationSidebar = () => {
   return (
     <div
       className="fixed left-0 top-1/2 -translate-y-1/2 w-40 z-30 overflow-hidden"
-      style={{ height: CONTAINER_HEIGHT }}
-    >
+      style={ { height: CONTAINER_HEIGHT } }>
       <div
-        ref={listRef}
-        onScroll={handleScroll}
-        className="h-full w-full flex flex-col items-center overflow-y-auto overflow-x-hidden scrollbar-hide snap-y snap-mandatory"
-      >
-        {displayItems.map((item, idx) => {
+        ref={ listRef }
+        onScroll={ handleScroll }
+        className="h-full w-full flex flex-col items-center overflow-y-auto overflow-x-hidden
+        scrollbar-hide snap-y snap-mandatory">
+        { displayItems.map((item, idx) => {
           const originalIdx = idx % listLength;
           const diff = Math.abs(originalIdx - activeIndex);
           const dist = Math.min(diff, listLength - diff);
@@ -96,27 +95,25 @@ const NavigationSidebar = () => {
 
           return (
             <NavLink
-              key={`${item.path}-${Math.floor(idx / listLength)}`}
-              to={item.path}
+              key={ `${ item.path }-${ Math.floor(idx / listLength) }` }
+              to={ item.path }
               className="snap-center w-full flex items-center justify-center transition-all duration-300"
-              style={{
+              style={ {
                 height: ITEM_HEIGHT,
                 flexShrink: 0,
                 opacity,
-              }}
-            >
+              } }>
               <span
-                className={`transition-all duration-100 ${
+                className={ `transition-all duration-100 ${
                   isActive
                     ? "scale-125 font-extrabold text-white"
                     : "scale-100 font-normal text-white/70 hover:text-white hover:scale-105"
-                }`}
-              >
-                {item.label}
+                }` }>
+                { item.label }
               </span>
             </NavLink>
           );
-        })}
+        }) }
       </div>
     </div>
   );

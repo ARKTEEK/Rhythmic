@@ -24,18 +24,21 @@ const App = () => {
         <Routes>
           <Route element={ <LayoutWrapper/> }>
             { AppRoutes.map(({ path, element, private: isPriv, publicOnly }) => {
-              const wrapped = isPriv ? (
-                <PrivateRoute>{ element }</PrivateRoute>
-              ) : publicOnly ? (
-                <PublicRoute>{ element }</PublicRoute>
-              ) : (
-                element
-              );
+              const wrapped = isPriv
+                ? <PrivateRoute>{ element }</PrivateRoute>
+                : publicOnly
+                  ? <PublicRoute>{ element }</PublicRoute>
+                  : element;
 
-              return <Route key={ path } path={ path } element={ wrapped }/>;
+              return <Route
+                key={ path }
+                path={ path }
+                element={ wrapped }/>;
             }) }
 
-            <Route path="*" element={ <NotFound/> }/>
+            <Route
+              path="*"
+              element={ <NotFound/> }/>
           </Route>
         </Routes>
       </BrowserRouter>

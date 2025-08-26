@@ -19,7 +19,8 @@ const PlaylistSortControls = ({
     <select
       value={ sortKey }
       onChange={ (e) => setSortKey(e.target.value as SortKey) }
-      className="bg-gray-800 border border-gray-600 text-gray-300 rounded px-3 py-1 focus:outline-none text-sm">
+      className="bg-gray-800 border border-gray-600 text-gray-300 rounded px-3 py-1
+      focus:outline-none text-sm">
       <option value="title">Name</option>
       <option value="itemCount">Songs</option>
       <option value="privacyStatus">Privacy</option>
@@ -27,8 +28,7 @@ const PlaylistSortControls = ({
     <button
       onClick={ toggleSortOrder }
       title="Toggle ascending / descending"
-      className="hover:text-red-400"
-    >
+      className="hover:text-red-400">
       { sortAsc ? <FaSortAlphaDown/> : <FaSortAmountDown/> }
     </button>
   </div>

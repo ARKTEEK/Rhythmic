@@ -52,45 +52,46 @@ const AuthPage = () => {
 
         { error && <div className="text-red-500 mt-4">{ error }</div> }
 
-        <form onSubmit={ handleSubmit } className="mt-6 w-96 space-y-4">
+        <form
+          onSubmit={ handleSubmit }
+          className="mt-6 w-96 space-y-4">
           { isSignUp && (
             <input
               type="text"
               placeholder="Username"
               value={ username }
               onChange={ (e) => setUsername(e.target.value) }
-              className="w-full px-6 py-3 bg-transparent border-2 border-gray-700 rounded-full text-white placeholder-gray-400 focus:outline-none focus:border-red-500"
-            />
+              className="w-full px-6 py-3 bg-transparent border-2 border-gray-700 rounded-full
+              text-white placeholder-gray-400 focus:outline-none focus:border-red-500"/>
           ) }
           <input
             type="email"
             placeholder="Email"
             value={ email }
             onChange={ (e) => setEmail(e.target.value) }
-            className="w-full px-6 py-3 bg-transparent border-2 border-gray-700 rounded-full text-white placeholder-gray-400 focus:outline-none focus:border-red-500"
-          />
+            className="w-full px-6 py-3 bg-transparent border-2 border-gray-700 rounded-full
+            text-white placeholder-gray-400 focus:outline-none focus:border-red-500"/>
           <div className="relative w-full">
             <input
               type={ showPassword ? "text" : "password" }
               placeholder="Password"
               value={ password }
               onChange={ (e) => setPassword(e.target.value) }
-              className="w-full px-6 py-3 bg-transparent border-2 border-gray-700 rounded-full text-white placeholder-gray-400 focus:outline-none focus:border-red-500"
-            />
+              className="w-full px-6 py-3 bg-transparent border-2 border-gray-700 rounded-full
+              text-white placeholder-gray-400 focus:outline-none focus:border-red-500"/>
             <button
               type="button"
               className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-red-400"
-              onClick={ () => setShowPassword(!showPassword) }
-            >
+              onClick={ () => setShowPassword(!showPassword) }>
               { showPassword ? <FaEyeSlash/> : <FaEye/> }
             </button>
           </div>
 
           <button
             type="submit"
-            className="w-full flex justify-center items-center space-x-3 bg-red-600 px-8 py-3 rounded-full shadow-lg hover:opacity-90 transition text-white font-medium text-lg"
-            disabled={ loading }
-          >
+            className="w-full flex justify-center items-center space-x-3 bg-red-600 px-8 py-3
+            rounded-full shadow-lg hover:opacity-90 transition text-white font-medium text-lg"
+            disabled={ loading }>
             { loading ? (
               <div className="loader">Loading...</div>
             ) : isSignUp ? (
@@ -113,8 +114,7 @@ const AuthPage = () => {
               Already have an account?{ " " }
               <button
                 className="text-red-400 hover:underline"
-                onClick={ handleTypeChange }
-              >
+                onClick={ handleTypeChange }>
                 Sign In
               </button>
             </>
@@ -123,15 +123,16 @@ const AuthPage = () => {
               Don't have an account?{ " " }
               <button
                 className="text-red-400 hover:underline"
-                onClick={ handleTypeChange }
-              >
+                onClick={ handleTypeChange }>
                 Sign Up
               </button>
             </>
           ) }
         </p>
 
-        <Link to="/" className="mt-6 text-gray-400 hover:text-gray-300 text-sm">
+        <Link
+          to="/"
+          className="mt-6 text-gray-400 hover:text-gray-300 text-sm">
           &larr; Return to Home Page
         </Link>
       </div>

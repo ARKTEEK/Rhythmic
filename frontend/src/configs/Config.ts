@@ -1,2 +1,9 @@
-export const API_BASE_URL = "https://localhost:7184/api";
-export const AUTH_TOKEN_KEY = "auth_token";
+export const API_BASE_URL = "https://127.0.0.1:7184/api";
+
+export const googleOAuth = () => {
+  window.location.href = `${ API_BASE_URL }/oauth/google/login`;
+};
+
+export const spotifyOAuth = () => {
+  window.location.href = `${ API_BASE_URL }/oauth/spotify/login`;
+};

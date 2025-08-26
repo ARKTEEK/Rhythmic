@@ -9,22 +9,22 @@ interface PlaylistGridProps {
 }
 
 const PlaylistGrid = ({
-  playlists,
-  onEdit,
-  onDelete,
-  onClick,
-}: PlaylistGridProps) => (
+                        playlists,
+                        onEdit,
+                        onDelete,
+                        onClick,
+                      }: PlaylistGridProps) => (
   <div className="overflow-y-auto max-h-[51vh] pr-0 pb-3">
     <div className="grid gap-3 lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1">
-      {playlists.map((pl) => (
+      { playlists.map((pl) => (
         <PlaylistCard
-          key={pl.id}
-          playlist={pl}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onClick={onClick}
+          key={ pl.id }
+          playlist={ pl }
+          onEdit={ onEdit }
+          onDelete={ onDelete }
+          onClick={ onClick }
         />
-      ))}
+      )) }
     </div>
   </div>
 );

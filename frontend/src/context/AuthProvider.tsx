@@ -16,7 +16,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       const currentTime = Date.now() / 1000;
       if (rawUser.exp && rawUser.exp < currentTime) {
-        console.warn("Attempted to log in with an expired token. Logging out.");
         logout();
         return;
       }
@@ -63,11 +62,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
           axios.defaults.headers.common["Authorization"] = `Bearer ${ token }`;
         } else {
-          console.log("Token from localStorage expired. Logging out.");
           logout();
         }
       } catch (e) {
-        console.error("Failed to decode token from localStorage:", e);
         logout();
       }
     }
