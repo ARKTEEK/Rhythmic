@@ -1,22 +1,22 @@
-﻿using backend.DataEntity;
-using backend.DataEntity.Auth;
+﻿using backend.DataEntity.OAuth;
 using backend.Entity;
 using backend.Enums;
 using backend.Extensions;
-using backend.Services;
+using backend.Services.Core;
+using backend.Services.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace backend.Controllers;
+namespace backend.Controllers.Core;
 
 [ApiController]
 public abstract class OAuthControllerBase<TUserInfo, TTokenResponse> : ControllerBase
   where TTokenResponse : OAuthTokenResponse {
-  protected readonly UserManager<User> _userManager;
-  protected readonly IUserConnectionService _userConnectionService;
   protected readonly IOAuthService<TUserInfo, TTokenResponse> _oauthService;
   protected readonly OAuthProvider _provider;
+  protected readonly IUserConnectionService _userConnectionService;
+  protected readonly UserManager<User> _userManager;
 
   protected OAuthControllerBase(
     IUserConnectionService userConnectionService,

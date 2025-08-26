@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace backend.DataEntity;
+namespace backend.DataEntity.Google;
 
 public class YoutubePlaylistsResponse {
   [JsonPropertyName("items")] public List<PlaylistRootItem>? Items { get; set; }

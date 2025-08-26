@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace backend.DataEntity;
+namespace backend.DataEntity.Google;
 
 public class GoogleUserInfoResponse {
   [JsonPropertyName("id")] public string Id { get; set; }

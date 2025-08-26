@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace backend.DataEntity;
+namespace backend.DataEntity.OAuth;
 
 public class OAuthTokenResponse {
   [JsonPropertyName("access_token")] public string AccessToken { get; set; }

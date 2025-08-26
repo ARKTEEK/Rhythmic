@@ -1,12 +1,12 @@
 ﻿using backend.DataEntity.Auth;
 using backend.Entity;
-using backend.Services;
+using backend.Services.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
-namespace backend.Controllers;
+namespace backend.Controllers.Core;
 
 [Route("api/auth")]
 [ApiController]

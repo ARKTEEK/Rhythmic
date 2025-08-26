@@ -1,8 +1,9 @@
-﻿using backend.DataEntity;
+﻿using backend.DataEntity.OAuth;
 using backend.Entity;
 using backend.Enums;
+using backend.Services.Core;
 
-namespace backend.Services;
+namespace backend.Services.User;
 
 public interface IUserConnectionService {
   Task RefreshTokenAsync<TUserInfo, TTokenResponse>(

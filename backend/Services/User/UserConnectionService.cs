@@ -1,9 +1,10 @@
-﻿using backend.DataEntity;
+﻿using backend.DataEntity.OAuth;
 using backend.Entity;
 using backend.Enums;
+using backend.Services.Core;
 using Microsoft.EntityFrameworkCore;
 
-namespace backend.Services;
+namespace backend.Services.User;
 
 public class UserConnectionService : IUserConnectionService {
   private readonly AppDbContext _dbContext;

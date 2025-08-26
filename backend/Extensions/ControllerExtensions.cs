@@ -7,7 +7,7 @@ namespace backend.Extensions;
 public static class ControllerExtensions {
   public static async Task<User?> GetCurrentUserAsync(this ControllerBase controller,
     UserManager<User> userManager) {
-    var username = controller.User.GetUsername();
+    string username = controller.User.GetUsername();
     return await userManager.FindByNameAsync(username);
   }
 }

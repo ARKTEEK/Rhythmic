@@ -1,9 +1,9 @@
 ﻿using System.Net.Http.Headers;
 using System.Text.Json;
-using backend.DataEntity;
-using backend.DataEntity.Auth;
+using backend.DataEntity.Google;
+using backend.Services.Core;
 
-namespace backend.Services;
+namespace backend.Services.Google;
 
 public class GoogleOAuthService : IOAuthService<GoogleUserInfoResponse, GoogleTokenResponse> {
   private readonly IConfiguration _configuration;

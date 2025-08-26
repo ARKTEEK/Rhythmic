@@ -1,6 +1,6 @@
-﻿using backend.DataEntity;
+﻿using backend.DataEntity.Google;
 
-namespace backend.Services;
+namespace backend.Services.Google;
 
 public interface IYoutubeService {
   Task<List<YoutubePlaylist>> GetPlaylistsAsync(string accessToken);

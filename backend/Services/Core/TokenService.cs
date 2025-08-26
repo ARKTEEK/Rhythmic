@@ -1,10 +1,9 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using backend.Entity;
 using Microsoft.IdentityModel.Tokens;
 
-namespace backend.Services;
+namespace backend.Services.Core;
 
 public class TokenService : ITokenService {
   private readonly IConfiguration _config;
@@ -15,7 +14,7 @@ public class TokenService : ITokenService {
     _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:SigningKey"]));
   }
 
-  public string CreateToken(User user) {
+  public string CreateToken(Entity.User user) {
     List<Claim> claims = new() {
       new Claim(JwtRegisteredClaimNames.Email, user.Email),
       new Claim(JwtRegisteredClaimNames.GivenName, user.UserName)

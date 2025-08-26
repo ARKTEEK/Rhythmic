@@ -1,12 +1,13 @@
-﻿using backend.DataEntity;
-using backend.DataEntity.Auth;
+﻿using backend.Controllers.Core;
+using backend.DataEntity.Google;
 using backend.Entity;
 using backend.Enums;
-using backend.Services;
+using backend.Services.Core;
+using backend.Services.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace backend.Controllers;
+namespace backend.Controllers.Google;
 
 [ApiController]
 [Route("api/oauth/google")]

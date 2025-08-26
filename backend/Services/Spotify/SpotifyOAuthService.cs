@@ -1,8 +1,10 @@
 ﻿using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
-using backend.DataEntity.Auth;
+using backend.DataEntity.Spotify;
+using backend.Services.Core;
 
-namespace backend.Services;
+namespace backend.Services.Spotify;
 
 public class SpotifyOAuthService : IOAuthService<SpotifyUserInfoResponse, SpotifyTokenResponse> {
   private readonly IConfiguration _configuration;
@@ -34,19 +36,19 @@ public class SpotifyOAuthService : IOAuthService<SpotifyUserInfoResponse, Spotif
     string clientSecret = _configuration["Spotify:ClientSecret"];
     string redirectUri = _configuration["Spotify:RedirectUri"];
 
-    var client = _httpClientFactory.CreateClient();
-    var body = new Dictionary<string, string> {
+    HttpClient client = _httpClientFactory.CreateClient();
+    Dictionary<string, string> body = new() {
       ["grant_type"] = "authorization_code",
       ["code"] = code,
       ["redirect_uri"] = redirectUri
     };
 
-    var request = new HttpRequestMessage(HttpMethod.Post, "https://accounts.spotify.com/api/token") {
+    HttpRequestMessage request = new(HttpMethod.Post, "https://accounts.spotify.com/api/token") {
       Content = new FormUrlEncodedContent(body)
     };
 
     string basicAuth =
-      Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}"));
+      Convert.ToBase64String(Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}"));
     request.Headers.Authorization = new AuthenticationHeaderValue("Basic", basicAuth);
 
     HttpResponseMessage response = await client.SendAsync(request);
@@ -60,18 +62,18 @@ public class SpotifyOAuthService : IOAuthService<SpotifyUserInfoResponse, Spotif
     string clientId = _configuration["Spotify:ClientId"];
     string clientSecret = _configuration["Spotify:ClientSecret"];
 
-    var client = _httpClientFactory.CreateClient();
-    var body = new Dictionary<string, string> {
+    HttpClient client = _httpClientFactory.CreateClient();
+    Dictionary<string, string> body = new() {
       ["grant_type"] = "refresh_token",
       ["refresh_token"] = refreshToken
     };
 
-    var request = new HttpRequestMessage(HttpMethod.Post, "https://accounts.spotify.com/api/token") {
+    HttpRequestMessage request = new(HttpMethod.Post, "https://accounts.spotify.com/api/token") {
       Content = new FormUrlEncodedContent(body)
     };
 
     string basicAuth =
-      Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}"));
+      Convert.ToBase64String(Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}"));
     request.Headers.Authorization = new AuthenticationHeaderValue("Basic", basicAuth);
 
     HttpResponseMessage response = await client.SendAsync(request);
@@ -82,7 +84,7 @@ public class SpotifyOAuthService : IOAuthService<SpotifyUserInfoResponse, Spotif
   }
 
   public async Task<SpotifyUserInfoResponse> GetUserInfoAsync(string accessToken) {
-    var client = _httpClientFactory.CreateClient();
+    HttpClient client = _httpClientFactory.CreateClient();
     client.DefaultRequestHeaders.Authorization =
       new AuthenticationHeaderValue("Bearer", accessToken);
 

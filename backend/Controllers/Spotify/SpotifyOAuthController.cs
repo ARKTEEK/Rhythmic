@@ -1,11 +1,13 @@
-﻿using backend.DataEntity.Auth;
+﻿using backend.Controllers.Core;
+using backend.DataEntity.Spotify;
 using backend.Entity;
 using backend.Enums;
-using backend.Services;
+using backend.Services.Core;
+using backend.Services.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace backend.Controllers;
+namespace backend.Controllers.Spotify;
 
 [ApiController]
 [Route("api/oauth/spotify")]

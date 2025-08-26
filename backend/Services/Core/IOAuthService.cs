@@ -1,6 +1,6 @@
-﻿using backend.DataEntity;
+﻿using backend.DataEntity.OAuth;
 
-namespace backend.Services;
+namespace backend.Services.Core;
 
 public interface IOAuthService<TUserInfo, TTokenResponse>
   where TTokenResponse : OAuthTokenResponse {

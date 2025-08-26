@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
-using backend.DataEntity;
+using backend.DataEntity.Google;
 
-namespace backend.Services;
+namespace backend.Services.Google;
 
 public class YoutubeService : IYoutubeService {
   private readonly IHttpClientFactory _clientFactory;

@@ -1,4 +1,4 @@
-﻿namespace backend.DataEntity.Auth;
+﻿namespace backend.DataEntity.OAuth;
 
 public class OAuthCallbackDto {
   public string Code { get; set; }

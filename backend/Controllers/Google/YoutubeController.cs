@@ -1,20 +1,18 @@
-﻿using backend.DataEntity;
-using backend.Entity;
-using backend.Enums;
-using backend.Extensions;
-using backend.Services;
+﻿using backend.Entity;
+using backend.Services.Google;
+using backend.Services.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace backend.Controllers;
+namespace backend.Controllers.Google;
 
 [ApiController]
 [Route("api/youtube")]
 public class YoutubeController : ControllerBase {
   private readonly IUserConnectionService _userConnectionService;
-  private readonly IYoutubeService _youtubeService;
   private readonly UserManager<User> _userManager;
+  private readonly IYoutubeService _youtubeService;
 
   public YoutubeController(IUserConnectionService userConnectionService,
     IYoutubeService youtubeService,
