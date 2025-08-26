@@ -1,21 +1,25 @@
-﻿using System.Text.Json;
+﻿using System.Net.Http.Headers;
+using System.Text.Json;
+using backend.DataEntity;
 using backend.DataEntity.Auth;
 
 namespace backend.Services;
 
-public class GoogleAuthService : IGoogleAuthService {
+public class GoogleOAuthService : IOAuthService<GoogleUserInfoResponse, GoogleTokenResponse> {
   private readonly IConfiguration _configuration;
   private readonly IHttpClientFactory _httpClientFactory;
 
-  public GoogleAuthService(IConfiguration configuration, IHttpClientFactory httpClientFactory) {
+  public GoogleOAuthService(IConfiguration configuration, IHttpClientFactory httpClientFactory) {
     _configuration = configuration;
     _httpClientFactory = httpClientFactory;
   }
 
-  public string GetGoogleLoginUrl() {
+  public string GetLoginUrl() {
     string? clientId = _configuration["Google:ClientId"];
     string? redirectUrl = _configuration["Google:RedirectUri"];
-    string scope = "https://www.googleapis.com/auth/youtube";
+    string scope = "https://www.googleapis.com/auth/youtube " +
+                   "https://www.googleapis.com/auth/userinfo.email " +
+                   "https://www.googleapis.com/auth/userinfo.profile";
     string state = Guid.NewGuid().ToString();
 
     return $"https://accounts.google.com/o/oauth2/v2/auth?" +
@@ -104,5 +108,29 @@ public class GoogleAuthService : IGoogleAuthService {
     }
 
     return newTokenResponse;
+  }
+
+  public async Task<GoogleUserInfoResponse> GetUserInfoAsync(string accessToken) {
+    HttpClient client = _httpClientFactory.CreateClient();
+    client.DefaultRequestHeaders.Authorization =
+      new AuthenticationHeaderValue("Bearer", accessToken);
+
+    string requestUri = "https://www.googleapis.com/oauth2/v1/userinfo?alt=json";
+
+    HttpResponseMessage response = await client.GetAsync(requestUri);
+
+    if (!response.IsSuccessStatusCode) {
+      string message = await response.Content.ReadAsStringAsync();
+      throw new HttpRequestException(message);
+    }
+
+    string json = await response.Content.ReadAsStringAsync();
+    GoogleUserInfoResponse userInfo = JsonSerializer.Deserialize<GoogleUserInfoResponse>(json);
+
+    if (userInfo == null) {
+      return new GoogleUserInfoResponse();
+    }
+
+    return userInfo;
   }
 }

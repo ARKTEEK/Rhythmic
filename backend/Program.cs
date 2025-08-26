@@ -1,5 +1,7 @@
 using System.Text;
 using backend;
+using backend.DataEntity;
+using backend.DataEntity.Auth;
 using backend.Entity;
 using backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -22,6 +24,7 @@ builder.Services.AddCors(options => {
       .AllowAnyHeader()
       .AllowCredentials());
 });
+
 
 builder.Services.AddDbContext<AppDbContext>(options =>
   options.UseMySql(builder.Configuration["DatabaseConnection"], mysqlVersion)
@@ -67,7 +70,10 @@ builder.Services.AddHttpClient();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUserConnectionService, UserConnectionService>();
-builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
+builder.Services
+  .AddScoped<IOAuthService<GoogleUserInfoResponse, GoogleTokenResponse>, GoogleOAuthService>();
+builder.Services
+  .AddScoped<IOAuthService<SpotifyUserInfoResponse, SpotifyTokenResponse>, SpotifyOAuthService>();
 builder.Services.AddScoped<IYoutubeService, YoutubeService>();
 
 WebApplication app = builder.Build();

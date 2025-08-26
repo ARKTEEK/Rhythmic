@@ -27,22 +27,28 @@ public class YoutubeController : ControllerBase {
   [Authorize]
   [HttpGet("playlists")]
   public async Task<IActionResult> GetPlaylists() {
-    User? user = await this.GetCurrentUserAsync(_userManager);
-    if (user == null) {
-      return Unauthorized();
-    }
-
-    await _userConnectionService.RefreshGoogleTokenAsync(user.Id);
-
-    UserConnection? userConnection =
-      await _userConnectionService.GetUserConnectionAsync(user.Id, OAuthProvider.Google);
-    if (userConnection == null) {
-      return Forbid("Google account is not connected.");
-    }
-
-    List<YoutubePlaylist> playlists =
-      await _youtubeService.GetPlaylistsAsync(userConnection.AccessToken);
-
-    return Ok(playlists);
+    // User? user = await this.GetCurrentUserAsync(_userManager);
+    // if (user == null) {
+    //   return Unauthorized();
+    // }
+    //
+    // try {
+    //   await _userConnectionService.RefreshGoogleTokenAsync(user.Id);
+    // } catch (Exception ex) {
+    //   return StatusCode(403, "Google account is not connected.");
+    // }
+    //
+    // UserConnection? userConnection =
+    //   await _userConnectionService.GetUserConnectionAsync(user.Id, OAuthProvider.Google);
+    //
+    // if (userConnection == null || string.IsNullOrWhiteSpace(userConnection.AccessToken)) {
+    //   return StatusCode(403, "Google account is not connected.");
+    // }
+    //
+    // List<YoutubePlaylist> playlists =
+    //   await _youtubeService.GetPlaylistsAsync(userConnection.AccessToken);
+    //
+    // return Ok(playlists);
+    return Ok();
   }
 }

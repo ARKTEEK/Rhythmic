@@ -1,4 +1,4 @@
-﻿using backend.DataEntity.Auth;
+﻿using backend.DataEntity;
 using backend.Entity;
 using backend.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -6,12 +6,10 @@ using Microsoft.EntityFrameworkCore;
 namespace backend.Services;
 
 public class UserConnectionService : IUserConnectionService {
-  private readonly IGoogleAuthService _googleAuthService;
   private readonly AppDbContext _dbContext;
 
-  public UserConnectionService(AppDbContext dbContext, IGoogleAuthService googleAuthService) {
+  public UserConnectionService(AppDbContext dbContext) {
     _dbContext = dbContext;
-    _googleAuthService = googleAuthService;
   }
 
   public async Task<UserConnection?> GetUserConnectionAsync(string userId, OAuthProvider provider) {
@@ -19,19 +17,28 @@ public class UserConnectionService : IUserConnectionService {
       .FirstOrDefaultAsync(c => c != null && c.UserId == userId && c.Provider == provider);
   }
 
+  public async Task<List<UserConnection?>> GetAllUserConnectionsAsync(string userId) {
+    return await _dbContext.UserConnections
+      .Where(c => c != null && c.UserId == userId).ToListAsync();
+  }
+
   public async Task DeleteUserConnectionAsync(string userId, OAuthProvider provider) {
-    UserConnection? existingConnection = await GetUserConnectionAsync(userId, OAuthProvider.Google);
+    UserConnection? existingConnection = await GetUserConnectionAsync(userId, provider);
 
     if (existingConnection == null) {
       return;
     }
 
     _dbContext.UserConnections.Remove(existingConnection);
+    await _dbContext.SaveChangesAsync();
   }
 
-  public async Task RefreshGoogleTokenAsync(string userId) {
-    UserConnection? userConnection = await GetUserConnectionAsync(userId, OAuthProvider.Google);
-
+  public async Task RefreshTokenAsync<TUserInfo, TTokenResponse>(
+    string userId,
+    OAuthProvider provider,
+    IOAuthService<TUserInfo, TTokenResponse> oauthService)
+    where TTokenResponse : OAuthTokenResponse {
+    UserConnection? userConnection = await GetUserConnectionAsync(userId, provider);
     if (userConnection == null) {
       return;
     }
@@ -40,36 +47,36 @@ public class UserConnectionService : IUserConnectionService {
       return;
     }
 
-    if (userConnection.RefreshToken == null) {
+    if (string.IsNullOrWhiteSpace(userConnection.RefreshToken)) {
       throw new Exception("Refresh token is missing");
     }
 
-    GoogleTokenResponse newToken =
-      await _googleAuthService.RefreshTokenAsync(userConnection.RefreshToken);
-
-    await SaveUserConnectionAsync(userId, newToken);
+    TTokenResponse newToken = await oauthService.RefreshTokenAsync(userConnection.RefreshToken);
+    await SaveUserConnectionAsync(userId, newToken, provider);
   }
 
-  public async Task SaveUserConnectionAsync(string userId, GoogleTokenResponse response) {
-    UserConnection? existingConnection = await GetUserConnectionAsync(userId, OAuthProvider.Google);
+  public async Task SaveUserConnectionAsync<TTokenResponse>(
+    string userId,
+    TTokenResponse token,
+    OAuthProvider provider)
+    where TTokenResponse : OAuthTokenResponse {
+    UserConnection? existingConnection = await GetUserConnectionAsync(userId, provider);
 
     if (existingConnection != null) {
-      existingConnection.AccessToken = response.AccessToken;
-      existingConnection.RefreshToken =
-        response.RefreshToken ??
-        existingConnection.RefreshToken;
-      existingConnection.ExpiresAt = DateTime.UtcNow.AddSeconds(response.ExpiresIn);
-      existingConnection.Scope = response.Scope;
-      existingConnection.TokenType = response.TokenType;
+      existingConnection.AccessToken = token.AccessToken;
+      existingConnection.RefreshToken = token.RefreshToken;
+      existingConnection.ExpiresAt = DateTime.UtcNow.AddSeconds(token.ExpiresIn);
+      existingConnection.Scope = token.Scope;
+      existingConnection.TokenType = token.TokenType;
     } else {
-      UserConnection? connection = new() {
+      UserConnection connection = new() {
         UserId = userId,
-        Provider = OAuthProvider.Google,
-        AccessToken = response.AccessToken,
-        RefreshToken = response.RefreshToken,
-        ExpiresAt = DateTime.UtcNow.AddSeconds(response.ExpiresIn),
-        Scope = response.Scope,
-        TokenType = response.TokenType
+        Provider = provider,
+        AccessToken = token.AccessToken,
+        RefreshToken = token.RefreshToken,
+        ExpiresAt = DateTime.UtcNow.AddSeconds(token.ExpiresIn),
+        Scope = token.Scope,
+        TokenType = token.TokenType
       };
       _dbContext.UserConnections.Add(connection);
     }

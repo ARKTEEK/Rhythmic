@@ -3,5 +3,6 @@
 public enum OAuthProvider {
   None = 0,
   Google,
-  Spotify
+  Spotify,
+  Apple
 }

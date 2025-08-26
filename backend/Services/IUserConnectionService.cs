@@ -1,12 +1,25 @@
-﻿using backend.DataEntity.Auth;
+﻿using backend.DataEntity;
 using backend.Entity;
 using backend.Enums;
 
 namespace backend.Services;
 
 public interface IUserConnectionService {
-  Task RefreshGoogleTokenAsync(string userId);
+  Task RefreshTokenAsync<TUserInfo, TTokenResponse>(
+    string userId,
+    OAuthProvider provider,
+    IOAuthService<TUserInfo, TTokenResponse> oauthService)
+    where TTokenResponse : OAuthTokenResponse;
+
   Task DeleteUserConnectionAsync(string userId, OAuthProvider provider);
+
   Task<UserConnection?> GetUserConnectionAsync(string userId, OAuthProvider provider);
-  Task SaveUserConnectionAsync(string userId, GoogleTokenResponse response);
+
+  Task<List<UserConnection?>> GetAllUserConnectionsAsync(string userId);
+
+  Task SaveUserConnectionAsync<TTokenResponse>(
+    string userId,
+    TTokenResponse token,
+    OAuthProvider provider)
+    where TTokenResponse : OAuthTokenResponse;
 }

@@ -11,8 +11,6 @@ public class YoutubeService : IYoutubeService {
   }
 
   public async Task<List<YoutubePlaylist>> GetPlaylistsAsync(string accessToken) {
-    Console.WriteLine(accessToken);
-
     HttpClient client = _clientFactory.CreateClient();
     client.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
 
