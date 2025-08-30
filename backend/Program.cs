@@ -1,15 +1,9 @@
 using System.Text;
-using backend;
-using backend.DataEntity;
-using backend.DataEntity.Auth;
-using backend.DataEntity.Google;
-using backend.DataEntity.Spotify;
-using backend.Entity;
-using backend.Services;
-using backend.Services.Core;
-using backend.Services.Google;
-using backend.Services.Spotify;
-using backend.Services.User;
+using backend.Application.Interface;
+using backend.Application.Service;
+using backend.Domain.Entity;
+using backend.Infrastructure.Persistence;
+using backend.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -31,8 +25,7 @@ builder.Services.AddCors(options => {
       .AllowCredentials());
 });
 
-
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddDbContext<DatabaseContext>(options =>
   options.UseMySql(builder.Configuration["DatabaseConnection"], mysqlVersion)
     .LogTo(Console.WriteLine, LogLevel.Information)
     .EnableDetailedErrors());
@@ -41,46 +34,47 @@ builder.Services.AddIdentity<User, IdentityRole>(options => {
     options.Password.RequireDigit = true;
     options.Password.RequiredLength = 8;
   })
-  .AddEntityFrameworkStores<AppDbContext>();
+  .AddEntityFrameworkStores<DatabaseContext>();
+
+string jwtScheme = JwtBearerDefaults.AuthenticationScheme;
 
 builder.Services.AddAuthentication(options => {
-  options.DefaultAuthenticateScheme =
-    options.DefaultChallengeScheme =
-      options.DefaultForbidScheme =
-        options.DefaultScheme =
-          options.DefaultSignInScheme =
-            options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options => {
-  options.TokenValidationParameters = new TokenValidationParameters {
-    ValidateIssuer = true,
-    ValidIssuer = builder.Configuration["JWT:Issuer"],
-    ValidateAudience = true,
-    ValidAudience = builder.Configuration["JWT:Audience"],
-    ValidateIssuerSigningKey = true,
-    IssuerSigningKey = new SymmetricSecurityKey(
-      Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"]))
-  };
+    options.DefaultAuthenticateScheme = jwtScheme;
+    options.DefaultChallengeScheme = jwtScheme;
+    options.DefaultForbidScheme = jwtScheme;
+    options.DefaultScheme = jwtScheme;
+    options.DefaultSignInScheme = jwtScheme;
+    options.DefaultSignOutScheme = jwtScheme;
+  })
+  .AddJwtBearer(options => {
+    ConfigurationManager configuration = builder.Configuration;
+    SymmetricSecurityKey signingKey = new(Encoding.UTF8.GetBytes(configuration["JWT:SigningKey"]));
 
-  options.Events = new JwtBearerEvents {
-    OnMessageReceived = context => {
-      if (context.Request.Cookies.ContainsKey("jwt")) {
-        context.Token = context.Request.Cookies["jwt"];
+    options.TokenValidationParameters = new TokenValidationParameters {
+      ValidateIssuer = true,
+      ValidIssuer = configuration["JWT:Issuer"],
+      ValidateAudience = true,
+      ValidAudience = configuration["JWT:Audience"],
+      ValidateIssuerSigningKey = true,
+      IssuerSigningKey = signingKey
+    };
+
+    options.Events = new JwtBearerEvents {
+      OnMessageReceived = context => {
+        if (context.Request.Cookies.TryGetValue("jwt", out string? token)) {
+          context.Token = token;
+        }
+
+        return Task.CompletedTask;
       }
+    };
+  });
 
-      return Task.CompletedTask;
-    }
-  };
-});
 
 builder.Services.AddHttpClient();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IUserConnectionService, UserConnectionService>();
-builder.Services
-  .AddScoped<IOAuthService<GoogleUserInfoResponse, GoogleTokenResponse>, GoogleOAuthService>();
-builder.Services
-  .AddScoped<IOAuthService<SpotifyUserInfoResponse, SpotifyTokenResponse>, SpotifyOAuthService>();
-builder.Services.AddScoped<IYoutubeService, YoutubeService>();
+builder.Services.AddScoped<AuthService>();
 
 WebApplication app = builder.Build();
 
