@@ -9,5 +9,4 @@ public interface IProviderClient {
   string GetLoginUrl();
   Task<TokenInfo> ExchangeCodeAsync(string code);
   Task<TokenInfo> RefreshTokenAsync(string refreshToken);
-  Task<ProviderProfile> GetProfileAsync(string accessToken);
 }

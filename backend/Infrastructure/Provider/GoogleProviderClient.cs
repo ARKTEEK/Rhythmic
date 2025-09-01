@@ -55,11 +55,24 @@ public class GoogleProviderClient : IProviderClient {
     return GoogleOAuthMapper.ToTokenInfo(tokenResponse);
   }
 
-  public Task<TokenInfo> RefreshTokenAsync(string refreshToken) {
-    throw new NotImplementedException();
-  }
+  public async Task<TokenInfo> RefreshTokenAsync(string refreshToken) {
+    string? clientId = _configuration["Google:ClientId"];
+    string? clientSecret = _configuration["Google:ClientSecret"];
 
-  public async Task<ProviderProfile> GetProfileAsync(string accessToken) {
-    throw new NotImplementedException();
+    FormUrlEncodedContent content = new(new Dictionary<string, string> {
+      ["client_id"] = clientId,
+      ["client_secret"] = clientSecret!,
+      ["refresh_token"] = refreshToken,
+      ["grant_type"] = "refresh_token"
+    });
+
+    HttpResponseMessage response =
+      await _http.PostAsync("https://oauth2.googleapis.com/token", content);
+    response.EnsureSuccessStatusCode();
+
+    string json = await response.Content.ReadAsStringAsync();
+    GoogleTokenResponse tokenResponse = JsonSerializer.Deserialize<GoogleTokenResponse>(json)!;
+
+    return GoogleOAuthMapper.ToTokenInfo(tokenResponse);
   }
 }
