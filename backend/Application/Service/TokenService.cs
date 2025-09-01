@@ -5,7 +5,7 @@ using backend.Application.Interface;
 using backend.Domain.Entity;
 using Microsoft.IdentityModel.Tokens;
 
-namespace backend.Infrastructure.Security;
+namespace backend.Application.Service;
 
 public class TokenService : ITokenService {
   private readonly IConfiguration _config;

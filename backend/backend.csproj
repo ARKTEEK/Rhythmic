@@ -13,10 +13,6 @@
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0-preview.3.efcore.9.0.0"/>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Infrastructure\Persistence\Migrations\"/>
-  </ItemGroup>
-
   <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>

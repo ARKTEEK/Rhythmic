@@ -2,8 +2,9 @@ using System.Text;
 using backend.Application.Interface;
 using backend.Application.Service;
 using backend.Domain.Entity;
+using backend.Infrastructure.Factory;
 using backend.Infrastructure.Persistence;
-using backend.Infrastructure.Security;
+using backend.Infrastructure.Provider;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -72,6 +73,13 @@ builder.Services.AddAuthentication(options => {
 
 
 builder.Services.AddHttpClient();
+
+builder.Services.AddScoped<IProviderClient, GoogleProviderClient>();
+builder.Services.AddScoped<IProviderFactory, ProviderFactory>();
+
+builder.Services.AddScoped<IOAuthService, OAuthService>();
+
+builder.Services.AddScoped<IAccountTokensService, AccountTokensService>();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<AuthService>();
