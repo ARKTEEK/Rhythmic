@@ -1,55 +1,39 @@
-import { ReactNode, useState } from "react";
-import NavigationSidebar from "./Navigation";
-import ProfileDropdown from "./ProfileDropdown";
-import ProfilePopup from "./ProfilePopup";
+import { ReactNode, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth.tsx";
+import { Sidebar } from "./Sidebar.tsx";
+import { TopNavBar } from "./TopNavBar.tsx";
+import { useLocation } from "react-router-dom";
+import { useSetTopNavActions, useTopNavActions } from "../../context/TopNavActionsContext.tsx";
 
 interface LayoutProps {
   children: ReactNode;
   showProfile?: boolean;
 }
 
-const Layout = ({ children, showProfile = true }: LayoutProps) => {
-  const { isAuthenticated, user, logout } = useAuth();
-  const [showPopup, setShowPopup] = useState(false);
+export const Layout = ({ children }: LayoutProps) => {
+  const { isAuthenticated } = useAuth();
+  const location = useLocation();
+  const setTopNavActions = useSetTopNavActions();
+  const actions = useTopNavActions();
+
+  useEffect(() => {
+    setTopNavActions([]);
+  }, [location.pathname, setTopNavActions]);
 
   return (
-    <div
-      className="bg-black min-h-screen flex flex-col items-center justify-center relative overflow-hidden p-6">
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div
-          className={ `${
-            isAuthenticated ? "w-[600px] h-[600px]" : "w-96 h-96"
-          } bg-red-500 opacity-20 blur-3xl rounded-full` }
-        />
-      </div>
-
-      { isAuthenticated && showProfile && (
-        <div>
-          <div className="absolute top-4 right-4 text-white text-right">
-            <ProfileDropdown
-              user={ user }
-              onSettings={ () => setShowPopup(true) }
-              onLogout={ logout }
-            />
-            <ProfilePopup
-              isOpen={ showPopup }
-              onClose={ () => setShowPopup(false) }
-            />
-          </div>
-        </div>
+    <div className="bg-gradient-to-br from-[#fafafa] to-[#f0f0f0] min-h-screen min-w-screen relative overflow-hidden flex">
+      { isAuthenticated && (
+        <aside className="w-64 h-screen fixed top-0 left-0 z-10">
+          <Sidebar/>
+        </aside>
       ) }
 
       <div
-        className="relative z-10 w-[70vw] flex justify-center items-center text-white overflow-auto">
-        { children }
-        { isAuthenticated && (
-          <NavigationSidebar/>
-        ) }
+        className="flex-1 flex flex-col transition-all duration-300"
+        style={ { marginLeft: isAuthenticated ? "16rem" : 0 } }>
+        { isAuthenticated && <TopNavBar actions={ actions }/> }
+        <main className="flex-1 overflow-auto px-8 py-6">{ children }</main>
       </div>
-
     </div>
   );
 };
-
-export default Layout;

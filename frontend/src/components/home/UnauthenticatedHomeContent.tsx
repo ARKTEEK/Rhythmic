@@ -5,7 +5,7 @@ const UnauthenticatedHomeContent = () => {
   return (
     <div className="w-full max-w-lg mx-auto flex flex-col items-center text-center">
       <h1 className="text-5xl font-extrabold text-red-400">
-        Welcome to ListPort
+        Welcome to Rhythmic
       </h1>
       <p className="text-gray-300 mt-2 text-lg">
         Your gateway to seamless playlist management
