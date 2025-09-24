@@ -14,10 +14,10 @@ import {
   FaList,
   FaCog,
   FaQuestionCircle,
-  FaSync,
-  FaShareAlt, FaLink, FaCompass, FaExchangeAlt, FaRegClone, FaListAlt,
+  FaLink, FaCompass, FaListAlt,
 } from "react-icons/fa";
 import PlaceholderPage from "../../pages/private/PlaceholderPage.tsx";
+import DashboardPage from "../../pages/private/DashboardPage.tsx";
 
 const PlaylistPage = lazy(() => import("../../pages/private/PlaylistPage.tsx"));
 
@@ -38,6 +38,15 @@ export const AppRoutes: AppRoute[] = [
     label: "Home",
     icon: FaHome,
     category: "",
+    publicOnly: true,
+  },
+
+  {
+    path: "/dashboard",
+    element: <DashboardPage/>,
+    label: "Dashboard",
+    icon: FaHome,
+    private: true
   },
 
   // My Library

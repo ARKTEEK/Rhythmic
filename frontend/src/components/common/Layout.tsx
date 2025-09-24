@@ -21,7 +21,9 @@ export const Layout = ({ children }: LayoutProps) => {
   }, [location.pathname, setTopNavActions]);
 
   return (
-    <div className="bg-gradient-to-br from-[#fafafa] to-[#f0f0f0] min-h-screen min-w-screen relative overflow-hidden flex">
+    <div
+      className="bg-gradient-to-br from-[#fafafa] to-[#f0f0f0] min-h-screen min-w-screen
+                 relative overflow-hidden flex">
       { isAuthenticated && (
         <aside className="w-64 h-screen fixed top-0 left-0 z-10">
           <Sidebar/>
@@ -32,7 +34,7 @@ export const Layout = ({ children }: LayoutProps) => {
         className="flex-1 flex flex-col transition-all duration-300"
         style={ { marginLeft: isAuthenticated ? "16rem" : 0 } }>
         { isAuthenticated && <TopNavBar actions={ actions }/> }
-        <main className="flex-1 overflow-auto px-8 py-6">{ children }</main>
+        <main className="flex-1 overflow-auto">{ children }</main>
       </div>
     </div>
   );

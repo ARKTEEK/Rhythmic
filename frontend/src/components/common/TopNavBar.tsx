@@ -1,5 +1,5 @@
 import { FaEllipsisV } from "react-icons/fa";
-import { Button } from "./Button.tsx";
+import { Button } from "./button/Button.tsx";
 
 interface TopNavBarProps {
   actions: {
@@ -18,9 +18,9 @@ export const TopNavBar = ({ actions }: TopNavBarProps) => {
           <Button
             key={ action.id }
             label={ action.label }
-            active={ action.active }
+            variant={ action.active === true ? 'active' : 'inactive' }
             onClick={ action.onClick }
-          />
+            size="small"/>
         )) }
       </div>
 
@@ -29,8 +29,7 @@ export const TopNavBar = ({ actions }: TopNavBarProps) => {
           <img
             src="https://ui-avatars.com/api/?name=John+Doe&background=0D8ABC&color=fff"
             alt="User"
-            className="w-8 h-8 rounded-full object-cover"
-          />
+            className="w-8 h-8 rounded-full object-cover"/>
           <span className="text-sm font-semibold text-black">Username</span>
         </div>
         <FaEllipsisV className="text-black cursor-pointer"/>

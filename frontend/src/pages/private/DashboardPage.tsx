@@ -1,4 +1,4 @@
-const AuthenticatedHomeContent = () => {
+const DashboardPage = () => {
   return (
     <div className="w-full max-w-lg mx-auto flex flex-col items-center text-center">
 
@@ -6,4 +6,4 @@ const AuthenticatedHomeContent = () => {
   );
 };
 
-export default AuthenticatedHomeContent;
+export default DashboardPage;
