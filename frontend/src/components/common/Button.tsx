@@ -22,12 +22,10 @@ const baseButtonClasses = `
 
 const variantClassesMap = {
   inactive: `
-    bg-gradient-to-br from-white to-gray-100 text-gray-800
-    hover:from-blue-50 hover:to-purple-50
+    bg-white text-gray-800 hover:from-blue-50 hover:to-purple-50
   `,
   active: `
-    bg-[#ede0d0] text-black
-    border-2 border-black
+    bg-[#f9ccb5] text-black border-2 border-black
   `,
 };
 

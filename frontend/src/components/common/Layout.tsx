@@ -22,7 +22,7 @@ export const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div
-      className="bg-[#ede0d0] min-h-screen min-w-screen
+      className="bg-[#f9ccb5] min-h-screen min-w-screen
                  relative overflow-hidden flex">
       { isAuthenticated && (
         <aside className="w-64 h-screen fixed top-0 left-0 z-10">
@@ -34,7 +34,13 @@ export const Layout = ({ children }: LayoutProps) => {
         className="flex-1 flex flex-col transition-all duration-300"
         style={ { marginLeft: isAuthenticated ? "16rem" : 0 } }>
         { isAuthenticated && <TopNavBar actions={ actions }/> }
-        <main className="flex-1 overflow-auto">{ children }</main>
+        <main className="flex-1 overflow-auto h-full">
+          <div
+            className="bg-[repeating-linear-gradient(transparent_0px,transparent_1px,rgba(0,0,0,0.05)_1px,rgba(0,0,0,0.05)_2px)]
+                       h-full pointer-events-none">
+            { children }
+          </div>
+        </main>
       </div>
     </div>
   );
