@@ -22,7 +22,7 @@ export const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div
-      className="bg-gradient-to-br from-[#fafafa] to-[#f0f0f0] min-h-screen min-w-screen
+      className="bg-[#ede0d0] min-h-screen min-w-screen
                  relative overflow-hidden flex">
       { isAuthenticated && (
         <aside className="w-64 h-screen fixed top-0 left-0 z-10">

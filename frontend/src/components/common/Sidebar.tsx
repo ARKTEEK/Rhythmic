@@ -1,5 +1,5 @@
 import { AppRoute, AppRoutes } from "../route/AppRoutes.tsx";
-import { Button } from "./button/Button.tsx";
+import { Button } from "./Button.tsx";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Logo } from "./Logo.tsx";
 
@@ -20,18 +20,16 @@ export function Sidebar() {
   }, {});
 
   return (
-    <aside
-      className="w-full h-full bg-gradient-to-b from-white/80 to-[#f8f8f8]/80
-                 backdrop-blur-md border-r border-gray-200/50 flex flex-col justify-between py-6">
+    <aside className="w-full h-full flex flex-col justify-between py-6 border-r-2 border-black">
       <div className="flex justify-center px-6 pb-8 pt-2">
         <Logo
           size="md"
           underline/>
       </div>
 
-      <div className="flex-1 overflow-y-auto mt-4">
+      <div className="flex-1 overflow-y-auto pt-6">
         { homeRoute && (
-          <nav className="flex flex-col px-6 space-y-3">
+          <nav className="flex flex-col px-6 space-y-4 mb-6">
             <Button
               key={ homeRoute.path }
               label={ homeRoute.label! }
@@ -45,8 +43,8 @@ export function Sidebar() {
         { Object.entries(categorizedRoutes).map(([category, routes]) => (
           <nav
             key={ category }
-            className="flex flex-col px-6 mt-6 space-y-3">
-            <div className="mb-3 text-sm font-semibold tracking-widest text-gray-600/80 uppercase">
+            className="flex flex-col px-6 mt-6 space-y-4">
+            <div className="mb-3 text-sm font-bold tracking-widest text-gray-800 uppercase">
               { category }
             </div>
             { routes.map(({ label, path, icon: Icon }) => (

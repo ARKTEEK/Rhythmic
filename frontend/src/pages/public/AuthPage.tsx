@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import useAuthForm from "../../hooks/useAuthForm.tsx";
-import { Button } from "../../components/common/button/Button.tsx";
+import { Button } from "../../components/common/Button.tsx";
 import { Card } from "../../components/home/Card.tsx";
 import { Logo } from "../../components/common/Logo.tsx";
 
@@ -37,8 +37,7 @@ const AuthPage = () => {
 
   return (
     <div
-      className="min-h-screen w-full bg-gradient-to-br from-[#ffe8dc] to-[#ffd6c7]
-                 flex items-center justify-center">
+      className="min-h-screen w-full flex items-center justify-center">
       <div className="w-full max-w-lg mx-auto flex flex-col items-center text-center relative z-10">
         <Card>
           <div className="mb-8">
@@ -67,8 +66,9 @@ const AuthPage = () => {
                 placeholder="Username"
                 value={ username }
                 onChange={ (e) => setUsername(e.target.value) }
-                className="w-full px-6 py-3 bg-white/70 border-2 border-gray-300 rounded-full
-                           text-neutralGray placeholder-gray-400 focus:outline-none focus:border-accent"/>
+                className="w-full px-6 py-3 bg-white/70 border-2 border-black rounded-lg
+                           shadow-[3px_3px_0_0_rgba(0,0,0,1)] text-gray-800 placeholder-gray-400
+                           focus:outline-none focus:border-accent"/>
             ) }
 
             <input
@@ -76,8 +76,9 @@ const AuthPage = () => {
               placeholder="Email"
               value={ email }
               onChange={ (e) => setEmail(e.target.value) }
-              className="w-full px-6 py-3 bg-white/70 border-2 border-gray-300 rounded-full
-                         text-neutralGray placeholder-gray-400 focus:outline-none focus:border-accent"/>
+              className="w-full px-6 py-3 bg-white/70 border-2 border-black rounded-lg
+                         shadow-[3px_3px_0_0_rgba(0,0,0,1)] text-gray-800 placeholder-gray-400
+                         focus:outline-none focus:border-accent"/>
 
             <div className="relative w-full">
               <input
@@ -85,8 +86,9 @@ const AuthPage = () => {
                 placeholder="Password"
                 value={ password }
                 onChange={ (e) => setPassword(e.target.value) }
-                className="w-full px-6 py-3 bg-white/70 border-2 border-gray-300 rounded-full
-                           text-neutralGray placeholder-gray-400 focus:outline-none focus:border-accent"/>
+                className="w-full px-6 py-3 bg-white/70 border-2 border-black rounded-lg
+                           shadow-[3px_3px_0_0_rgba(0,0,0,1)] text-gray-800 placeholder-gray-400
+                           focus:outline-none focus:border-accent"/>
               <button
                 type="button"
                 className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-accent"
@@ -106,7 +108,7 @@ const AuthPage = () => {
           <p className="mt-6 text-sm text-neutralGray">
             { isSignUp ? "Already have an account?" : "Don’t have an account?" }{ " " }
             <button
-              className="text-[#FF7A5A] font-extrabold hover:underline hover:cursor-pointer
+              className="font-extrabold hover:underline hover:cursor-pointer
                          transition-colors duration-200"
               onClick={ handleTypeChange }>
               { isSignUp ? "SIGN IN" : "SIGN UP" }

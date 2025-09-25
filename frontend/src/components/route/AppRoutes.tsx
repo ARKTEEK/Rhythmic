@@ -18,6 +18,7 @@ import {
 } from "react-icons/fa";
 import PlaceholderPage from "../../pages/private/PlaceholderPage.tsx";
 import DashboardPage from "../../pages/private/DashboardPage.tsx";
+import ConnectionsPage from "../../pages/private/ConnectionsPage.tsx";
 
 const PlaylistPage = lazy(() => import("../../pages/private/PlaylistPage.tsx"));
 
@@ -83,7 +84,7 @@ export const AppRoutes: AppRoute[] = [
   },
   {
     path: "/platforms",
-    element: <PlaceholderPage/>,
+    element: <ConnectionsPage/>,
     label: "Connections",
     private: true,
     icon: FaLink,

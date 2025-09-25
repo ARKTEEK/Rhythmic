@@ -28,9 +28,8 @@ export const Logo = ({ size = "md", underline = true, text = "Rhythmic" }: LogoP
       <span
         className={ `
           font-extrabold tracking-tight
-          bg-gradient-to-r from-[#FF906D] to-[#FF7A5A]
+          bg-black
           bg-clip-text text-transparent relative z-10
-          drop-shadow-[0_2px_4px_rgba(255,122,90,0.3)]
           ${ textSizes[size] }` }>
         { text }
       </span>
@@ -41,7 +40,7 @@ export const Logo = ({ size = "md", underline = true, text = "Rhythmic" }: LogoP
           { [1, 2, 3].map((i) => (
             <div
               key={ i }
-              className={ `rounded-full bg-gradient-to-b from-[#FF906D] to-[#FF7A5A] ${ dotSizes[size] }` }/>
+              className={ `rounded-full bg-black ${ dotSizes[size] }` }/>
           )) }
         </div>
       ) }
