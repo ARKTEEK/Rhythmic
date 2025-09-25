@@ -37,7 +37,7 @@ export const Layout = ({ children }: LayoutProps) => {
         <main className="flex-1 overflow-auto h-full">
           <div
             className="bg-[repeating-linear-gradient(transparent_0px,transparent_1px,rgba(0,0,0,0.05)_1px,rgba(0,0,0,0.05)_2px)]
-                       h-full pointer-events-none">
+                       h-full">
             { children }
           </div>
         </main>
