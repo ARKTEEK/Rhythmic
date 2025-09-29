@@ -12,7 +12,8 @@ export default function ErrorWindow({
                                     }: ErrorWindowProps) {
   return (
     <Window
-      windowClassName={ "bg-red-50 min-h-[100px] min-w-[300px]" }
+      containerClassName={ "h-[130px] w-[340px]" }
+      windowClassName={ "bg-red-50" }
       ribbonClassName={ "bg-red-400" }>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">

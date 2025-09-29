@@ -1,21 +1,8 @@
 ﻿import { useState } from "react";
 import { FaApple, FaDeezer, FaPlus, FaSoundcloud, FaSpotify, FaYoutube } from "react-icons/fa";
-import { IconType } from "react-icons";
 import Window from "../../components/ui/Window.tsx";
-
-interface Account {
-  id: string;
-  username: string;
-}
-
-type Platform = {
-  name: string;
-  icon: IconType;
-  color: string;
-  ribbonColor?: string;
-  windowColor?: string;
-  accounts: Account[];
-};
+import { googleOAuth } from "../../config/Config.ts";
+import { Platform } from "../../models/Connection.ts";
 
 export default function ConnectionsPage() {
   const [platforms] = useState<Platform[]>([
@@ -72,9 +59,10 @@ export default function ConnectionsPage() {
       <div className="grid grid-cols-3 gap-8 max-w-7xl mx-auto mt-8">
         { platforms.map((platform) => (
           <Window
+            containerClassName={ "h-[380px] w-[400px]" }
             key={ platform.name }
             ribbonClassName={ platform.ribbonColor }
-            windowClassName={ `${ platform.windowColor } h-[300px] w-[400px]` }>
+            windowClassName={ `${ platform.windowColor }` }>
 
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
@@ -127,7 +115,9 @@ export default function ConnectionsPage() {
                 platform.ribbonColor || "bg-brown-200"
               } hover:opacity-80 transition-all duration-200 group hover:cursor-pointer 
                 font-bold text-brown-900 mt-auto` }>
-              <div className="flex items-center justify-center space-x-2">
+              <div
+                className="flex items-center justify-center space-x-2"
+                onClick={ googleOAuth }>
                 <FaPlus className="text-brown-900"/>
                 <span>Add Account</span>
               </div>

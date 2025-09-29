@@ -2,19 +2,22 @@
 import Ribbon from "./Ribbon";
 
 interface WindowProps {
+  containerClassName?: string;
   ribbonClassName?: string;
   windowClassName?: string;
   children: React.ReactNode;
 }
 
 export default function Window({
+                                 containerClassName = "h-[300px] w-[400px]",
                                  ribbonClassName,
                                  windowClassName,
                                  children,
                                }: WindowProps) {
   return (
     <div
-      className="box-style-lg transform transition-transform duration-300 flex flex-col"
+      className={ `box-style-lg transform transition-transform 
+                   duration-300 flex flex-col ${ containerClassName }` }
       style={ { backgroundColor: windowClassName ? "" : "#fefefe" } }>
       <Ribbon className={ ribbonClassName }/>
       <div
