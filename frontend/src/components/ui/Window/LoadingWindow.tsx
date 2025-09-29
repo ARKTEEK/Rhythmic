@@ -1,5 +1,7 @@
-﻿import Window from "../Window.tsx";
-import { ReactNode, useEffect, useRef, useState } from "react";
+﻿import { ReactNode, useEffect, useRef, useState } from "react";
+import Window from "../Window.tsx";
+import ErrorWindow from "./ErrorWindow.tsx";
+import SuccessWindow from "./SuccessWindow.tsx";
 
 type LoadingState = "loading" | "complete" | "error";
 
@@ -11,93 +13,96 @@ interface LoadingWindowProps {
   errorMessage?: string;
   loadingSpeed?: number;
   loadingActions?: ReactNode;
-  completeActions?: ReactNode;
-  errorActions?: ReactNode;
   totalCubes?: number;
   filledCubeClassName?: string;
   emptyCubeClassName?: string;
   onComplete?: () => void;
   onError?: () => void;
+  onProgressComplete?: () => void;
+  status: LoadingState;
 }
 
 export default function LoadingWindow({
-                                        ribbonClassName = "bg-blue-200",
-                                        windowClassName = "bg-brown-50",
-                                        loadingSpeed = 1000,
-                                        loadingMessage = "Loading...",
-                                        completeMessage = "Complete",
-                                        errorMessage = "Something went wrong",
+                                        ribbonClassName = "bg-fuchsia-200",
+                                        windowClassName = "bg-fuchsia-50",
+                                        loadingSpeed = 100,
+                                        loadingMessage = "Processing...",
+                                        completeMessage = "Success",
+                                        errorMessage = "Failure",
                                         loadingActions,
-                                        completeActions,
-                                        errorActions,
                                         totalCubes = 10,
-                                        filledCubeClassName = "bg-orange-500",
-                                        emptyCubeClassName = "bg-brown-200",
+                                        filledCubeClassName = "bg-fuchsia-500",
+                                        emptyCubeClassName = "bg-gray-200",
                                         onComplete,
                                         onError,
+                                        onProgressComplete,
+                                        status,
                                       }: LoadingWindowProps) {
   const [progress, setProgress] = useState(0);
-  const [state, setState] = useState<LoadingState>("loading");
-  const prevState = useRef<LoadingState>(state);
   const filledCubes = Math.round((progress / 100) * totalCubes);
+  const prevStatusRef = useRef<LoadingState>(status);
 
   useEffect(() => {
-    if (state !== "loading") return;
+    if (status !== "loading") return;
 
     const interval = setInterval(() => {
       setProgress((p) => {
-        if (p >= 100) {
+        const newProgress = p + 10;
+        if (newProgress >= 100) {
           clearInterval(interval);
-          setTimeout(() => setState(Math.random() > 0.2 ? "complete" : "error"), 500);
+          if (onProgressComplete) {
+            onProgressComplete();
+          }
           return 100;
         }
-        return p + 10;
+        return newProgress;
       });
     }, loadingSpeed);
 
     return () => clearInterval(interval);
-  }, [state]);
+  }, [status, loadingSpeed, onProgressComplete]);
 
   useEffect(() => {
-    if (prevState.current !== state) {
-      if (state === "complete" && onComplete) {
+    if (prevStatusRef.current !== status) {
+      if (status === "complete" && onComplete) {
         onComplete();
       }
-      if (state === "error" && onError) {
+      if (status === "error" && onError) {
         onError();
       }
-      prevState.current = state;
+      prevStatusRef.current = status;
     }
-  }, [state, onComplete, onError]);
+  }, [status, onComplete, onError]);
+
+  if (status === "error") {
+    return <ErrorWindow errorDescription={ errorMessage }/>;
+  }
+
+  if (status === "complete") {
+    return <SuccessWindow successDescription={ completeMessage }/>;
+  }
 
   return (
     <Window
+      containerClassName={"h-[160px] w-[320px]"}
       ribbonClassName={ ribbonClassName }
       windowClassName={ windowClassName }>
       <div className="flex flex-col items-center gap-4">
-        <span className="text-brown-900 font-semibold">
-          { state === "loading" && loadingMessage }
-          { state === "complete" && completeMessage }
-          { state === "error" && errorMessage }
-        </span>
-
-        { state === "loading" && (
-          <div className="flex gap-1 border border-brown-900 p-1 bg-brown-100 rounded">
-            { Array.from({ length: totalCubes }).map((_, i) => (
-              <div
-                key={ i }
-                className={ `w-6 h-6 transition-colors duration-300 ${
-                  i < filledCubes ? filledCubeClassName : emptyCubeClassName
-                }` }
-              />
-            )) }
-          </div>
-        ) }
-
+                <span className="text-brown-900 font-semibold">
+                    { loadingMessage }
+                </span>
+        <div className="flex gap-1 border border-brown-900 p-1 bg-brown-100 rounded">
+          { Array.from({ length: totalCubes }).map((_, i) => (
+            <div
+              key={ i }
+              className={ `w-6 h-6 transition-colors duration-300 ${
+                i < filledCubes ? filledCubeClassName : emptyCubeClassName
+              }` }
+            />
+          )) }
+        </div>
         <div className="flex gap-2">
-          { state === "loading" && loadingActions }
-          { state === "complete" && completeActions }
-          { state === "error" && errorActions }
+          { loadingActions }
         </div>
       </div>
     </Window>
