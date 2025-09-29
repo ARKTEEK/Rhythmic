@@ -1,10 +1,15 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { handleOAuthCallback } from "../../services/OAuthService.ts";
+import LoadingWindow from "../../components/ui/Window/LoadingWindow.tsx";
+
+type LoadingState = "loading" | "complete" | "error";
 
 export default function OAuthCallback() {
   const navigate = useNavigate();
+  const [apiStatus, setApiStatus] = useState<LoadingState>("loading");
+  const [isAnimationComplete, setIsAnimationComplete] = useState(false);
   const alreadyCalled = useRef(false);
   const { provider } = useParams<{ provider: string }>();
 
@@ -12,15 +17,18 @@ export default function OAuthCallback() {
     mutationFn: ({ code, state, jwt }: { code: string; state: string; jwt: string }) =>
       handleOAuthCallback(provider as "google" | "spotify", code, state, jwt),
     onSuccess: () => {
-      navigate("/oauth/complete", { state: { allowOAuth: true } });
+      setApiStatus("complete");
     },
-    onError: () => {
-      navigate("/oauth/error", { state: { allowOAuth: true } });
-    }
+    onError: (error) => {
+      console.error("OAuth callback error:", error);
+      setApiStatus("error");
+    },
   });
 
   useEffect(() => {
-    if (alreadyCalled.current || !provider) return;
+    if (alreadyCalled.current || !provider) {
+      return;
+    }
     alreadyCalled.current = true;
 
     const params = new URLSearchParams(window.location.search);
@@ -29,21 +37,41 @@ export default function OAuthCallback() {
     const jwt = localStorage.getItem("token");
 
     if (!code || !state || !jwt) {
-      navigate("/oauth/error", { state: { allowOAuth: true } });
+      setApiStatus("error");
       return;
     }
 
     mutate({ code, state, jwt });
-  }, [provider, mutate, navigate]);
+  }, [provider, mutate]);
+
+  const handleVisualComplete = () => {
+    setIsAnimationComplete(true);
+  };
+
+  const effectiveStatus: LoadingState =
+    (apiStatus !== "loading" && isAnimationComplete)
+      ? apiStatus
+      : "loading";
+
+  useEffect(() => {
+    if (effectiveStatus === "complete" || effectiveStatus === "error") {
+      const timer = setTimeout(() => {
+        navigate("/platforms");
+      }, 1500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [effectiveStatus, navigate]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6">
-      <div className="text-center text-white max-w-lg">
-        <h1 className="text-4xl font-extrabold text-red-400 mb-2">
-          Linking your Account...
-        </h1>
-        <p className="text-gray-300 mb-6">Wait a few seconds...</p>
-      </div>
+    <div className="flex items-center justify-center min-h-screen">
+      <LoadingWindow
+        status={ effectiveStatus }
+        onProgressComplete={ handleVisualComplete }
+        loadingMessage={ `Linking your ${ provider } account...` }
+        errorMessage="Authentication failed! Please try again...."
+        completeMessage="Authentication successful."
+      />
     </div>
   );
-};
+}

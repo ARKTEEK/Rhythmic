@@ -1,7 +1,12 @@
+import LoadingWindow from "../../components/ui/Window/LoadingWindow.tsx";
+
 export default function PlaceholderPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
-
-    </div>
+    <LoadingWindow
+      status={ "error" }
+      loadingMessage={ `Linking your account...` }
+      errorMessage="Authentication failed! Please try again...."
+      completeMessage="Authentication successful."
+    />
   );
 }

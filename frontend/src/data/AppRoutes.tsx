@@ -2,9 +2,6 @@ import React from "react";
 import { IconType } from "react-icons";
 import AuthPage from "../pages/public/AuthPage.tsx";
 import HomePage from "../pages/public/HomePage.tsx";
-import OAuthComplete from "../pages/oauth/OAuthComplete.tsx";
-import OAuthError from "../pages/oauth/OAuthError.tsx";
-import OAuthRoute from "../components/route/OAuthRoute.tsx";
 import OAuthCallback from "../pages/oauth/OAuthCallback.tsx";
 import {
   FaCog,
@@ -110,21 +107,5 @@ export const AppRoutes: AppRoute[] = [
   {
     path: "/api/oauth/:provider/callback",
     element: <OAuthCallback/>,
-  },
-  {
-    path: "/oauth/complete",
-    element: (
-      <OAuthRoute>
-        <OAuthComplete/>
-      </OAuthRoute>
-    ),
-  },
-  {
-    path: "/oauth/error",
-    element: (
-      <OAuthRoute>
-        <OAuthError/>
-      </OAuthRoute>
-    ),
   },
 ];
