@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-const OAuthError = () => {
+export default function OAuthError() {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,4 +29,3 @@ const OAuthError = () => {
     </div>
   );
 };
-export default OAuthError;

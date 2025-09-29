@@ -1,66 +1,68 @@
 ﻿import { useState } from "react";
-import {
-  FaSpotify,
-  FaApple,
-  FaDeezer,
-  FaSoundcloud,
-  FaPlus,
-  FaYoutube
-} from "react-icons/fa";
+import { FaApple, FaDeezer, FaPlus, FaSoundcloud, FaSpotify, FaYoutube } from "react-icons/fa";
 import { IconType } from "react-icons";
+import Window from "../../components/ui/Window.tsx";
 
 interface Account {
   id: string;
   username: string;
 }
 
-interface Platform {
+type Platform = {
   name: string;
   icon: IconType;
   color: string;
+  ribbonColor?: string;
+  windowColor?: string;
   accounts: Account[];
-}
+};
 
-const ConnectionsPage = () => {
+export default function ConnectionsPage() {
   const [platforms] = useState<Platform[]>([
     {
       name: "Spotify",
       icon: FaSpotify,
       color: "bg-green-400",
+      ribbonColor: "bg-green-200",
+      windowColor: "bg-green-50",
       accounts: [
         { id: "1", username: "Username" },
-        { id: "2", username: "Username" }
+        { id: "2", username: "Username" },
       ],
     },
     {
       name: "Apple Music",
       icon: FaApple,
       color: "bg-pink-500",
-      accounts: [
-        { id: "1", username: "Username" }
-      ],
+      ribbonColor: "bg-pink-200",
+      windowColor: "bg-pink-50",
+      accounts: [{ id: "1", username: "Username" }],
     },
     {
       name: "YouTube",
       icon: FaYoutube,
       color: "bg-red-400",
-      accounts: [
-        { id: "1", username: "Username" }
-      ],
+      ribbonColor: "bg-red-200",
+      windowColor: "bg-red-50",
+      accounts: [{ id: "1", username: "Username" }],
     },
     {
       name: "Deezer",
       icon: FaDeezer,
       color: "bg-purple-500",
+      ribbonColor: "bg-purple-200",
+      windowColor: "bg-purple-50",
       accounts: [],
     },
     {
       name: "SoundCloud",
       icon: FaSoundcloud,
       color: "bg-orange-500",
+      ribbonColor: "bg-orange-200",
+      windowColor: "bg-orange-50",
       accounts: [
         { id: "1", username: "Username" },
-        { id: "2", username: "Username" }
+        { id: "2", username: "Username" },
       ],
     },
   ]);
@@ -69,67 +71,70 @@ const ConnectionsPage = () => {
     <div className="p-6">
       <div className="grid grid-cols-3 gap-8 max-w-7xl mx-auto mt-8">
         { platforms.map((platform) => (
-          <div
+          <Window
             key={ platform.name }
-            className="bg-white rounded-lg p-6 shadow-[3px_3px_0_0_rgba(0,0,0,1)] border-4
-                     border-black transform transition-transform duration-300 flex flex-col">
+            ribbonClassName={ platform.ribbonColor }
+            windowClassName={ `${ platform.windowColor } h-[300px] w-[400px]` }>
+
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
-                <div className={ `${ platform.color } p-3 rounded-2xl border-2 border-black` }>
+                <div className={ `${ platform.color } p-3 box-style-md` }>
                   <platform.icon className="text-white text-2xl"/>
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold text-gray-900">{ platform.name }</h3>
                   <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-600">
-                    { platform.accounts.length } accounts
-                  </span>
+                    <span className="text-sm text-gray-600">
+                      { platform.accounts.length } accounts
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-3 mb-4">
+            <div className="space-y-3 mb-4 flex-grow">
               { platform.accounts.length === 0 ? (
-                <div className="text-center text-gray-500 italic">No accounts connected</div>
+                <div
+                  className="rounded-lg text-center text-gray-500 italic p-3 border-2
+                             border-dashed border-brown-800 bg-white h-full flex
+                             items-center justify-center">
+                  No accounts connected
+                </div>
               ) : (
                 platform.accounts.map((account) => (
                   <div
                     key={ account.id }
-                    className="flex items-center justify-between p-3 rounded-xl border-2 border-dashed
-                             border-black">
+                    className="box-style-md flex items-center justify-between p-3 border-2
+                               border-brown-800 bg-white">
                     <div className="flex items-center space-x-3">
-                      <span className="font-medium text-gray-800">{ account.username }</span>
+                      <span className="font-medium text-brown-900">{ account.username }</span>
                     </div>
-
                     <div className="flex items-center space-x-2">
                       <button
-                        className="px-4 py-1 rounded-full text-sm font-bold border-2 border-black
-                                 transition-all duration-200 transform bg-red-400
-                                 hover:bg-red-500 text-white hover:cursor-pointer">
+                        className="box-style-md px-4 py-1 rounded-full text-sm font-bold border-2
+                                   border-brown-800 transition-all duration-200 transform bg-red-400
+                                   hover:bg-red-500 text-white hover:cursor-pointer">
                         Disconnect
                       </button>
                     </div>
                   </div>
                 ))
-              )}
+              ) }
             </div>
 
             <button
-              className="w-full py-3 rounded-lg border-2 border-dashed border-gray-400
-                       hover:border-gray-700 transition-all duration-200 group hover:cursor-pointer mt-auto">
+              className={ `box-style-md w-full py-3 border-2 border-brown-800 ${
+                platform.ribbonColor || "bg-brown-200"
+              } hover:opacity-80 transition-all duration-200 group hover:cursor-pointer 
+                font-bold text-brown-900 mt-auto` }>
               <div className="flex items-center justify-center space-x-2">
-                <FaPlus className="text-gray-600 group-hover:text-black transition-colors"/>
-                <span className="font-bold text-gray-700 group-hover:text-black transition-colors">
-                Add Account
-              </span>
+                <FaPlus className="text-brown-900"/>
+                <span>Add Account</span>
               </div>
             </button>
-          </div>
+          </Window>
         )) }
       </div>
     </div>
   );
 };
-
-export default ConnectionsPage;

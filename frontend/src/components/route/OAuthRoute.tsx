@@ -1,8 +1,12 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useOAuthAccess } from "../../context/OAuthFlowContext.tsx";
 
-const OAuthRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface OAuthProps {
+  children: ReactNode;
+}
+
+export default function OAuthRoute({ children }: OAuthProps) {
   const location = useLocation();
   const { allowAccess } = useOAuthAccess();
 
@@ -16,5 +20,3 @@ const OAuthRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return <>{ children }</>;
 };
-
-export default OAuthRoute;

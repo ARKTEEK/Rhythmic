@@ -1,26 +1,23 @@
-import React, { lazy, Suspense } from "react";
+import React from "react";
 import { IconType } from "react-icons";
-import AuthPage from "../../pages/public/AuthPage.tsx";
-import HomePage from "../../pages/public/HomePage.tsx";
-import OAuthComplete from "../../pages/oauth/OAuthComplete.tsx";
-import OAuthError from "../../pages/oauth/OAuthError.tsx";
-import OAuthRoute from "./OAuthRoute.tsx";
-import OAuthCallback from "../../pages/oauth/OAuthCallback.tsx";
-import Spinner from "../common/Spinner.tsx";
-import SettingsPage from "../../pages/private/SettingsPage.tsx";
-import HelpPage from "../../pages/public/HelpPage.tsx";
+import AuthPage from "../pages/public/AuthPage.tsx";
+import HomePage from "../pages/public/HomePage.tsx";
+import OAuthComplete from "../pages/oauth/OAuthComplete.tsx";
+import OAuthError from "../pages/oauth/OAuthError.tsx";
+import OAuthRoute from "../components/route/OAuthRoute.tsx";
+import OAuthCallback from "../pages/oauth/OAuthCallback.tsx";
 import {
-  FaHome,
-  FaList,
   FaCog,
+  FaCompass,
+  FaHome,
+  FaLink,
+  FaList,
+  FaListAlt,
   FaQuestionCircle,
-  FaLink, FaCompass, FaListAlt,
 } from "react-icons/fa";
-import PlaceholderPage from "../../pages/private/PlaceholderPage.tsx";
-import DashboardPage from "../../pages/private/DashboardPage.tsx";
-import ConnectionsPage from "../../pages/private/ConnectionsPage.tsx";
-
-const PlaylistPage = lazy(() => import("../../pages/private/PlaylistPage.tsx"));
+import PlaceholderPage from "../pages/private/PlaceholderPage.tsx";
+import DashboardPage from "../pages/private/DashboardPage.tsx";
+import ConnectionsPage from "../pages/private/ConnectionsPage.tsx";
 
 export interface AppRoute {
   path: string;
@@ -53,11 +50,7 @@ export const AppRoutes: AppRoute[] = [
   // My Library
   {
     path: "/playlists",
-    element: (
-      <Suspense fallback={ <Spinner/> }>
-        <PlaylistPage/>
-      </Suspense>
-    ),
+    element: <PlaceholderPage/>,
     label: "Playlists",
     private: true,
     icon: FaList,
@@ -92,7 +85,7 @@ export const AppRoutes: AppRoute[] = [
   },
   {
     path: "/settings",
-    element: <SettingsPage/>,
+    element: <PlaceholderPage/>,
     label: "Settings",
     private: true,
     icon: FaCog,
@@ -102,7 +95,7 @@ export const AppRoutes: AppRoute[] = [
   // Support
   {
     path: "/help",
-    element: <HelpPage/>,
+    element: <PlaceholderPage/>,
     label: "Help",
     icon: FaQuestionCircle,
     category: "Support",

@@ -1,7 +1,7 @@
 import { ReactNode, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth.tsx";
-import { Sidebar } from "./Sidebar.tsx";
-import { TopNavBar } from "./TopNavBar.tsx";
+import Sidebar from "./Sidebar.tsx";
+import TopNavBar from "./TopNavBar.tsx";
 import { useLocation } from "react-router-dom";
 import { useSetTopNavActions, useTopNavActions } from "../../context/TopNavActionsContext.tsx";
 
@@ -10,7 +10,7 @@ interface LayoutProps {
   showProfile?: boolean;
 }
 
-export const Layout = ({ children }: LayoutProps) => {
+export default function Layout({ children }: LayoutProps) {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
   const setTopNavActions = useSetTopNavActions();
@@ -22,8 +22,7 @@ export const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div
-      className="bg-[#f9ccb5] min-h-screen min-w-screen
-                 relative overflow-hidden flex">
+      className="bg-[#f9ccb5] min-h-screen min-w-screen relative overflow-hidden flex">
       { isAuthenticated && (
         <aside className="w-64 h-screen fixed top-0 left-0 z-10">
           <Sidebar/>
@@ -36,12 +35,13 @@ export const Layout = ({ children }: LayoutProps) => {
         { isAuthenticated && <TopNavBar actions={ actions }/> }
         <main className="flex-1 overflow-auto h-full">
           <div
-            className="bg-[repeating-linear-gradient(transparent_0px,transparent_1px,rgba(0,0,0,0.05)_1px,rgba(0,0,0,0.05)_2px)]
-                       h-full">
+            className="bg-grid-pattern h-full flex items-center justify-center">
             { children }
           </div>
         </main>
+
       </div>
     </div>
   );
-};
+}
+;

@@ -1,10 +1,10 @@
 import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
-import { AppRoutes } from "./components/route/AppRoutes.tsx";
+import { AppRoutes } from "./data/AppRoutes.tsx";
 import PrivateRoute from "./components/route/PrivateRoute.tsx";
 import PublicRoute from "./components/route/PublicRoute.tsx";
 import NotFound from "./pages/public/NotFound.tsx";
-import { OAuthAccessProvider } from "./context/OAuthFlowContext.tsx";
-import { Layout } from "./components/common/Layout.tsx";
+import Layout from "./components/common/Layout.tsx";
+import OAuthAccessProvider from "./context/OAuthAccessProvider.tsx";
 
 const LayoutWrapper = () => {
   return (

@@ -5,7 +5,11 @@ import { jwtDecode } from "jwt-decode";
 import { ReactNode, useEffect, useState } from "react";
 import { JwtPayload } from "../models/JwtPayload.ts";
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export default function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<UserDto | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -64,7 +68,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else {
           logout();
         }
-      } catch (e) {
+      } catch {
         logout();
       }
     }

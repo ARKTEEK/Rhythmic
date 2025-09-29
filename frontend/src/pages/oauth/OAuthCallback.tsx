@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { handleOAuthCallback } from "../../services/OAuthService.ts";
 
-const OAuthCallback = () => {
+export default function OAuthCallback() {
   const navigate = useNavigate();
   const alreadyCalled = useRef(false);
   const { provider } = useParams<{ provider: string }>();
@@ -47,5 +47,3 @@ const OAuthCallback = () => {
     </div>
   );
 };
-
-export default OAuthCallback;

@@ -10,7 +10,8 @@ export interface TopNavAction {
 export type SetTopNavActions = (actions: TopNavAction[]) => void;
 
 export const TopNavActionsContext = createContext<TopNavAction[]>([]);
-export const SetTopNavActionsContext = createContext<SetTopNavActions>(() => {});
+export const SetTopNavActionsContext = createContext<SetTopNavActions>(() => {
+});
 
 export const useTopNavActions = () => useContext(TopNavActionsContext);
 export const useSetTopNavActions = () => useContext(SetTopNavActionsContext);

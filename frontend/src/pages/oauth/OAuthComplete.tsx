@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-const OAuthComplete = () => {
+export default function OAuthComplete() {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,5 +31,3 @@ const OAuthComplete = () => {
     </div>
   );
 };
-
-export default OAuthComplete;

@@ -1,9 +1,9 @@
-import { AppRoute, AppRoutes } from "../route/AppRoutes.tsx";
-import { Button } from "./Button.tsx";
+import { AppRoute, AppRoutes } from "../../data/AppRoutes.tsx";
+import Button from "../ui/Button.tsx";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Logo } from "./Logo.tsx";
+import Logo from "./Logo.tsx";
 
-export function Sidebar() {
+export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -23,9 +23,7 @@ export function Sidebar() {
     <aside
       className="w-full h-full flex flex-col justify-between py-6 border-r-4 border-black
                  bg-[#e0b39c] relative overflow-hidden z-100">
-      <div
-        className="bg-[repeating-linear-gradient(transparent_0px,transparent_1px,rgba(0,0,0,0.05)_1px,rgba(0,0,0,0.05)_2px)]
-                   absolute inset-0 pointer-events-none"/>
+      <div className="bg-grid-pattern absolute inset-0 pointer-events-none"/>
 
       <div className="flex justify-center px-6 pb-8 pt-2 relative z-10">
         <Logo

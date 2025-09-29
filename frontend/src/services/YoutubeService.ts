@@ -1,5 +1,5 @@
 import axios from "axios";
-import { API_BASE_URL } from "../configs/Config.ts";
+import { API_BASE_URL } from "../config/Config.ts";
 import { Playlist } from "../models/Playlist.ts";
 
 export const getPlaylists = async (): Promise<Playlist[]> => {

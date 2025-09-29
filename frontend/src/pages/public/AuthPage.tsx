@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import useAuthForm from "../../hooks/useAuthForm.tsx";
-import { Button } from "../../components/common/Button.tsx";
-import { Card } from "../../components/home/Card.tsx";
-import { Logo } from "../../components/common/Logo.tsx";
+import Button from "../../components/ui/Button.tsx";
+import Logo from "../../components/common/Logo.tsx";
+import Window from "../../components/ui/Window.tsx";
 
-const AuthPage = () => {
+export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -32,14 +32,16 @@ const AuthPage = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    await handleAuthSubmit();
+    handleAuthSubmit();
   };
 
   return (
     <div
       className="min-h-screen w-full flex items-center justify-center">
-      <div className="w-full max-w-lg mx-auto flex flex-col items-center text-center relative z-10">
-        <Card>
+      <div className="w-full flex flex-col items-center text-center relative z-10">
+        <Window
+          ribbonClassName={ "bg-blue-50" }
+          windowClassName={ "bg-blue-200" }>
           <div className="mb-8">
             <Logo
               text={ isSignUp ? "Create Account" : "Welcome Back" }
@@ -66,8 +68,7 @@ const AuthPage = () => {
                 placeholder="Username"
                 value={ username }
                 onChange={ (e) => setUsername(e.target.value) }
-                className="w-full px-6 py-3 bg-white/70 border-2 border-black rounded-lg
-                           shadow-[3px_3px_0_0_rgba(0,0,0,1)] text-gray-800 placeholder-gray-400
+                className="w-full px-6 py-3 bg-white/70 box-style-sm text-gray-800 placeholder-gray-400
                            focus:outline-none focus:border-accent"/>
             ) }
 
@@ -76,9 +77,8 @@ const AuthPage = () => {
               placeholder="Email"
               value={ email }
               onChange={ (e) => setEmail(e.target.value) }
-              className="w-full px-6 py-3 bg-white/70 border-2 border-black rounded-lg
-                         shadow-[3px_3px_0_0_rgba(0,0,0,1)] text-gray-800 placeholder-gray-400
-                         focus:outline-none focus:border-accent"/>
+              className="w-full px-6 py-3 bg-white/70 box-style-sm text-gray-800 placeholder-gray-400
+                           focus:outline-none focus:border-accent"/>
 
             <div className="relative w-full">
               <input
@@ -86,8 +86,7 @@ const AuthPage = () => {
                 placeholder="Password"
                 value={ password }
                 onChange={ (e) => setPassword(e.target.value) }
-                className="w-full px-6 py-3 bg-white/70 border-2 border-black rounded-lg
-                           shadow-[3px_3px_0_0_rgba(0,0,0,1)] text-gray-800 placeholder-gray-400
+                className="w-full px-6 py-3 bg-white/70 box-style-sm text-gray-800 placeholder-gray-400
                            focus:outline-none focus:border-accent"/>
               <button
                 type="button"
@@ -123,9 +122,8 @@ const AuthPage = () => {
               <span className="text-lg">&larr;</span> Return to Home
             </Link>
           </div>
-        </Card>
+        </Window>
       </div>
     </div>
   );
 };
-export default AuthPage;

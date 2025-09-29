@@ -6,7 +6,7 @@ interface PrivateRouteProps {
   children: ReactNode;
 }
 
-const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
+export default function PrivateRoute({ children }: PrivateRouteProps) {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
 
@@ -19,5 +19,3 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
 
   return <>{ children }</>;
 };
-
-export default PrivateRoute;

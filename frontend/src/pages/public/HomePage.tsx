@@ -1,23 +1,18 @@
-import Spinner from "../../components/common/Spinner.tsx";
-import { useAuth } from "../../hooks/useAuth.tsx";
 import { Link } from "react-router-dom";
-import { Button } from "../../components/common/Button.tsx";
-import { Logo } from "../../components/common/Logo.tsx";
-import { Terms } from "../../components/home/Terms.tsx";
-import { Card } from "../../components/home/Card.tsx";
+import Button from "../../components/ui/Button.tsx";
+import Logo from "../../components/common/Logo.tsx";
+import Window from "../../components/ui/Window.tsx";
 
-const HomePage = () => {
-  const { isLoading } = useAuth();
-
-  if (isLoading) {
-    return <Spinner/>;
-  }
-
+export default function HomePage() {
   return (
     <div
       className="min-h-screen w-full flex items-center justify-center">
-      <div className="w-full max-w-2xl mx-auto flex flex-col items-center text-center relative z-10">
-        <Card>
+      <div
+        className="w-full max-w-2xl mx-auto flex flex-col items-center text-center
+                   relative z-10">
+        <Window
+          windowClassName={ "bg-green-50" }
+          ribbonClassName={ "bg-green-200" }>
           <div className="relative mb-6">
             <Logo
               size="lg"
@@ -43,11 +38,21 @@ const HomePage = () => {
                 size="medium"/>
             </Link>
           </div>
-          <Terms/>
-        </Card>
+
+          <div className="p-4 bg-white/50 rounded-2xl border-2 border-dashed border-black">
+            <p className="text-sm text-[#6C6C6C] font-medium"> By using RHYTHMIC, you agree to
+                                                               our{ " " }
+              <Link
+                to="/terms"
+                className="font-black hover:underline transition-colors duration-200"> TERMS </Link>
+              { " " }and{ " " }
+              <Link
+                to="/policy"
+                className="font-black hover:underline transition-colors duration-200"> POLICY </Link>
+            </p>
+          </div>
+        </Window>
       </div>
     </div>
   );
 };
-
-export default HomePage;

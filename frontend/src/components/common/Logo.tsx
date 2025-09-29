@@ -4,7 +4,7 @@ interface LogoProps {
   text?: string;
 }
 
-export const Logo = ({ size = "md", underline = true, text = "Rhythmic" }: LogoProps) => {
+export default function Logo({ size = "md", underline = true, text = "Rhythmic" }: LogoProps) {
   const textSizes = {
     sm: "text-xl",
     md: "text-3xl",
