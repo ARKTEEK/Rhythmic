@@ -17,11 +17,15 @@ public class AccountProfileService : IAccountProfileService {
 
   public async Task SaveOrUpdateAsync(AccountProfile profile) {
     AccountProfile? existing = await _db.AccountProfiles.FirstOrDefaultAsync(x =>
-      x.UserId == profile.UserId && x.Provider == profile.Provider);
+      x.UserId == profile.UserId &&
+      x.Provider == profile.Provider &&
+      x.Id == profile.Id);
+
     if (existing != null) {
       existing.Email = profile.Email;
       existing.Displayname = profile.Displayname;
       existing.UpdatedAt = DateTime.UtcNow;
+
       _db.Update(existing);
     } else {
       _db.Add(profile);
@@ -43,9 +47,6 @@ public class AccountProfileService : IAccountProfileService {
   public async Task<List<AccountProfile>> GetAllAsync(string userId) {
     List<AccountProfile> profiles =
       await _db.AccountProfiles.Where(x => x.UserId == userId).ToListAsync();
-    foreach (AccountProfile profile in profiles) {
-     Console.WriteLine(profile.Displayname + " " + profile.Email);
-    }
     return profiles;
   }
 }

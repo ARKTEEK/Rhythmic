@@ -50,13 +50,13 @@ namespace backend.Infrastructure.Persistence.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "8c33b14f-18ba-44a2-9e8c-d3e4d5768090",
+                            Id = "6b33f961-f030-469f-818c-83da4c228e19",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "7600e059-1f7c-40fd-932f-83a9115ba208",
+                            Id = "b95062cb-a0a5-42e5-88e5-ead286ee8734",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -184,7 +184,7 @@ namespace backend.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Provider")
                         .IsRequired()
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");
@@ -195,8 +195,7 @@ namespace backend.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId", "Provider")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("AccountProfiles");
                 });
@@ -219,7 +218,7 @@ namespace backend.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Provider")
                         .IsRequired()
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("RefreshToken")
                         .IsRequired()
@@ -242,8 +241,7 @@ namespace backend.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId", "Provider")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("AccountTokens");
                 });

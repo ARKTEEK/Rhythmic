@@ -36,7 +36,9 @@ public class AccountTokensService : IAccountTokensService {
   public async Task SaveOrUpdateAsync(AccountToken accountToken) {
     AccountToken? existing = await _db.AccountTokens
       .FirstOrDefaultAsync(x =>
-        x.UserId == accountToken.UserId && x.Provider == accountToken.Provider);
+        x.UserId == accountToken.UserId &&
+        x.Provider == accountToken.Provider &&
+        x.Id == accountToken.Id);
 
     if (existing != null) {
       existing.AccessToken = accountToken.AccessToken;

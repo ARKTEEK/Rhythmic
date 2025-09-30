@@ -21,6 +21,12 @@ public class OAuthService : IOAuthService {
 
   public async Task<OAuthLoginResponseDto> LoginAsync(string userId, OAuthProvider provider,
     string code) {
+    List<AccountProfile> existingProfiles = await _accountProfileService.GetAllAsync(userId);
+    int countForProvider = existingProfiles.Count(p => p.Provider == provider);
+    if (countForProvider >= 3) {
+      throw new InvalidOperationException($"Cannot add more than 3 accounts for {provider}.");
+    }
+
     IProviderClient client = _factory.GetClient(provider);
 
     TokenInfo tokens = await client.ExchangeCodeAsync(code);

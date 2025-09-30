@@ -97,13 +97,40 @@ namespace backend.Infrastructure.Persistence.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "AccountProfiles",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    UserId = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Provider = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Displayname = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Email = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AccountProfiles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AccountProfiles_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "AccountTokens",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     UserId = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Provider = table.Column<string>(type: "varchar(255)", nullable: false)
+                    Provider = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     AccessToken = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -236,15 +263,19 @@ namespace backend.Infrastructure.Persistence.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "1a1d0576-a14e-44f4-8e69-a33f32ad3e07", null, "User", "USER" },
-                    { "e67e4873-ab85-4442-b285-a5aca2743177", null, "Admin", "ADMIN" }
+                    { "6b33f961-f030-469f-818c-83da4c228e19", null, "Admin", "ADMIN" },
+                    { "b95062cb-a0a5-42e5-88e5-ead286ee8734", null, "User", "USER" }
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AccountTokens_UserId_Provider",
+                name: "IX_AccountProfiles_UserId",
+                table: "AccountProfiles",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AccountTokens_UserId",
                 table: "AccountTokens",
-                columns: new[] { "UserId", "Provider" },
-                unique: true);
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -287,6 +318,9 @@ namespace backend.Infrastructure.Persistence.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AccountProfiles");
+
             migrationBuilder.DropTable(
                 name: "AccountTokens");
 
