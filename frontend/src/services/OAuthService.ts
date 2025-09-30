@@ -1,5 +1,6 @@
 import axios from "axios";
 import { API_BASE_URL } from "../config/Config.ts";
+import { Connection } from "../models/Connection.ts";
 
 export const handleOAuthCallback = async (
   provider: "google" | "spotify",
@@ -28,3 +29,8 @@ export const handleOAuthCallback = async (
     console.error(`${ provider } OAuth callback failed:`, error);
   }
 };
+
+export const getConnections = async (): Promise<Connection[]> => {
+  const response = await axios.get<Connection[]>(`${ API_BASE_URL }/account-profiles`);
+  return response.data;
+}
