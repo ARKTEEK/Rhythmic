@@ -26,10 +26,6 @@ public class AccountProfilesController : ControllerBase {
     User? user = await this.GetCurrentUserAsync(_userManager);
     List<AccountProfile> profiles = await _accountProfileService.GetAllAsync(user.Id);
 
-    foreach (AccountProfile profile in profiles) {
-      Console.WriteLine(profile.Id + " " + profile.Displayname + " " + profile.Provider);
-    }
-
     IEnumerable<AccountProfileResponse> profileDto =
       profiles.Select(AccountProfileMapper.ToProviderProfile);
 

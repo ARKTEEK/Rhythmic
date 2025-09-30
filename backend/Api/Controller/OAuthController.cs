@@ -44,7 +44,7 @@ public class OAuthController : ControllerBase {
   [HttpDelete("oauth/google/logout")]
   public async Task<IActionResult> GoogleLogout() {
     User? user = await this.GetCurrentUserAsync(_userManager);
-    _accountTokensService.DeleteAsync(user.Id, OAuthProvider.Google);
+    await _accountTokensService.DeleteAsync(user.Id, OAuthProvider.Google);
     return Ok(new { success = true });
   }
 }
