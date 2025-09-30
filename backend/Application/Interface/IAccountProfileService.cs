@@ -6,4 +6,5 @@ namespace backend.Application.Interface;
 public interface IAccountProfileService {
   Task SaveOrUpdateAsync(AccountProfile profile);
   Task DeleteAsync(string userId, OAuthProvider provider);
+  Task<List<AccountProfile>> GetAllAsync(string userId);
 }

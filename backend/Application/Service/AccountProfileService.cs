@@ -39,4 +39,13 @@ public class AccountProfileService : IAccountProfileService {
       await _db.SaveChangesAsync();
     }
   }
+
+  public async Task<List<AccountProfile>> GetAllAsync(string userId) {
+    List<AccountProfile> profiles =
+      await _db.AccountProfiles.Where(x => x.UserId == userId).ToListAsync();
+    foreach (AccountProfile profile in profiles) {
+     Console.WriteLine(profile.Displayname + " " + profile.Email);
+    }
+    return profiles;
+  }
 }

@@ -1,4 +1,5 @@
-﻿using backend.Application.Model;
+﻿using backend.Api.DTO;
+using backend.Application.Model;
 using backend.Domain.Entity;
 using backend.Domain.Enum;
 
@@ -12,6 +13,15 @@ public static class AccountProfileMapper {
       Provider = provider,
       Displayname = providerProfile.Name,
       Email = providerProfile.Email
+    };
+  }
+
+  public static AccountProfileResponse ToProviderProfile(this AccountProfile accountProfile) {
+    return new AccountProfileResponse {
+      Id = accountProfile.Id,
+      Displayname = accountProfile.Displayname,
+      Provider = accountProfile.Provider,
+      Email = accountProfile.Email,
     };
   }
 }
