@@ -11,8 +11,15 @@ interface TopNavBarProps {
   }[];
 }
 
+
 export default function TopNavBar({ actions }: TopNavBarProps) {
   const { user } = useAuth();
+
+  const handleLogout = (): void => {
+    localStorage.removeItem("token");
+    window.location.reload();
+  };
+
   return (
     <div
       className="flex justify-between items-center h-[64px] px-6 border-b-4 border-black
@@ -39,7 +46,9 @@ export default function TopNavBar({ actions }: TopNavBarProps) {
             className="w-8 h-8 rounded-lg object-cover shadow-[2px_2px_0_0_rgba(0,0,0,1)] border-2"/>
           <span className="text-md font-semibold text-black">{ user?.username }</span>
         </div>
-        <FaEllipsisV className="text-black cursor-pointer"/>
+        <FaEllipsisV
+          onClick={ handleLogout }
+          className="text-black cursor-pointer"/>
       </div>
 
     </div>
