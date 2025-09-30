@@ -10,6 +10,7 @@ public static class GoogleOAuthMapper {
       ExpiresIn = response.ExpiresIn,
       RefreshToken = response.RefreshToken,
       TokenType = response.TokenType,
-      Scope = response.Scope
+      Scope = response.Scope,
+      IdToken = response.IdToken
     };
 }

@@ -100,7 +100,8 @@ namespace backend.Infrastructure.Persistence.Migrations
                 name: "AccountProfiles",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     UserId = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Provider = table.Column<string>(type: "longtext", nullable: false)
@@ -127,7 +128,8 @@ namespace backend.Infrastructure.Persistence.Migrations
                 name: "AccountTokens",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Id = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     UserId = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Provider = table.Column<string>(type: "longtext", nullable: false)
@@ -263,8 +265,8 @@ namespace backend.Infrastructure.Persistence.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "6b33f961-f030-469f-818c-83da4c228e19", null, "Admin", "ADMIN" },
-                    { "b95062cb-a0a5-42e5-88e5-ead286ee8734", null, "User", "USER" }
+                    { "0e43f8f6-106e-418b-bca1-5e0e9d6154b6", null, "User", "USER" },
+                    { "4ee6740c-a3ab-4cd9-8c66-084331e1ecfb", null, "Admin", "ADMIN" }
                 });
 
             migrationBuilder.CreateIndex(

@@ -6,7 +6,7 @@ namespace backend.Infrastructure.Mapper;
 public static class GoogleProfileMapper {
   public static ProviderProfile ToProviderProfile(GoogleUserInfoResponse response) =>
     new() {
-      ProviderUserId = response.Id,
+      Id = response.Id,
       Name = response.Name,
       Email = response.Email
     };

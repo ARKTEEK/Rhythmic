@@ -6,4 +6,5 @@ public class TokenInfo {
   public string Scope { get; set; }
   public int ExpiresIn { get; set; }
   public string RefreshToken { get; set; }
+  public string IdToken { get; set; }
 }

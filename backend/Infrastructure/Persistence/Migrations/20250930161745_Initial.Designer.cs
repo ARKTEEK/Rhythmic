@@ -12,7 +12,7 @@ using backend.Infrastructure.Persistence;
 namespace backend.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20250930132603_Initial")]
+    [Migration("20250930161745_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -53,13 +53,13 @@ namespace backend.Infrastructure.Persistence.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "6b33f961-f030-469f-818c-83da4c228e19",
+                            Id = "4ee6740c-a3ab-4cd9-8c66-084331e1ecfb",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "b95062cb-a0a5-42e5-88e5-ead286ee8734",
+                            Id = "0e43f8f6-106e-418b-bca1-5e0e9d6154b6",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -173,9 +173,8 @@ namespace backend.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("backend.Domain.Entity.AccountProfile", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Displayname")
                         .IsRequired()
@@ -205,9 +204,8 @@ namespace backend.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("backend.Domain.Entity.AccountToken", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("AccessToken")
                         .IsRequired()

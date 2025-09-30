@@ -1,4 +1,5 @@
-﻿using backend.Api.DTO.OAuth;
+﻿using System.IdentityModel.Tokens.Jwt;
+using backend.Api.DTO.OAuth;
 using backend.Application.Interface;
 using backend.Application.Mapper;
 using backend.Application.Model;
@@ -9,14 +10,18 @@ namespace backend.Application.Service;
 
 public class OAuthService : IOAuthService {
   private readonly IProviderFactory _factory;
+  private readonly ITokenService _tokenService;
   private readonly IAccountTokensService _accountTokensService;
   private readonly IAccountProfileService _accountProfileService;
 
   public OAuthService(IProviderFactory factory,
-    IAccountTokensService accountTokensService, IAccountProfileService accountProfileService) {
+    IAccountTokensService accountTokensService,
+    IAccountProfileService accountProfileService,
+    ITokenService tokenService) {
     _factory = factory;
     _accountTokensService = accountTokensService;
     _accountProfileService = accountProfileService;
+    _tokenService = tokenService;
   }
 
   public async Task<OAuthLoginResponseDto> LoginAsync(string userId, OAuthProvider provider,
@@ -31,7 +36,12 @@ public class OAuthService : IOAuthService {
 
     TokenInfo tokens = await client.ExchangeCodeAsync(code);
 
-    AccountToken accountToken = tokens.ToEntity(userId, provider);
+    string? sub = _tokenService.GetClaimFromToken(tokens.IdToken, "sub");
+    if (string.IsNullOrEmpty(sub)) {
+      throw new InvalidOperationException("ID token does not contain a 'sub' claim.");
+    }
+
+    AccountToken accountToken = tokens.ToEntity(sub!, userId, provider);
     await _accountTokensService.SaveOrUpdateAsync(accountToken);
 
     ProviderProfile providerProfile = await client.GetProfileAsync(accountToken.AccessToken);

@@ -9,6 +9,7 @@ public static class AccountProfileMapper {
   public static AccountProfile ToEntity(this ProviderProfile providerProfile, string userId,
     OAuthProvider provider) {
     return new AccountProfile {
+      Id = providerProfile.Id,
       UserId = userId,
       Provider = provider,
       Displayname = providerProfile.Name,

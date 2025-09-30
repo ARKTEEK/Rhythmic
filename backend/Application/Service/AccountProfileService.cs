@@ -34,7 +34,7 @@ public class AccountProfileService : IAccountProfileService {
     await _db.SaveChangesAsync();
   }
 
-  public async Task DeleteAsync(string userId, OAuthProvider provider) {
+  public async Task DeleteAsync(string userId, string providerId, OAuthProvider provider) {
     AccountProfile? existingProfile =
       await _db.AccountProfiles.FirstOrDefaultAsync(x =>
         x.UserId == userId && x.Provider == provider);
