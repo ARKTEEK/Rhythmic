@@ -10,11 +10,13 @@ namespace backend.Application.Service;
 public class OAuthService : IOAuthService {
   private readonly IProviderFactory _factory;
   private readonly IAccountTokensService _accountTokensService;
+  private readonly IAccountProfileService _accountProfileService;
 
   public OAuthService(IProviderFactory factory,
-    IAccountTokensService accountTokensService) {
+    IAccountTokensService accountTokensService, IAccountProfileService accountProfileService) {
     _factory = factory;
     _accountTokensService = accountTokensService;
+    _accountProfileService = accountProfileService;
   }
 
   public async Task<OAuthLoginResponseDto> LoginAsync(string userId, OAuthProvider provider,
@@ -25,6 +27,11 @@ public class OAuthService : IOAuthService {
 
     AccountToken accountToken = tokens.ToEntity(userId, provider);
     await _accountTokensService.SaveOrUpdateAsync(accountToken);
+
+    ProviderProfile providerProfile = await client.GetProfileAsync(accountToken.AccessToken);
+
+    AccountProfile accountProfile = providerProfile.ToEntity(userId, provider);
+    await _accountProfileService.SaveOrUpdateAsync(accountProfile);
 
     return new OAuthLoginResponseDto(
       tokens.AccessToken,

@@ -80,6 +80,7 @@ builder.Services.AddScoped<IProviderFactory, ProviderFactory>();
 builder.Services.AddScoped<IOAuthService, OAuthService>();
 
 builder.Services.AddScoped<IAccountTokensService, AccountTokensService>();
+builder.Services.AddScoped<IAccountProfileService, AccountProfileService>();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<AuthService>();

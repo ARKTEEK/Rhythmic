@@ -9,7 +9,8 @@ public class DatabaseContext : IdentityDbContext<User> {
   public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) {
   }
 
-  public DbSet<AccountToken?> AccountTokens { get; set; }
+  public DbSet<AccountToken> AccountTokens { get; set; }
+  public DbSet<AccountProfile> AccountProfiles { get; set; }
 
   protected override void OnModelCreating(ModelBuilder builder) {
     base.OnModelCreating(builder);
@@ -35,6 +36,20 @@ public class DatabaseContext : IdentityDbContext<User> {
       .HasConversion<string>();
 
     builder.Entity<AccountToken>()
+      .HasIndex(uc => new { uc.UserId, uc.Provider })
+      .IsUnique();
+
+
+    builder.Entity<AccountProfile>()
+      .HasOne(uc => uc.User)
+      .WithMany(u => u.AccountProfiles)
+      .HasForeignKey(uc => uc.UserId);
+
+    builder.Entity<AccountProfile>()
+      .Property(uc => uc.Provider)
+      .HasConversion<string>();
+
+    builder.Entity<AccountProfile>()
       .HasIndex(uc => new { uc.UserId, uc.Provider })
       .IsUnique();
   }

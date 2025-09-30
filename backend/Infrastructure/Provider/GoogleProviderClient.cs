@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Net.Http.Headers;
+using System.Text.Json;
 using backend.Application.Interface;
 using backend.Application.Model;
 using backend.Domain.Enum;
@@ -74,5 +75,23 @@ public class GoogleProviderClient : IProviderClient {
     GoogleTokenResponse tokenResponse = JsonSerializer.Deserialize<GoogleTokenResponse>(json)!;
 
     return GoogleOAuthMapper.ToTokenInfo(tokenResponse);
+  }
+
+  public async Task<ProviderProfile> GetProfileAsync(string accessToken) {
+    HttpRequestMessage request =
+      new(HttpMethod.Get, "https://www.googleapis.com/oauth2/v3/userinfo");
+    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+    HttpResponseMessage response = await _http.SendAsync(request);
+    response.EnsureSuccessStatusCode();
+
+    string json = await response.Content.ReadAsStringAsync();
+
+    GoogleUserInfoResponse responseProfile =
+      JsonSerializer.Deserialize<GoogleUserInfoResponse>(json)!;
+
+    ProviderProfile profile = GoogleProfileMapper.ToProviderProfile(responseProfile);
+
+    return profile;
   }
 }

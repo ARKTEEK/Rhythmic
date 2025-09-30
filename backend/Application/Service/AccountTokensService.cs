@@ -16,23 +16,27 @@ public class AccountTokensService : IAccountTokensService {
     _providerFactory = providerFactory;
   }
 
-  public async Task<AccountToken?> GetAccountToken(string userId, OAuthProvider provider) {
+  public async Task<AccountToken> GetAccountToken(string userId, OAuthProvider provider) {
     AccountToken? accountToken =
       await _db.AccountTokens.FirstOrDefaultAsync(x =>
-        x != null && x.UserId == userId && x.Provider == provider);
+        x.UserId == userId && x.Provider == provider);
+    if (accountToken == null) {
+      throw new NullReferenceException($"Account token for {userId} not found");
+    }
+
     return accountToken;
   }
 
-  public async Task<List<AccountToken?>> GetAccountTokens(string userId) {
-    List<AccountToken?> accountTokens =
-      await _db.AccountTokens.Where(x => x != null && x.UserId == userId).ToListAsync();
+  public async Task<List<AccountToken>> GetAccountTokens(string userId) {
+    List<AccountToken> accountTokens =
+      await _db.AccountTokens.Where(x => x.UserId == userId).ToListAsync();
     return accountTokens;
   }
 
   public async Task SaveOrUpdateAsync(AccountToken accountToken) {
     AccountToken? existing = await _db.AccountTokens
       .FirstOrDefaultAsync(x =>
-        x != null && x.UserId == accountToken.UserId && x.Provider == accountToken.Provider);
+        x.UserId == accountToken.UserId && x.Provider == accountToken.Provider);
 
     if (existing != null) {
       existing.AccessToken = accountToken.AccessToken;
@@ -52,8 +56,9 @@ public class AccountTokensService : IAccountTokensService {
   }
 
   public async Task DeleteAsync(string userId, OAuthProvider provider) {
-    AccountToken? existing = await _db.AccountTokens.FirstOrDefaultAsync(x =>
-      x != null && x.UserId == userId && x.Provider == provider);
+    AccountToken? existing =
+      await _db.AccountTokens.FirstOrDefaultAsync(x =>
+        x.UserId == userId && x.Provider == provider);
     if (existing != null) {
       _db.AccountTokens.Remove(existing);
       await _db.SaveChangesAsync();

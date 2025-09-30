@@ -5,7 +5,7 @@ namespace backend.Infrastructure.Mapper;
 
 public static class GoogleOAuthMapper {
   public static TokenInfo ToTokenInfo(GoogleTokenResponse response) =>
-    new TokenInfo() {
+    new() {
       AccessToken = response.AccessToken,
       ExpiresIn = response.ExpiresIn,
       RefreshToken = response.RefreshToken,
