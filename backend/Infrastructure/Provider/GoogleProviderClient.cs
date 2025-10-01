@@ -94,4 +94,17 @@ public class GoogleProviderClient : IProviderClient {
 
     return profile;
   }
+
+  public async Task DisconnectAsync(string refreshToken) {
+    Dictionary<string, string> requestBody = new() {
+      { "token", refreshToken }
+    };
+
+    HttpResponseMessage response = await _http.PostAsync(
+      "https://oauth2.googleapis.com/revoke",
+      new FormUrlEncodedContent(requestBody)
+    );
+
+    response.EnsureSuccessStatusCode();
+  }
 }

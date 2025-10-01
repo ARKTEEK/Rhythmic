@@ -49,4 +49,20 @@ public class OAuthController : ControllerBase {
 
     return Ok(result);
   }
+
+  [HttpDelete("{provider}/disconnect")]
+  public async Task<IActionResult> Logout([FromRoute] string provider,
+    [FromQuery] string providerId) {
+    if (!Enum.TryParse<OAuthProvider>(provider, true, out var providerEnum)) {
+      return BadRequest(new { error = "Unsupported provider." });
+    }
+
+    User? user = await this.GetCurrentUserAsync(_userManager);
+    if (user == null) {
+      return Unauthorized();
+    }
+
+    await _iOAuthService.DisconnectAsync(providerEnum, providerId);
+    return Ok(new { success = true });
+  }
 }

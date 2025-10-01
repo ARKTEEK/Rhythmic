@@ -1,5 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using backend.Api.DTO.OAuth;
+﻿using backend.Api.DTO.OAuth;
 using backend.Application.Interface;
 using backend.Application.Mapper;
 using backend.Application.Model;
@@ -54,6 +53,17 @@ public class OAuthService : IOAuthService {
       tokens.RefreshToken,
       tokens.ExpiresIn
     );
+  }
+
+  public async Task DisconnectAsync(OAuthProvider provider, string providerId) {
+    AccountToken accountToken = await _accountTokensService.GetAccountToken(providerId, provider);
+
+    IProviderClient client = _factory.GetClient(provider);
+
+    await client.DisconnectAsync(accountToken.RefreshToken);
+
+    await _accountTokensService.DeleteAsync(providerId, provider);
+    await _accountProfileService.DeleteAsync(providerId, provider);
   }
 
   public string GetLoginUrl(OAuthProvider provider) {

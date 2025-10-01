@@ -16,12 +16,12 @@ public class AccountTokensService : IAccountTokensService {
     _providerFactory = providerFactory;
   }
 
-  public async Task<AccountToken> GetAccountToken(string userId, OAuthProvider provider) {
+  public async Task<AccountToken> GetAccountToken(string providerId, OAuthProvider provider) {
     AccountToken? accountToken =
       await _db.AccountTokens.FirstOrDefaultAsync(x =>
-        x.UserId == userId && x.Provider == provider);
+        x.Id == providerId && x.Provider == provider);
     if (accountToken == null) {
-      throw new NullReferenceException($"Account token for {userId} not found");
+      throw new NullReferenceException($"Account token {providerId} not found");
     }
 
     return accountToken;
@@ -57,10 +57,10 @@ public class AccountTokensService : IAccountTokensService {
     await _db.SaveChangesAsync();
   }
 
-  public async Task DeleteAsync(string userId, OAuthProvider provider) {
+  public async Task DeleteAsync(string providerId, OAuthProvider provider) {
     AccountToken? existing =
       await _db.AccountTokens.FirstOrDefaultAsync(x =>
-        x.UserId == userId && x.Provider == provider);
+        x.Id == providerId && x.Provider == provider);
     if (existing != null) {
       _db.AccountTokens.Remove(existing);
       await _db.SaveChangesAsync();
