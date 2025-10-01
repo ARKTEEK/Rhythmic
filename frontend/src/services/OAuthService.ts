@@ -30,6 +30,14 @@ export const handleOAuthCallback = async (
   }
 };
 
+export const disconnectOAuth = async (provider: "google" | "spotify", providerId: string) => {
+  await axios.delete(`${ API_BASE_URL }/oauth/${ provider }/disconnect`, {
+    params: {
+      providerId: providerId,
+    },
+  });
+}
+
 export const getConnections = async (): Promise<Connection[]> => {
   const response = await axios.get<Connection[]>(`${ API_BASE_URL }/account-profiles`);
   return response.data;

@@ -1,19 +1,37 @@
 ﻿import Window from "../../components/ui/Window.tsx";
 import { FaPlus, } from "react-icons/fa";
 import { OAuthProviderNames } from "../../models/Connection.ts";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import createConnectionsQueryOptions from "../../queries/createConnectionsQueryOptions.ts";
 import ErrorWindow from "../../components/ui/Window/ErrorWindow.tsx";
 import LoadingWindow from "../../components/ui/Window/LoadingWindow.tsx";
 import { platforms } from "../../data/platforms.ts";
+import { useState } from "react";
+import { disconnectOAuth } from "../../services/OAuthService.ts";
+import ConfirmWindow from "../../components/ui/Window/ConfirmWindow.tsx";
 
 export default function ConnectionsPage() {
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [selectedAccountId, setSelectedAccountId] = useState("");
+
+  const queryClient = useQueryClient();
+
   const {
     isLoading,
     isError,
     error,
     data: connections = []
   } = useQuery(createConnectionsQueryOptions());
+
+
+  const handleDisconnect = async () => {
+    if (selectedAccountId) {
+      await disconnectOAuth("google", selectedAccountId);
+      setShowConfirm(false);
+      setSelectedAccountId("");
+      await queryClient.invalidateQueries({ queryKey: ["connections"] });
+    }
+  };
 
   const platformsWithAccounts = platforms.map((platform) => {
     const matchedConnections = connections
@@ -46,7 +64,7 @@ export default function ConnectionsPage() {
       <div className="grid grid-cols-3 gap-8 max-w-7xl mx-auto">
         { platformsWithAccounts.map((platform) => (
           <Window
-            containerClassName={ "h-[400px] w-[380px]" }
+            containerClassName={ "h-[420px] w-[380px]" }
             key={ platform.name }
             ribbonClassName={ platform.ribbonColor }
             windowClassName={ `${ platform.windowColor }` }>
@@ -75,12 +93,25 @@ export default function ConnectionsPage() {
                 platform.accounts.map((account) => (
                   <div
                     key={ account.id }
-                    className="box-style-md flex items-center justify-between p-3 border-2 border-brown-800 bg-white">
+                    className="box-style-md flex items-center justify-between p-2 border-2 border-brown-800 bg-white">
                     <div className="flex items-center space-x-3">
-                      <span className="font-medium text-brown-900">{ account.email }</span>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-brown-900 text-md">
+                          { account.username }
+                        </span>
+                        <span className="text-sm text-brown-700">
+                          { account.email }
+                        </span>
+                      </div>
                     </div>
+
                     <div className="flex items-center space-x-2">
-                      <button className="box-style-md px-4 py-1 rounded-full text-sm font-bold border-2 border-brown-800 transition-all duration-200 transform bg-red-400 hover:bg-red-500 text-white hover:cursor-pointer">
+                      <button
+                        onClick={ () => {
+                          setSelectedAccountId(account.id);
+                          setShowConfirm(true)
+                        } }
+                        className="box-style-md px-4 py-1 rounded-full text-sm font-bold border-2 border-brown-800 transition-all duration-200 transform bg-red-400 hover:bg-red-500 text-white hover:cursor-pointer">
                         Disconnect
                       </button>
                     </div>
@@ -105,6 +136,14 @@ export default function ConnectionsPage() {
           </Window>
         )) }
       </div>
+      { showConfirm && (
+        <ConfirmWindow
+          onConfirm={ handleDisconnect }
+          onCancel={ () => setShowConfirm(false) }
+          confirmTitle={ "Are you sure?" }
+          confirmMessage={ "Your account will be disconnected." }/>
+      ) }
     </div>
   );
+
 }
