@@ -12,7 +12,10 @@ import ConfirmWindow from "../../components/ui/Window/ConfirmWindow.tsx";
 
 export default function ConnectionsPage() {
   const [showConfirm, setShowConfirm] = useState(false);
-  const [selectedAccountId, setSelectedAccountId] = useState("");
+  const [selectedAccount, setSelectedAccount] = useState<{
+    id: string;
+    provider: string
+  } | null>(null);
 
   const queryClient = useQueryClient();
 
@@ -22,16 +25,6 @@ export default function ConnectionsPage() {
     error,
     data: connections = []
   } = useQuery(createConnectionsQueryOptions());
-
-
-  const handleDisconnect = async () => {
-    if (selectedAccountId) {
-      await disconnectOAuth("google", selectedAccountId);
-      setShowConfirm(false);
-      setSelectedAccountId("");
-      await queryClient.invalidateQueries({ queryKey: ["connections"] });
-    }
-  };
 
   const platformsWithAccounts = platforms.map((platform) => {
     const matchedConnections = connections
@@ -47,6 +40,15 @@ export default function ConnectionsPage() {
       accounts: matchedConnections,
     };
   });
+
+  const handleDisconnect = async () => {
+    if (selectedAccount) {
+      await disconnectOAuth(selectedAccount.provider, selectedAccount.id);
+      setShowConfirm(false);
+      setSelectedAccount(null);
+      await queryClient.invalidateQueries({ queryKey: ["connections"] });
+    }
+  };
 
   if (isLoading) {
     return <LoadingWindow
@@ -108,7 +110,10 @@ export default function ConnectionsPage() {
                     <div className="flex items-center space-x-2">
                       <button
                         onClick={ () => {
-                          setSelectedAccountId(account.id);
+                          setSelectedAccount({
+                            provider: platform.name,
+                            id: account.id
+                          });
                           setShowConfirm(true)
                         } }
                         className="box-style-md px-4 py-1 rounded-full text-sm font-bold border-2 border-brown-800 transition-all duration-200 transform bg-red-400 hover:bg-red-500 text-white hover:cursor-pointer">
