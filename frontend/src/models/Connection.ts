@@ -7,6 +7,7 @@ export enum OAuthProvider {
   Deezer = 3,
   SoundCloud = 4,
   Apple = 5,
+  Amazon = 6,
 }
 
 export interface Connection {
@@ -39,4 +40,5 @@ export const OAuthProviderNames: Record<OAuthProvider, string> = {
   [OAuthProvider.Deezer]: "Deezer",
   [OAuthProvider.Apple]: "Apple",
   [OAuthProvider.SoundCloud]: "SoundCloud",
+  [OAuthProvider.Amazon]: "Amazon"
 };

@@ -19,3 +19,7 @@ export const deezerOAuth = () => {
 export const soundCloudOAuth = () => {
   window.location.href = `${ API_BASE_URL }/oauth/soundcloud/login`;
 };
+
+export const amazonOAuth = () => {
+  window.location.href = `${ API_BASE_URL }/oauth/amazon/login`;
+};
