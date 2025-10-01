@@ -11,6 +11,7 @@ export default function HomePage() {
         className="w-full max-w-2xl mx-auto flex flex-col items-center text-center
                    relative z-10">
         <Window
+          containerClassName={ "w-[500px] h-[400px]" }
           windowClassName={ "bg-green-50" }
           ribbonClassName={ "bg-green-200" }>
           <div className="relative mb-6">

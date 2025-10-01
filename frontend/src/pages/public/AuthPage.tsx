@@ -40,6 +40,7 @@ export default function AuthPage() {
       className="min-h-screen w-full flex items-center justify-center">
       <div className="w-full flex flex-col items-center text-center relative z-10">
         <Window
+          containerClassName={ "w-[500px] h-[550px]" }
           ribbonClassName={ "bg-blue-50" }
           windowClassName={ "bg-blue-200" }>
           <div className="mb-8">

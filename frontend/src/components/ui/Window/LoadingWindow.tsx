@@ -84,7 +84,7 @@ export default function LoadingWindow({
 
   return (
     <Window
-      containerClassName={"h-[160px] w-[320px]"}
+      containerClassName={ "h-[160px] w-[320px]" }
       ribbonClassName={ ribbonClassName }
       windowClassName={ windowClassName }>
       <div className="flex flex-col items-center gap-4">
