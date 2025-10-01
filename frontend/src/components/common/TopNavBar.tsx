@@ -1,4 +1,4 @@
-import { FaEllipsisV } from "react-icons/fa";
+import { FaSignOutAlt } from "react-icons/fa";
 import Button from "../ui/Button.tsx";
 import { useAuth } from "../../hooks/useAuth.tsx";
 
@@ -10,7 +10,6 @@ interface TopNavBarProps {
     active?: boolean;
   }[];
 }
-
 
 export default function TopNavBar({ actions }: TopNavBarProps) {
   const { user } = useAuth();
@@ -38,19 +37,27 @@ export default function TopNavBar({ actions }: TopNavBarProps) {
         )) }
       </div>
 
-      <div className="flex items-center gap-2">
+      <div
+        className="flex items-center gap-2 relative">
         <div className="flex items-center gap-2">
           <img
             src={ `https://ui-avatars.com/api/?name=${ user?.username }&background=0D8ABC&color=fff` }
             alt="User"
-            className="w-8 h-8 rounded-lg object-cover shadow-[2px_2px_0_0_rgba(0,0,0,1)] border-2"/>
+            className="w-8 h-8 rounded-lg object-cover box-style-md"
+          />
           <span className="text-md font-semibold text-black">{ user?.username }</span>
         </div>
-        <FaEllipsisV
-          onClick={ handleLogout }
-          className="text-black cursor-pointer"/>
-      </div>
 
+        <div className="relative">
+          <FaSignOutAlt
+            onClick={ () => {
+              handleLogout();
+            } }
+            className="text-black cursor-pointer hover:opacity-70
+                       hover:text-blue-600 transition-opacity"
+          />
+        </div>
+      </div>
     </div>
   );
-};
+}
