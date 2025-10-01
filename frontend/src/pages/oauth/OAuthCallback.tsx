@@ -56,7 +56,7 @@ export default function OAuthCallback() {
   useEffect(() => {
     if (effectiveStatus === "complete" || effectiveStatus === "error") {
       const timer = setTimeout(() => {
-        navigate("/platforms");
+        navigate("/connections");
       }, 1500);
 
       return () => clearTimeout(timer);

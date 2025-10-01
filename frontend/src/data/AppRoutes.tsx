@@ -24,6 +24,7 @@ export interface AppRoute {
   publicOnly?: boolean;
   icon?: IconType;
   category?: string;
+  noLayout?: boolean;
 }
 
 export const AppRoutes: AppRoute[] = [
@@ -34,6 +35,7 @@ export const AppRoutes: AppRoute[] = [
     icon: FaHome,
     category: "",
     publicOnly: true,
+    noLayout: true,
   },
 
   {
@@ -73,7 +75,7 @@ export const AppRoutes: AppRoute[] = [
     category: "Manage",
   },
   {
-    path: "/platforms",
+    path: "/connections",
     element: <ConnectionsPage/>,
     label: "Connections",
     private: true,
@@ -103,9 +105,11 @@ export const AppRoutes: AppRoute[] = [
     path: "/auth",
     element: <AuthPage/>,
     publicOnly: true,
+    noLayout: true,
   },
   {
     path: "/api/oauth/:provider/callback",
     element: <OAuthCallback/>,
+    noLayout: true,
   },
 ];
