@@ -1,9 +1,9 @@
 ﻿using backend.Api.DTO;
 using backend.Application.Interface;
 using backend.Application.Mapper;
-using backend.Application.Model;
 using backend.Domain.Entity;
 using backend.Infrastructure.Extensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,9 +21,14 @@ public class AccountProfilesController : ControllerBase {
     _userManager = userManager;
   }
 
+  [Authorize]
   [HttpGet("account-profiles")]
   public async Task<IActionResult> GetAllAsync() {
     User? user = await this.GetCurrentUserAsync(_userManager);
+    if (user == null) {
+      return Unauthorized();
+    }
+
     List<AccountProfile> profiles = await _accountProfileService.GetAllAsync(user.Id);
 
     IEnumerable<AccountProfileResponse> profileDto =
