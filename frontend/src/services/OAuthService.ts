@@ -1,6 +1,6 @@
 import axios from "axios";
 import { API_BASE_URL } from "../config/Config.ts";
-import { Connection } from "../models/Connection.ts";
+import { Connection, OAuthProvider } from "../models/Connection.ts";
 
 export const handleOAuthCallback = async (
   provider: "google" | "spotify",
@@ -30,7 +30,7 @@ export const handleOAuthCallback = async (
   }
 };
 
-export const disconnectOAuth = async (provider: "google" | "spotify", providerId: string) => {
+export const disconnectOAuth = async (provider: string, providerId: string) => {
   await axios.delete(`${ API_BASE_URL }/oauth/${ provider }/disconnect`, {
     params: {
       providerId: providerId,
