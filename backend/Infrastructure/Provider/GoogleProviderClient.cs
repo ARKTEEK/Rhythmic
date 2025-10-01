@@ -11,10 +11,13 @@ namespace backend.Infrastructure.Provider;
 public class GoogleProviderClient : IProviderClient {
   private readonly HttpClient _http;
   private readonly IConfiguration _configuration;
+  private readonly ITokenService _tokenService;
 
-  public GoogleProviderClient(IHttpClientFactory http, IConfiguration configuration) {
+  public GoogleProviderClient(IHttpClientFactory http, IConfiguration configuration,
+    ITokenService tokenService) {
     _http = http.CreateClient();
     _configuration = configuration;
+    _tokenService = tokenService;
   }
 
   public OAuthProvider Provider => OAuthProvider.Google;
@@ -53,7 +56,13 @@ public class GoogleProviderClient : IProviderClient {
     string json = await response.Content.ReadAsStringAsync();
     GoogleTokenResponse tokenResponse = JsonSerializer.Deserialize<GoogleTokenResponse>(json)!;
 
-    return GoogleOAuthMapper.ToTokenInfo(tokenResponse);
+    string? sub = _tokenService.GetClaimFromToken(tokenResponse.IdToken, "sub");
+
+    if (string.IsNullOrEmpty(sub)) {
+      throw new InvalidOperationException("ID token is required for Google login.");
+    }
+
+    return GoogleOAuthMapper.ToTokenInfo(tokenResponse, sub);
   }
 
   public async Task<TokenInfo> RefreshTokenAsync(string refreshToken) {
@@ -74,7 +83,13 @@ public class GoogleProviderClient : IProviderClient {
     string json = await response.Content.ReadAsStringAsync();
     GoogleTokenResponse tokenResponse = JsonSerializer.Deserialize<GoogleTokenResponse>(json)!;
 
-    return GoogleOAuthMapper.ToTokenInfo(tokenResponse);
+    string? sub = _tokenService.GetClaimFromToken(tokenResponse.IdToken, "sub");
+
+    if (string.IsNullOrEmpty(sub)) {
+      throw new InvalidOperationException("ID token is required for Google login.");
+    }
+
+    return GoogleOAuthMapper.ToTokenInfo(tokenResponse, sub);
   }
 
   public async Task<ProviderProfile> GetProfileAsync(string accessToken) {

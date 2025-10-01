@@ -23,28 +23,21 @@ public class OAuthService : IOAuthService {
     _tokenService = tokenService;
   }
 
-  public async Task<OAuthLoginResponseDto> LoginAsync(string userId, OAuthProvider provider,
-    string code) {
+  public async Task<OAuthLoginResponseDto> LoginAsync(
+    string userId, OAuthProvider provider, string code) {
     List<AccountProfile> existingProfiles = await _accountProfileService.GetAllAsync(userId);
     int countForProvider = existingProfiles.Count(p => p.Provider == provider);
-    if (countForProvider >= 3) {
+    if (countForProvider >= 3)
       throw new InvalidOperationException($"Cannot add more than 3 accounts for {provider}.");
-    }
 
     IProviderClient client = _factory.GetClient(provider);
 
     TokenInfo tokens = await client.ExchangeCodeAsync(code);
 
-    string? sub = _tokenService.GetClaimFromToken(tokens.IdToken, "sub");
-    if (string.IsNullOrEmpty(sub)) {
-      throw new InvalidOperationException("ID token does not contain a 'sub' claim.");
-    }
-
-    AccountToken accountToken = tokens.ToEntity(sub!, userId, provider);
+    AccountToken accountToken = tokens.ToEntity(userId, provider);
     await _accountTokensService.SaveOrUpdateAsync(accountToken);
 
     ProviderProfile providerProfile = await client.GetProfileAsync(accountToken.AccessToken);
-
     AccountProfile accountProfile = providerProfile.ToEntity(userId, provider);
     await _accountProfileService.SaveOrUpdateAsync(accountProfile);
 
@@ -54,6 +47,7 @@ public class OAuthService : IOAuthService {
       tokens.ExpiresIn
     );
   }
+
 
   public async Task DisconnectAsync(OAuthProvider provider, string providerId) {
     AccountToken accountToken = await _accountTokensService.GetAccountToken(providerId, provider);

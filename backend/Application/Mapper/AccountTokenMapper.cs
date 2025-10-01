@@ -5,10 +5,10 @@ using backend.Domain.Enum;
 namespace backend.Application.Mapper;
 
 public static class AccountTokenMapper {
-  public static AccountToken ToEntity(this TokenInfo tokenInfo, string sub, string userId,
+  public static AccountToken ToEntity(this TokenInfo tokenInfo, string userId,
     OAuthProvider provider) {
     return new AccountToken {
-      Id = sub,
+      Id = tokenInfo.Id,
       UserId = userId,
       Provider = provider,
       AccessToken = tokenInfo.AccessToken,
