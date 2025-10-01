@@ -75,6 +75,8 @@ builder.Services.AddAuthentication(options => {
 builder.Services.AddHttpClient();
 
 builder.Services.AddScoped<IProviderClient, GoogleProviderClient>();
+builder.Services.AddScoped<IProviderClient, SpotifyProviderClient>();
+
 builder.Services.AddScoped<IProviderFactory, ProviderFactory>();
 
 builder.Services.AddScoped<IOAuthService, OAuthService>();
