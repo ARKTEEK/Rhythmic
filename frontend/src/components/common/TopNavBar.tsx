@@ -8,6 +8,9 @@ interface TopNavBarProps {
     label: string;
     onClick: () => void;
     active?: boolean;
+    Icon?: any;
+    buttonClassName?: string;
+    textClassName?: string;
   }[];
 }
 
@@ -32,6 +35,9 @@ export default function TopNavBar({ actions }: TopNavBarProps) {
             label={ action.label }
             variant={ action.active === true ? 'active' : 'inactive' }
             onClick={ action.onClick }
+            Icon={ action.Icon }
+            color={ action.buttonClassName }
+            textColorClassName={ action.textClassName }
             size="small"
           />
         )) }

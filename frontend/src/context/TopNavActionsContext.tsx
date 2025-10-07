@@ -1,10 +1,14 @@
 import { createContext, useContext } from "react";
+import { IconType } from "react-icons";
 
 export interface TopNavAction {
   id: string;
   label: string;
   onClick: () => void;
   active?: boolean;
+  Icon?: IconType;
+  buttonClassName?: string;
+  textClassName?: string;
 }
 
 export type SetTopNavActions = (actions: TopNavAction[]) => void;
