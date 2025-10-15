@@ -33,6 +33,13 @@ public class AccountTokensService : IAccountTokensService {
     return accountTokens;
   }
 
+  public async Task<List<AccountToken>> GetAccountTokens(string userId, OAuthProvider provider) {
+    List<AccountToken> accountTokens =
+      await _db.AccountTokens.Where(x => x.UserId == userId && x.Provider == provider)
+        .ToListAsync();
+    return accountTokens;
+  }
+
   public async Task SaveOrUpdateAsync(AccountToken accountToken) {
     AccountToken? existing = await _db.AccountTokens
       .FirstOrDefaultAsync(x =>
