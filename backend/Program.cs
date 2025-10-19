@@ -78,6 +78,9 @@ builder.Services.AddScoped<IProviderClient, GoogleProviderClient>();
 builder.Services.AddScoped<IProviderClient, SpotifyProviderClient>();
 
 builder.Services.AddScoped<IProviderFactory, ProviderFactory>();
+builder.Services.AddScoped<IPlaylistProviderFactory, PlaylistProviderFactory>();
+
+builder.Services.AddScoped<IPlaylistProviderClient, GooglePlaylistClient>();
 
 builder.Services.AddScoped<IOAuthService, OAuthService>();
 
