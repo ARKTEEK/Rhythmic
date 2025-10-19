@@ -26,6 +26,7 @@ public class GoogleProviderClient : IProviderClient {
     string clientId = _configuration["Google:ClientId"];
     string redirectUri = _configuration["Google:RedirectUri"];
     string scope = "https://www.googleapis.com/auth/youtube " +
+                   "https://www.googleapis.com/auth/youtube.force-ssl " +
                    "https://www.googleapis.com/auth/userinfo.email " +
                    "https://www.googleapis.com/auth/userinfo.profile";
     string state = Guid.NewGuid().ToString();
@@ -51,7 +52,10 @@ public class GoogleProviderClient : IProviderClient {
 
     HttpResponseMessage response =
       await _http.PostAsync("https://oauth2.googleapis.com/token", content);
+
+
     response.EnsureSuccessStatusCode();
+
 
     string json = await response.Content.ReadAsStringAsync();
     GoogleTokenResponse tokenResponse = JsonSerializer.Deserialize<GoogleTokenResponse>(json)!;
@@ -65,12 +69,12 @@ public class GoogleProviderClient : IProviderClient {
     return GoogleOAuthMapper.ToTokenInfo(tokenResponse, sub);
   }
 
-  public async Task<TokenInfo> RefreshTokenAsync(string refreshToken) {
+  public async Task<TokenRefreshInfo> RefreshTokenAsync(string refreshToken) {
     string? clientId = _configuration["Google:ClientId"];
     string? clientSecret = _configuration["Google:ClientSecret"];
 
     FormUrlEncodedContent content = new(new Dictionary<string, string> {
-      ["client_id"] = clientId,
+      ["client_id"] = clientId!,
       ["client_secret"] = clientSecret!,
       ["refresh_token"] = refreshToken,
       ["grant_type"] = "refresh_token"
@@ -78,18 +82,19 @@ public class GoogleProviderClient : IProviderClient {
 
     HttpResponseMessage response =
       await _http.PostAsync("https://oauth2.googleapis.com/token", content);
+
+    if (!response.IsSuccessStatusCode) {
+      string error = await response.Content.ReadAsStringAsync();
+      throw new HttpRequestException($"Google refresh failed ({response.StatusCode}): {error}");
+    }
+
     response.EnsureSuccessStatusCode();
 
     string json = await response.Content.ReadAsStringAsync();
-    GoogleTokenResponse tokenResponse = JsonSerializer.Deserialize<GoogleTokenResponse>(json)!;
+    GoogleTokenRefreshResponse tokenResponse =
+      JsonSerializer.Deserialize<GoogleTokenRefreshResponse>(json)!;
 
-    string? sub = _tokenService.GetClaimFromToken(tokenResponse.IdToken, "sub");
-
-    if (string.IsNullOrEmpty(sub)) {
-      throw new InvalidOperationException("ID token is required for Google login.");
-    }
-
-    return GoogleOAuthMapper.ToTokenInfo(tokenResponse, sub);
+    return GoogleOAuthMapper.ToTokenRefreshInfo(tokenResponse);
   }
 
   public async Task<ProviderProfile> GetProfileAsync(string accessToken) {

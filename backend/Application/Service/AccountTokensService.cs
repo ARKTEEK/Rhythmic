@@ -2,6 +2,7 @@
 using backend.Application.Model;
 using backend.Domain.Entity;
 using backend.Domain.Enum;
+using backend.Infrastructure.Mapper;
 using backend.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -40,6 +41,25 @@ public class AccountTokensService : IAccountTokensService {
     return accountTokens;
   }
 
+  public async Task<List<AccountToken>> GetValidAccountTokens(string userId) {
+    List<AccountToken> tokens = await GetAccountTokens(userId);
+    List<AccountToken> validTokens = new();
+
+    foreach (AccountToken token in tokens) {
+      TokenInfo refreshed = await RefreshAsync(token.Id, token.Provider);
+
+      token.AccessToken = refreshed.AccessToken;
+      token.RefreshToken = refreshed.RefreshToken;
+      token.ExpiresAt = DateTime.UtcNow.AddSeconds(refreshed.ExpiresIn);
+      token.Scope = refreshed.Scope;
+      token.TokenType = refreshed.TokenType;
+
+      validTokens.Add(token);
+    }
+
+    return validTokens;
+  }
+
   public async Task SaveOrUpdateAsync(AccountToken accountToken) {
     AccountToken? existing = await _db.AccountTokens
       .FirstOrDefaultAsync(x =>
@@ -74,35 +94,28 @@ public class AccountTokensService : IAccountTokensService {
     }
   }
 
-  public async Task<TokenInfo> RefreshAsync(string userId, OAuthProvider provider) {
+  public async Task<TokenInfo> RefreshAsync(string providerId, OAuthProvider provider) {
     AccountToken? accountToken = await _db.AccountTokens
-      .FirstOrDefaultAsync(x => x.UserId == userId && x.Provider == provider);
+      .FirstOrDefaultAsync(x => x.Id == providerId && x.Provider == provider);
 
     if (accountToken == null) {
       throw new InvalidOperationException("No account token found for this provider.");
     }
 
     if (accountToken.ExpiresAt > DateTime.UtcNow) {
-      return new TokenInfo {
-        AccessToken = accountToken.AccessToken,
-        RefreshToken = accountToken.RefreshToken,
-        ExpiresIn = (int)(accountToken.ExpiresAt - DateTime.UtcNow).TotalSeconds,
-        Scope = accountToken.Scope,
-        TokenType = accountToken.TokenType
-      };
+      return GoogleOAuthMapper.ToTokenInfo(accountToken);
     }
 
     IProviderClient client = _providerFactory.GetClient(provider);
-    TokenInfo newTokens = await client.RefreshTokenAsync(accountToken.RefreshToken);
+    TokenRefreshInfo newTokens = await client.RefreshTokenAsync(accountToken.RefreshToken);
 
     accountToken.AccessToken = newTokens.AccessToken;
-    accountToken.RefreshToken = newTokens.RefreshToken;
     accountToken.ExpiresAt = DateTime.UtcNow.AddSeconds(newTokens.ExpiresIn);
     accountToken.UpdatedAt = DateTime.UtcNow;
 
     _db.Update(accountToken);
     await _db.SaveChangesAsync();
 
-    return newTokens;
+    return GoogleOAuthMapper.ToTokenInfo(accountToken);
   }
 }

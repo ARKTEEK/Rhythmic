@@ -67,7 +67,7 @@ public class SpotifyProviderClient : IProviderClient {
     return SpotifyOAuthMapper.ToTokenInfo(tokenResponse, profile.Id);
   }
 
-  public Task<TokenInfo> RefreshTokenAsync(string refreshToken) {
+  public Task<TokenRefreshInfo> RefreshTokenAsync(string refreshToken) {
     throw new NotImplementedException();
   }
 
