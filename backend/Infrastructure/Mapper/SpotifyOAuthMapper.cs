@@ -1,4 +1,5 @@
 ﻿using backend.Application.Model;
+using backend.Domain.Enum;
 using backend.Infrastructure.DTO;
 
 namespace backend.Infrastructure.Mapper;
@@ -13,4 +14,13 @@ public static class SpotifyOAuthMapper {
       RefreshToken = response.RefreshToken,
       TokenType = response.TokenType,
     };
+
+  public static TokenRefreshInfo ToTokenRefreshInfo(SpotifyTokenRefreshResponse response) {
+    return new TokenRefreshInfo {
+      AccessToken = response.AccessToken,
+      ExpiresIn = response.ExpiresIn,
+      Scope = response.Scope,
+      TokenType = response.TokenType,
+    };
+  }
 }

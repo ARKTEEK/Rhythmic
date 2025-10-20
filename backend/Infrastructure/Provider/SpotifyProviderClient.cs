@@ -67,8 +67,35 @@ public class SpotifyProviderClient : IProviderClient {
     return SpotifyOAuthMapper.ToTokenInfo(tokenResponse, profile.Id);
   }
 
-  public Task<TokenRefreshInfo> RefreshTokenAsync(string refreshToken) {
-    throw new NotImplementedException();
+  public async Task<TokenRefreshInfo> RefreshTokenAsync(string refreshToken) {
+    string? clientId = _configuration["Spotify:ClientId"];
+    string? clientSecret = _configuration["Spotify:ClientSecret"];
+
+    FormUrlEncodedContent content = new(new Dictionary<string, string> {
+      ["grant_type"] = "refresh_token",
+      ["refresh_token"] = refreshToken
+    });
+
+    HttpRequestMessage request = new(HttpMethod.Post, "https://accounts.spotify.com/api/token") {
+      Content = content
+    };
+
+    string encodedCredentials =
+      Convert.ToBase64String(Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}"));
+    request.Headers.Authorization = new AuthenticationHeaderValue("Basic", encodedCredentials);
+
+    HttpResponseMessage response = await _http.SendAsync(request);
+
+    if (!response.IsSuccessStatusCode) {
+      string error = await response.Content.ReadAsStringAsync();
+      throw new HttpRequestException($"Spotify refresh failed ({response.StatusCode}): {error}");
+    }
+
+    string json = await response.Content.ReadAsStringAsync();
+    SpotifyTokenRefreshResponse tokenResponse =
+      JsonSerializer.Deserialize<SpotifyTokenRefreshResponse>(json)!;
+
+    return SpotifyOAuthMapper.ToTokenRefreshInfo(tokenResponse);
   }
 
   public async Task<ProviderProfile> GetProfileAsync(string accessToken) {
