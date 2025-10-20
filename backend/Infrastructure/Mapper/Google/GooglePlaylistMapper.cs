@@ -1,13 +1,14 @@
 ﻿using backend.Application.Model;
 using backend.Domain.Enum;
-using backend.Infrastructure.DTO;
+using backend.Infrastructure.DTO.Google;
 
-namespace backend.Infrastructure.Mapper;
+namespace backend.Infrastructure.Mapper.Google;
 
 public static class GooglePlaylistMapper {
   public static List<ProviderPlaylist> ToProviderPlaylists(YoutubePlaylistsResponse response) {
-    if (response.Items == null || response.Items.Count == 0)
+    if (response.Items == null || response.Items.Count == 0) {
       return new List<ProviderPlaylist>();
+    }
 
     return response.Items
       .Where(item => item.Snippet != null)

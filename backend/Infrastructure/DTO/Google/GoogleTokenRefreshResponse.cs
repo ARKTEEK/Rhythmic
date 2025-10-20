@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace backend.Infrastructure.DTO;
+namespace backend.Infrastructure.DTO.Google;
 
 public class GoogleTokenRefreshResponse {
   [JsonPropertyName("access_token")] public string AccessToken { get; set; }

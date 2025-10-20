@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace backend.Infrastructure.DTO;
+namespace backend.Infrastructure.DTO.Spotify;
 
 public class SpotifyTokenResponse {
   [JsonPropertyName("access_token")] public string AccessToken { get; set; }

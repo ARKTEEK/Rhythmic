@@ -1,6 +1,6 @@
-﻿namespace backend.Infrastructure.DTO;
+﻿using System.Text.Json.Serialization;
 
-using System.Text.Json.Serialization;
+namespace backend.Infrastructure.DTO.Google;
 
 public class YoutubePlaylistsResponse {
   [JsonPropertyName("kind")] public string? Kind { get; set; }

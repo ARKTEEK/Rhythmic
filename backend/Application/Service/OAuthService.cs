@@ -8,10 +8,10 @@ using backend.Domain.Enum;
 namespace backend.Application.Service;
 
 public class OAuthService : IOAuthService {
+  private readonly IAccountProfileService _accountProfileService;
+  private readonly IAccountTokensService _accountTokensService;
   private readonly IProviderFactory _factory;
   private readonly ITokenService _tokenService;
-  private readonly IAccountTokensService _accountTokensService;
-  private readonly IAccountProfileService _accountProfileService;
 
   public OAuthService(IProviderFactory factory,
     IAccountTokensService accountTokensService,
@@ -27,8 +27,9 @@ public class OAuthService : IOAuthService {
     string userId, OAuthProvider provider, string code) {
     List<AccountProfile> existingProfiles = await _accountProfileService.GetAllAsync(userId);
     int countForProvider = existingProfiles.Count(p => p.Provider == provider);
-    if (countForProvider >= 3)
+    if (countForProvider >= 3) {
       throw new InvalidOperationException($"Cannot add more than 3 accounts for {provider}.");
+    }
 
     IProviderClient client = _factory.GetClient(provider);
 

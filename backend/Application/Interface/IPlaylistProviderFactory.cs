@@ -3,5 +3,5 @@
 namespace backend.Application.Interface;
 
 public interface IPlaylistProviderFactory {
-    IPlaylistProviderClient GetClient(OAuthProvider provider);
+  IPlaylistProviderClient GetClient(OAuthProvider provider);
 }

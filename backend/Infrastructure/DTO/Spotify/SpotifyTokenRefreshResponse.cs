@@ -1,18 +1,13 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace backend.Infrastructure.DTO;
+namespace backend.Infrastructure.DTO.Spotify;
 
-public class SpotifyTokenRefreshResponse
-{
-    [JsonPropertyName("access_token")]
-    public string AccessToken { get; set; }
+public class SpotifyTokenRefreshResponse {
+  [JsonPropertyName("access_token")] public string AccessToken { get; set; }
 
-    [JsonPropertyName("token_type")]
-    public string TokenType { get; set; }
+  [JsonPropertyName("token_type")] public string TokenType { get; set; }
 
-    [JsonPropertyName("scope")]
-    public string Scope { get; set; }
+  [JsonPropertyName("scope")] public string Scope { get; set; }
 
-    [JsonPropertyName("expires_in")]
-    public int ExpiresIn { get; set; }
+  [JsonPropertyName("expires_in")] public int ExpiresIn { get; set; }
 }

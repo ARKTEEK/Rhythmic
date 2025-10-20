@@ -1,7 +1,6 @@
 ﻿using backend.Application.Interface;
 using backend.Application.Model;
 using backend.Domain.Entity;
-using backend.Domain.Enum;
 using backend.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -12,12 +11,12 @@ namespace backend.Api.Controller;
 [ApiController]
 [Route("api")]
 public class PlaylistsController : ControllerBase {
-  private readonly IAccountTokensService _tokensService;
   private readonly IPlaylistProviderFactory _factory;
+  private readonly IAccountTokensService _tokensService;
   private readonly UserManager<User> _userManager;
 
   public PlaylistsController(UserManager<User> userManager, IPlaylistProviderFactory factory,
-    IProviderFactory providerFactory, IAccountTokensService tokensService) {
+    IAccountTokensService tokensService) {
     _userManager = userManager;
     _factory = factory;
     _tokensService = tokensService;
@@ -31,7 +30,7 @@ public class PlaylistsController : ControllerBase {
       return Unauthorized();
     }
 
-    List<ProviderPlaylist> playlists = new List<ProviderPlaylist>();
+    List<ProviderPlaylist> playlists = new();
 
     List<AccountToken> tokens =
       await _tokensService.GetValidAccountTokens(user.Id);

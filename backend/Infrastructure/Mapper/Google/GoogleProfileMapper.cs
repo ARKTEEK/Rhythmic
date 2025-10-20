@@ -1,13 +1,14 @@
 ﻿using backend.Application.Model;
-using backend.Infrastructure.DTO;
+using backend.Infrastructure.DTO.Google;
 
-namespace backend.Infrastructure.Mapper;
+namespace backend.Infrastructure.Mapper.Google;
 
 public static class GoogleProfileMapper {
-  public static ProviderProfile ToProviderProfile(GoogleUserInfoResponse response) =>
-    new() {
+  public static ProviderProfile ToProviderProfile(GoogleUserInfoResponse response) {
+    return new ProviderProfile {
       Id = response.Id,
       Name = response.Name,
       Email = response.Email
     };
+  }
 }

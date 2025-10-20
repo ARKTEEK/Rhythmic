@@ -39,7 +39,7 @@ public class TokenService : ITokenService {
   }
 
   public string? GetClaimFromToken(string jwt, string claimType) {
-    JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
+    JwtSecurityTokenHandler handler = new();
     JwtSecurityToken? token = handler.ReadJwtToken(jwt);
     return token.Claims.FirstOrDefault(c => c.Type == claimType)?.Value;
   }

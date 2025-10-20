@@ -3,14 +3,14 @@ using System.Text.Json;
 using backend.Application.Interface;
 using backend.Application.Model;
 using backend.Domain.Enum;
-using backend.Infrastructure.DTO;
-using backend.Infrastructure.Mapper;
+using backend.Infrastructure.DTO.Google;
+using backend.Infrastructure.Mapper.Google;
 
-namespace backend.Infrastructure.Provider;
+namespace backend.Infrastructure.Provider.Google;
 
 public class GoogleProviderClient : IProviderClient {
-  private readonly HttpClient _http;
   private readonly IConfiguration _configuration;
+  private readonly HttpClient _http;
   private readonly ITokenService _tokenService;
 
   public GoogleProviderClient(IHttpClientFactory http, IConfiguration configuration,

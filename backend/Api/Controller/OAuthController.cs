@@ -21,7 +21,7 @@ public class OAuthController : ControllerBase {
 
   [HttpGet("{provider}/login")]
   public IActionResult Login([FromRoute] string provider) {
-    if (!Enum.TryParse<OAuthProvider>(provider, true, out var providerEnum)) {
+    if (!Enum.TryParse<OAuthProvider>(provider, true, out OAuthProvider providerEnum)) {
       return BadRequest(new { error = "Unsupported provider." });
     }
 
@@ -32,7 +32,7 @@ public class OAuthController : ControllerBase {
   [HttpPost("{provider}/callback")]
   public async Task<IActionResult> Callback([FromRoute] string provider,
     [FromBody] OAuthLoginRequestDto request) {
-    if (!Enum.TryParse<OAuthProvider>(provider, true, out var providerEnum)) {
+    if (!Enum.TryParse<OAuthProvider>(provider, true, out OAuthProvider providerEnum)) {
       return BadRequest(new { error = "Unsupported provider." });
     }
 
@@ -53,7 +53,7 @@ public class OAuthController : ControllerBase {
   [HttpDelete("{provider}/disconnect")]
   public async Task<IActionResult> Logout([FromRoute] string provider,
     [FromQuery] string providerId) {
-    if (!Enum.TryParse<OAuthProvider>(provider, true, out var providerEnum)) {
+    if (!Enum.TryParse<OAuthProvider>(provider, true, out OAuthProvider providerEnum)) {
       return BadRequest(new { error = "Unsupported provider." });
     }
 

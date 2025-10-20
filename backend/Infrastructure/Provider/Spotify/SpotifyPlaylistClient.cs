@@ -1,15 +1,11 @@
-﻿using backend.Application.Interface;
+﻿using System.Text.Json;
+using backend.Application.Interface;
 using backend.Application.Model;
 using backend.Domain.Enum;
-using backend.Infrastructure.DTO;
-using backend.Infrastructure.Mapper;
+using backend.Infrastructure.DTO.Spotify;
+using backend.Infrastructure.Mapper.Spotify;
 
-namespace backend.Infrastructure.Provider;
-
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading.Tasks;
-using System.Collections.Generic;
+namespace backend.Infrastructure.Provider.Spotify;
 
 public class SpotifyPlaylistClient : IPlaylistProviderClient {
   private readonly HttpClient _http;

@@ -22,7 +22,7 @@ public static class AccountProfileMapper {
       Id = accountProfile.Id,
       Displayname = accountProfile.Displayname,
       Provider = accountProfile.Provider,
-      Email = accountProfile.Email,
+      Email = accountProfile.Email
     };
   }
 }

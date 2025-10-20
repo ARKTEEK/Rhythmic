@@ -4,14 +4,14 @@ using System.Text.Json;
 using backend.Application.Interface;
 using backend.Application.Model;
 using backend.Domain.Enum;
-using backend.Infrastructure.DTO;
-using backend.Infrastructure.Mapper;
+using backend.Infrastructure.DTO.Spotify;
+using backend.Infrastructure.Mapper.Spotify;
 
-namespace backend.Infrastructure.Provider;
+namespace backend.Infrastructure.Provider.Spotify;
 
 public class SpotifyProviderClient : IProviderClient {
-  private readonly HttpClient _http;
   private readonly IConfiguration _configuration;
+  private readonly HttpClient _http;
 
   public SpotifyProviderClient(HttpClient http, IConfiguration configuration) {
     _http = http;

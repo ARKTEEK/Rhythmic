@@ -2,7 +2,7 @@
 using backend.Application.Model;
 using backend.Domain.Entity;
 using backend.Domain.Enum;
-using backend.Infrastructure.Mapper;
+using backend.Infrastructure.Mapper.Google;
 using backend.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,8 +1,6 @@
-﻿
-namespace backend.Infrastructure.DTO;
+﻿using System.Text.Json.Serialization;
 
-using System.Collections.Generic;
-using System.Text.Json.Serialization;
+namespace backend.Infrastructure.DTO.Spotify;
 
 public class SpotifyPlaylistsResponse {
   [JsonPropertyName("items")] public List<SpotifyPlaylistItem> Items { get; set; } = [];

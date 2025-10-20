@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace backend.Infrastructure.DTO;
+namespace backend.Infrastructure.DTO.Spotify;
 
 public class SpotifyUserInfoResponse {
   [JsonPropertyName("id")] public string Id { get; set; }
