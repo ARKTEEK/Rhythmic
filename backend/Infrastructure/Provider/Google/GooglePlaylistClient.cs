@@ -10,8 +10,7 @@ namespace backend.Infrastructure.Provider;
 public class GooglePlaylistClient : IPlaylistProviderClient {
   private readonly HttpClient _http;
 
-  public GooglePlaylistClient(IHttpClientFactory http, IConfiguration configuration,
-    ITokenService tokenService) {
+  public GooglePlaylistClient(IHttpClientFactory http) {
     _http = http.CreateClient();
   }
 
