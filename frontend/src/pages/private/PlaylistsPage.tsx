@@ -59,7 +59,7 @@ export default function PlaylistsPage() {
   const windowPalette = ["bg-blue-50", "bg-green-50", "bg-purple-50", "bg-pink-50", "bg-yellow-50", "bg-cyan-50"];
 
   return (
-    <div className="p-8 w-full flex justify-center">
+    <div className="w-full flex justify-center m-4">
       <PlaylistActions
         selectedIds={ selectedIds }
         hasSelection={ hasSelection }
@@ -69,7 +69,7 @@ export default function PlaylistsPage() {
       />
 
       <Window
-        containerClassName="w-full max-w-[90vw] xl:max-w-[1600px] min-h-[80vh]"
+        containerClassName="w-full"
         ribbonClassName="bg-purple-200"
         windowClassName="bg-stone-100"
         ribbonContent={ (
