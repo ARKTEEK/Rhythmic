@@ -23,6 +23,9 @@ public class Snippet {
   [JsonPropertyName("description")] public string? Description { get; set; }
   [JsonPropertyName("thumbnails")] public Thumbnails? Thumbnails { get; set; }
   [JsonPropertyName("channelTitle")] public string? ChannelTitle { get; set; }
+
+  [JsonPropertyName("videoOwnerChannelTitle")]
+  public string? VideoOwnerChannelTitle { get; set; }
 }
 
 public class ContentDetails {

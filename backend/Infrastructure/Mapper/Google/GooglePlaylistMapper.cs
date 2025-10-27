@@ -1,6 +1,7 @@
 ﻿using backend.Application.Model;
 using backend.Domain.Enum;
 using backend.Infrastructure.DTO.Google;
+using backend.Infrastructure.Utils;
 
 namespace backend.Infrastructure.Mapper.Google;
 
@@ -32,21 +33,31 @@ public static class GooglePlaylistMapper {
   }
 
   public static List<ProviderTrack> ToProviderTracks(GooglePlaylistTracksResponse response) {
-    if (response.Items == null || response.Items.Count == 0)
+    if (response.Items == null || response.Items.Count == 0) {
       return new List<ProviderTrack>();
+    }
 
     return response.Items
       .Where(item => item.Snippet != null && item.ContentDetails != null)
-      .Select(item => new ProviderTrack {
-        Id = string.Empty,
-        Title = item.Snippet!.Title ?? string.Empty,
-        Artist = item.Snippet.ChannelTitle ?? string.Empty,
-        Album = string.Empty,
-        ThumbnailUrl = item.Snippet.Thumbnails?.High?.Url
-                       ?? item.Snippet.Thumbnails?.Medium?.Url
-                       ?? item.Snippet.Thumbnails?.Default?.Url,
-        DurationMs = 0,
-        Provider = OAuthProvider.Google
+      .Select(item => {
+        string title = item.Snippet!.Title ?? string.Empty;
+        (string artist, string track) = MappingUtils.ParseYoutubeTitle(title);
+
+        if (string.IsNullOrWhiteSpace(artist)) {
+          artist = item.Snippet.VideoOwnerChannelTitle ?? string.Empty;
+        }
+
+        return new ProviderTrack {
+          Id = item.ContentDetails?.VideoId ?? string.Empty,
+          Title = track,
+          Artist = artist,
+          Album = string.Empty,
+          ThumbnailUrl = item.Snippet.Thumbnails?.High?.Url
+                         ?? item.Snippet.Thumbnails?.Medium?.Url
+                         ?? item.Snippet.Thumbnails?.Default?.Url,
+          DurationMs = 0,
+          Provider = OAuthProvider.Google
+        };
       })
       .ToList();
   }
