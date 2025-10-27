@@ -12,5 +12,6 @@ public class ProviderPlaylist {
   public DateTime CreatedAt { get; set; }
   public int ItemCount { get; set; }
   public string? PrivacyStatus { get; set; }
+  public string ProviderId { get; set; } = string.Empty;
   public OAuthProvider Provider { get; set; }
 }

@@ -1,6 +1,7 @@
 ﻿using backend.Application.Interface;
 using backend.Application.Model;
 using backend.Domain.Entity;
+using backend.Domain.Enum;
 using backend.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -37,10 +38,27 @@ public class PlaylistsController : ControllerBase {
 
     foreach (AccountToken token in tokens) {
       IPlaylistProviderClient client = _factory.GetClient(token.Provider);
-      List<ProviderPlaylist> providerPlaylists = await client.GetPlaylistsAsync(token.AccessToken);
+      List<ProviderPlaylist> providerPlaylists = await client.GetPlaylistsAsync(token.Id, token.AccessToken);
       playlists.AddRange(providerPlaylists);
     }
 
     return Ok(playlists);
+  }
+
+  [HttpGet("{provider}/{playlistId}/tracks")]
+  public async Task<IActionResult> GetPlaylistTracks(
+    OAuthProvider provider,
+    [FromRoute] string playlistId,
+    [FromQuery] string providerAccountId) {
+    if (string.IsNullOrWhiteSpace(providerAccountId)) {
+      return BadRequest("providerAccountId is required.");
+    }
+
+    Console.WriteLine(provider + " " + playlistId + " " + providerAccountId);
+    IPlaylistProviderClient client = _factory.GetClient(provider);
+    AccountToken token = await _tokensService.GetAccountToken(providerAccountId, provider);
+
+    List<ProviderTrack> tracks = await client.GetPlaylistTracksAsync(token.AccessToken, playlistId);
+    return Ok(tracks);
   }
 }
