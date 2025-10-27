@@ -14,6 +14,7 @@ export default function SongListItem({
                                        playlistId,
                                        onRemoveSong,
                                      }: SongListProps) {
+
   return (
     <li
       key={ song.id }
@@ -30,7 +31,7 @@ export default function SongListItem({
       ) }
 
       <div className="flex-1 ml-2 min-w-0">
-        <div className="text-base font-semibold text-gray-900 truncate">{ song.title }</div>
+        <div className="text-base font-semibold text-gray-900 break-words">{ song.title }</div>
         <div className="text-sm text-gray-700 truncate">
           { song.artist } · { formatDuration(song.durationMs) }
         </div>

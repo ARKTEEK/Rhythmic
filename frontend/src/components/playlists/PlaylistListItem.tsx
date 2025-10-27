@@ -1,6 +1,7 @@
 ﻿import React from "react";
 import { FaCheckSquare, FaMusic, FaRegSquare } from "react-icons/fa";
 import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
+import { getProviderName } from "../../utils/providerUtils.tsx";
 
 interface PlaylistListItemProps {
   playlist: ProviderPlaylist;
@@ -90,7 +91,7 @@ export default function PlaylistListItem({
             { playlist.title }
           </div>
           <div className="text-xs text-black/70 mt-1 truncate uppercase tracking-wider">
-            { meta.trackCount } TRKS · { meta.lengthText }
+            { meta.trackCount } TRKS · { getProviderName(playlist.provider) }
           </div>
         </div>
 
