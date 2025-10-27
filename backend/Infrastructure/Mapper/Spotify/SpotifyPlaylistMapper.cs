@@ -28,14 +28,17 @@ public static class SpotifyPlaylistMapper {
   }
 
   public static List<ProviderTrack> ToProviderTracks(List<SpotifyPlaylistTrackItem> items) {
-    var tracks = new List<ProviderTrack>();
+    List<ProviderTrack> tracks = new List<ProviderTrack>();
 
     foreach (var item in items) {
-      var t = item.Track;
-      if (t == null) continue;
+      SpotifyTrack? t = item.Track;
+      if (t == null) {
+        continue;
+      }
 
       tracks.Add(new ProviderTrack {
         Id = t.Id,
+        TrackUrl = "https://open.spotify.com/track/" + t.Id,
         Title = t.Name,
         Artist = string.Join(", ", t.Artists?.Select(a => a.Name) ?? []),
         Album = t.Album?.Name,

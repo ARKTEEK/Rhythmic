@@ -49,6 +49,7 @@ public static class GooglePlaylistMapper {
 
         return new ProviderTrack {
           Id = item.ContentDetails?.VideoId ?? string.Empty,
+          TrackUrl = "https://www.youtube.com/watch?v=" + item.ContentDetails.VideoId,
           Title = track,
           Artist = artist,
           Album = string.Empty,

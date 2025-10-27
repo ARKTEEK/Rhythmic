@@ -39,7 +39,7 @@ export default function SongListItem({
 
       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
         <a
-          href={ song.id || "#" }
+          href={ song.trackUrl }
           target="_blank"
           rel="noreferrer"
           className="box-style-md p-1.5 border border-brown-800 bg-white text-brown-900 hover:bg-brown-100 rounded-md"
