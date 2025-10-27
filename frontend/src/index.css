@@ -41,6 +41,41 @@
     @apply rounded-lg border-2 border-black;
     box-shadow: 3px 3px 0 0 rgba(0, 0, 0, 1);
   }
+
+  .selection-box-style-md {
+    @apply rounded-lg border-2 border-green-700;
+    box-shadow: 2px 2px 0 0 rgba(97, 56, 28, 0.9);
+  }
+
+  .retro-scrollbar::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .retro-scrollbar::-webkit-scrollbar-track {
+    background: #f3e8e0;
+    border: 2px solid #4a2c2a;
+    border-radius: 8px;
+    box-shadow: inset 2px 2px 0 0 rgba(0,0,0,0.2);
+  }
+
+  .retro-scrollbar::-webkit-scrollbar-thumb {
+    background: #e0b39c;
+    border: 2px solid #4a2c2a;
+    border-radius: 8px;
+    box-shadow: 2px 2px 0 0 rgba(0,0,0,0.2);
+  }
+
+  .retro-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #e0b39c #f3e8e0;
+    border-radius: 8px;
+    overflow-y: auto;
+  }
+  
+  .scrollbar-gutter {
+    scrollbar-gutter: stable;
+  }
 }
 
 html, body, #root {
