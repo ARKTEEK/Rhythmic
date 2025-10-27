@@ -6,6 +6,7 @@ interface WindowProps {
   ribbonClassName?: string;
   windowClassName?: string;
   children: React.ReactNode;
+  ribbonContent?: React.ReactNode;
 }
 
 export default function Window({
@@ -13,13 +14,14 @@ export default function Window({
                                  ribbonClassName,
                                  windowClassName,
                                  children,
+                                 ribbonContent,
                                }: WindowProps) {
   return (
     <div
       className={ `box-style-lg transform transition-transform 
                    duration-300 flex flex-col ${ containerClassName }` }
       style={ { backgroundColor: windowClassName ? "" : "#fefefe" } }>
-      <Ribbon className={ ribbonClassName }/>
+      <Ribbon className={ ribbonClassName }>{ ribbonContent }</Ribbon>
       <div
         className={ `
           p-4 rounded-b-lg flex flex-col flex-grow

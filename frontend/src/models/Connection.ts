@@ -1,13 +1,10 @@
 ﻿import { IconType } from "react-icons";
 
 export enum OAuthProvider {
-  None = 0,
-  Google = 1,
-  Spotify = 2,
-  Deezer = 3,
-  SoundCloud = 4,
-  Apple = 5,
-  Amazon = 6,
+  Google = 0,
+  Spotify = 1,
+  SoundCloud = 2,
+  Tidal = 3,
 }
 
 export interface Connection {
@@ -31,14 +28,4 @@ export type Platform = {
   ribbonColor?: string;
   windowColor?: string;
   accounts: Account[];
-};
-
-export const OAuthProviderNames: Record<OAuthProvider, string> = {
-  [OAuthProvider.None]: "None",
-  [OAuthProvider.Google]: "Google",
-  [OAuthProvider.Spotify]: "Spotify",
-  [OAuthProvider.Deezer]: "Deezer",
-  [OAuthProvider.Apple]: "Apple",
-  [OAuthProvider.SoundCloud]: "SoundCloud",
-  [OAuthProvider.Amazon]: "Amazon"
 };

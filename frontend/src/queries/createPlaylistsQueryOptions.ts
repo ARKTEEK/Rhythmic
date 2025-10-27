@@ -1,5 +1,5 @@
-import { getPlaylists } from "../services/YoutubeService.ts";
 import { queryOptions } from "@tanstack/react-query";
+import { getPlaylists } from "../services/PlaylistsService.ts";
 
 export default function createPlaylistsQueryOptions() {
   return queryOptions({

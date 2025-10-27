@@ -1,6 +1,6 @@
 import axios from "axios";
 import { API_BASE_URL } from "../config/Config.ts";
-import { Connection, OAuthProvider } from "../models/Connection.ts";
+import { Connection } from "../models/Connection.ts";
 
 export const handleOAuthCallback = async (
   provider: "google" | "spotify",

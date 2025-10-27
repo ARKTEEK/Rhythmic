@@ -5,6 +5,8 @@ interface ButtonProps {
   onClick?: () => void;
   Icon?: IconType;
   disabled?: boolean;
+  color?: string;
+  textColorClassName?: string;
   type?: 'button' | 'submit' | 'reset';
   size?: 'small' | 'medium' | 'large';
   variant?: 'active' | 'inactive';
@@ -38,6 +40,8 @@ export default function Button({
                                  onClick,
                                  Icon,
                                  disabled = false,
+                                 color = 'primary',
+                                 textColorClassName,
                                  type = 'button',
                                  size = 'medium',
                                  variant = 'inactive',
@@ -51,12 +55,12 @@ export default function Button({
       type={ type }
       onClick={ onClick }
       disabled={ disabled }
-      className={ `${ baseButtonStyles } ${ sizeStyles[size] } ${ variantClasses }` }>
+      className={ `${ baseButtonStyles } ${ color } ${ sizeStyles[size] } ${ variantClasses }` }>
 
       <div className="flex items-center gap-2 relative z-10">
         { Icon &&
             <Icon className={ `flex-shrink-0 ${ iconSize } ${ iconColor }` }/> }
-        <span className="text-left font-bold drop-shadow-sm">{ label }</span>
+        <span className={ `text-left font-bold drop-shadow-sm ${ textColorClassName || '' }` }>{ label }</span>
       </div>
     </button>
   );

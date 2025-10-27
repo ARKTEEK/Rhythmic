@@ -1,6 +1,5 @@
 ﻿import Window from "../../components/ui/Window.tsx";
 import { FaPlus, } from "react-icons/fa";
-import { OAuthProviderNames } from "../../models/Connection.ts";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import createConnectionsQueryOptions from "../../queries/createConnectionsQueryOptions.ts";
 import ErrorWindow from "../../components/ui/Window/ErrorWindow.tsx";
@@ -9,6 +8,7 @@ import { platforms } from "../../data/platforms.ts";
 import { useState } from "react";
 import { disconnectOAuth } from "../../services/OAuthService.ts";
 import ConfirmWindow from "../../components/ui/Window/ConfirmWindow.tsx";
+import { OAuthProviderNames } from "../../utils/providerUtils.tsx";
 
 export default function ConnectionsPage() {
   const [showConfirm, setShowConfirm] = useState(false);

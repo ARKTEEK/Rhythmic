@@ -5,5 +5,4 @@ public enum OAuthProvider {
   Spotify,
   SoundCloud,
   Tidle,
-  Amazon
 }

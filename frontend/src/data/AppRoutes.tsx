@@ -15,6 +15,7 @@ import {
 import PlaceholderPage from "../pages/private/PlaceholderPage.tsx";
 import DashboardPage from "../pages/private/DashboardPage.tsx";
 import ConnectionsPage from "../pages/private/ConnectionsPage.tsx";
+import PlaylistsPage from "../pages/private/PlaylistsPage.tsx";
 
 export interface AppRoute {
   path: string;
@@ -49,7 +50,7 @@ export const AppRoutes: AppRoute[] = [
   // My Library
   {
     path: "/playlists",
-    element: <PlaceholderPage/>,
+    element: <PlaylistsPage/>,
     label: "Playlists",
     private: true,
     icon: FaList,
