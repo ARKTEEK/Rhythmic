@@ -21,3 +21,42 @@ export const OAuthProviderValues: Record<string, OAuthProvider> = {
   SoundCloud: OAuthProvider.SoundCloud,
   Tidal: OAuthProvider.Tidal,
 };
+
+const providerColors = {
+  google: {
+    accent: "bg-red-500",
+    accentSoft: "bg-red-100",
+    text: "text-white"
+  },
+  soundcloud: {
+    accent: "bg-orange-500",
+    accentSoft: "bg-orange-100",
+    text: "text-white"
+  },
+  spotify: {
+    accent: "bg-green-500",
+    accentSoft: "bg-green-100",
+    text: "text-white"
+  },
+  tidal: {
+    accent: "bg-black",
+    accentSoft: "bg-gray-200",
+    text: "text-white"
+  },
+  default: {
+    accent: "bg-gray-500",
+    accentSoft: "bg-gray-100",
+    text: "text-white"
+  }
+};
+
+type ProviderKey = keyof typeof providerColors;
+
+export const getProviderColors = (provider: string) => {
+  const lowerProvider = provider.toLowerCase() as ProviderKey;
+
+  if (providerColors[lowerProvider]) {
+    return providerColors[lowerProvider];
+  }
+  return providerColors.default;
+};

@@ -22,12 +22,6 @@ export const usePlaylistSongsManagement = (
   const [playlistIdToSongs, setPlaylistIdToSongs] = useState<Record<string, ProviderTrack[]>>({});
   const [focusedPlaylistId, setFocusedPlaylistId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!focusedPlaylistId && effectivePlaylists.length > 0) {
-      setFocusedPlaylistId(effectivePlaylists[0].id);
-    }
-  }, [effectivePlaylists, focusedPlaylistId]);
-
   const focusedPlaylist = effectivePlaylists.find(p => p.id === focusedPlaylistId);
 
   const {
@@ -55,17 +49,7 @@ export const usePlaylistSongsManagement = (
 
 
   const handleAddSong = (playlistId: string) => {
-    setPlaylistIdToSongs(prev => {
-      const current: ProviderTrack[] = prev[playlistId] || [];
-      const newSong: ProviderTrack = {
-        id: crypto.randomUUID(),
-        title: `New Song ${ current.length + 1 }`,
-        artist: "Unknown Artist",
-        durationMs: 195000,
-        provider: "manual"
-      };
-      return { ...prev, [playlistId]: [newSong, ...current] };
-    });
+
   };
 
   const handleRemoveSong = (playlistId: string, songId: string) => {

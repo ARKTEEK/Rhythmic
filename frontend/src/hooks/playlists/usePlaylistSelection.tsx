@@ -1,5 +1,5 @@
 ﻿import { useMemo, useState } from "react";
-import { ProviderPlaylist } from "../../models/Playlist.ts";
+import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
 
 interface UsePlaylistSelectionResult {
   selectedIds: Set<string>;

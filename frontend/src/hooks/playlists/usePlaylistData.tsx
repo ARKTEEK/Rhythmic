@@ -2,7 +2,7 @@
 import createPlaylistsQueryOptions from "../../queries/createPlaylistsQueryOptions.ts";
 import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
 
-interface PlaylistMeta {
+export interface PlaylistMeta {
   lengthText: string;
   updatedText: string;
   trackCount: number;

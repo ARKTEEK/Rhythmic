@@ -10,4 +10,6 @@ export interface ProviderPlaylist {
   channelId: string;
   channelTitle: string;
   createdAt: string;
+  isSynced?: boolean;
+  linkedPlaylistId?: string;
 }
