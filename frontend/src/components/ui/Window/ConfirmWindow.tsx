@@ -7,6 +7,7 @@ interface ConfirmWindowProps {
   confirmMessage?: string;
   onConfirm: () => void;
   onCancel: () => void;
+  height?: string;
 }
 
 export default function ConfirmWindow({
@@ -14,11 +15,12 @@ export default function ConfirmWindow({
                                         confirmMessage = "Please confirm your action.",
                                         onConfirm,
                                         onCancel,
+                                        height = "170px",
                                       }: ConfirmWindowProps) {
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <Window
-        containerClassName="h-[170px] w-[380px]"
+        containerClassName={`h-[${height}] w-[380px]`}
         windowClassName="bg-yellow-50"
         ribbonClassName="bg-yellow-400">
         <div className="flex items-center justify-between mb-4">
