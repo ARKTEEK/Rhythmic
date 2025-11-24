@@ -51,19 +51,19 @@
     width: 12px;
     height: 12px;
   }
-  
+
   .retro-scrollbar::-webkit-scrollbar-track {
     background: #f3e8e0;
     border: 2px solid #4a2c2a;
     border-radius: 8px;
-    box-shadow: inset 2px 2px 0 0 rgba(0,0,0,0.2);
+    box-shadow: inset 2px 2px 0 0 rgba(0, 0, 0, 0.2);
   }
 
   .retro-scrollbar::-webkit-scrollbar-thumb {
     background: #e0b39c;
     border: 2px solid #4a2c2a;
     border-radius: 8px;
-    box-shadow: 2px 2px 0 0 rgba(0,0,0,0.2);
+    box-shadow: 2px 2px 0 0 rgba(0, 0, 0, 0.2);
   }
 
   .retro-scrollbar {
@@ -72,7 +72,7 @@
     border-radius: 8px;
     overflow-y: auto;
   }
-  
+
   .scrollbar-gutter {
     scrollbar-gutter: stable;
   }
@@ -83,4 +83,26 @@ html, body, #root {
   margin: 0;
   padding: 0;
   font-family: 'Jost', sans-serif;
+}
+
+@theme {
+  --animate-cube-snake-1: cube-snake 1.2s infinite;
+  --animate-cube-snake-2: cube-snake 1.2s infinite 0.15s;
+  --animate-cube-snake-3: cube-snake 1.2s infinite 0.3s;
+  --animate-cube-snake-4: cube-snake 1.2s infinite 0.45s;
+  --animate-cube-snake-5: cube-snake 1.2s infinite 0.6s;
+  --animate-cube-snake-6: cube-snake 1.2s infinite 0.75s;
+  --animate-cube-snake-7: cube-snake 1.2s infinite 0.9s;
+  --animate-cube-snake-8: cube-snake 1.2s infinite 1.05s;
+
+  @keyframes cube-snake {
+    0%, 100% {
+      transform: scale(0);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
 }
