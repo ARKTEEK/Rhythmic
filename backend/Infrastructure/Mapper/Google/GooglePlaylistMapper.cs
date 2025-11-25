@@ -62,4 +62,17 @@ public static class GooglePlaylistMapper {
       })
       .ToList();
   }
+
+  public static List<ProviderTrack> ToProviderTracksFromSearch(YouTubeSearchResult searchResult) {
+    return searchResult.Items.Select(item => new ProviderTrack {
+      Id = item.Id.VideoId,
+      TrackUrl = $"https://www.youtube.com/watch?v={item.Id.VideoId}",
+      Title = item.Snippet.Title,
+      Artist = item.Snippet.ChannelTitle,
+      Album = string.Empty,
+      ThumbnailUrl = item.Snippet.Thumbnails.Default?.Url,
+      DurationMs = 0,
+      Provider = OAuthProvider.Google
+    }).ToList();
+  }
 }

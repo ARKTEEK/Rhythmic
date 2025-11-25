@@ -2,6 +2,10 @@
 
 namespace backend.Infrastructure.DTO.Google;
 
+public class YoutubePlaylistResponse {
+  [JsonPropertyName("snippet")] public Snippet Snippet { get; set; }
+}
+
 public class YoutubePlaylistsResponse {
   [JsonPropertyName("kind")] public string? Kind { get; set; }
   [JsonPropertyName("etag")] public string? Etag { get; set; }

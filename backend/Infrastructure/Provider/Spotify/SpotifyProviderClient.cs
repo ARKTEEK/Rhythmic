@@ -119,4 +119,20 @@ public class SpotifyProviderClient : IProviderClient {
   public Task DisconnectAsync(string refreshToken) {
     throw new NotImplementedException();
   }
+
+  public async Task<List<ProviderTrack>> Search(string accessToken, string query) {
+    string url =
+      $"https://api.spotify.com/v1/search?q={Uri.EscapeDataString(query)}&type=track&limit=10";
+
+    HttpRequestMessage request = new(HttpMethod.Get, url);
+    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+    HttpResponseMessage response = await _http.SendAsync(request);
+    response.EnsureSuccessStatusCode();
+
+    string json = await response.Content.ReadAsStringAsync();
+    SpotifySearchResult result = JsonSerializer.Deserialize<SpotifySearchResult>(json)!;
+
+    return SpotifyPlaylistMapper.ToProviderTracksFromSearch(result);
+  }
 }

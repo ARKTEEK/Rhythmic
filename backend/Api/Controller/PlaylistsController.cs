@@ -12,15 +12,14 @@ namespace backend.Api.Controller;
 [ApiController]
 [Route("api")]
 public class PlaylistsController : ControllerBase {
-  private readonly IPlaylistProviderFactory _factory;
-  private readonly IAccountTokensService _tokensService;
+  private readonly IPlaylistService _playlistService;
   private readonly UserManager<User> _userManager;
 
-  public PlaylistsController(UserManager<User> userManager, IPlaylistProviderFactory factory,
-    IAccountTokensService tokensService) {
+  public PlaylistsController(
+    UserManager<User> userManager,
+    IPlaylistService playlistService) {
     _userManager = userManager;
-    _factory = factory;
-    _tokensService = tokensService;
+    _playlistService = playlistService;
   }
 
   [Authorize]
@@ -31,34 +30,72 @@ public class PlaylistsController : ControllerBase {
       return Unauthorized();
     }
 
-    List<ProviderPlaylist> playlists = new();
-
-    List<AccountToken> tokens =
-      await _tokensService.GetValidAccountTokens(user.Id);
-
-    foreach (AccountToken token in tokens) {
-      IPlaylistProviderClient client = _factory.GetClient(token.Provider);
-      List<ProviderPlaylist> providerPlaylists = await client.GetPlaylistsAsync(token.Id, token.AccessToken);
-      playlists.AddRange(providerPlaylists);
-    }
+    List<ProviderPlaylist> playlists = await _playlistService.GetAllUserPlaylistsAsync(user.Id);
 
     return Ok(playlists);
   }
 
+  [Authorize]
   [HttpGet("{provider}/{playlistId}/tracks")]
   public async Task<IActionResult> GetPlaylistTracks(
     OAuthProvider provider,
     [FromRoute] string playlistId,
     [FromQuery] string providerAccountId) {
+    User? user = await this.GetCurrentUserAsync(_userManager);
+    if (user == null) {
+      return Unauthorized();
+    }
+
     if (string.IsNullOrWhiteSpace(providerAccountId)) {
       return BadRequest("providerAccountId is required.");
     }
 
-    Console.WriteLine(provider + " " + playlistId + " " + providerAccountId);
-    IPlaylistProviderClient client = _factory.GetClient(provider);
-    AccountToken token = await _tokensService.GetAccountToken(providerAccountId, provider);
+    List<ProviderTrack> tracks = await _playlistService.GetTracksByPlaylistIdAsync(
+      provider,
+      playlistId,
+      providerAccountId);
 
-    List<ProviderTrack> tracks = await client.GetPlaylistTracksAsync(token.AccessToken, playlistId);
+    return Ok(tracks);
+  }
+
+  [Authorize]
+  [HttpDelete("{provider}/{playlistId}")]
+  public async Task<IActionResult> DeletePlaylistAsync(
+    OAuthProvider provider,
+    [FromRoute] string playlistId,
+    [FromQuery] string providerAccountId) {
+    User? user = await this.GetCurrentUserAsync(_userManager);
+    if (user == null) {
+      return Unauthorized();
+    }
+
+    if (string.IsNullOrWhiteSpace(providerAccountId)) {
+      return BadRequest("providerAccountId is required.");
+    }
+
+    await _playlistService.DeletePlaylistAsync(provider, playlistId, providerAccountId);
+
+    return NoContent();
+  }
+
+  [Authorize]
+  [HttpGet("{provider}/search/{query}")]
+  public async Task<IActionResult> SearchSongsAsync(
+    OAuthProvider provider,
+    [FromQuery] string providerAccountId,
+    [FromRoute] string query) {
+    User? user = await this.GetCurrentUserAsync(_userManager);
+    if (user == null) {
+      return Unauthorized();
+    }
+
+    if (string.IsNullOrWhiteSpace(providerAccountId)) {
+      return BadRequest("providerAccountId is required.");
+    }
+
+    List<ProviderTrack> tracks =
+      await _playlistService.GetSearchResultsAsync(provider, providerAccountId, query);
+
     return Ok(tracks);
   }
 }

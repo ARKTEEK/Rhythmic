@@ -1,11 +1,13 @@
-﻿using backend.Application.Model;
+﻿using System.Text.Json;
+using backend.Application.Model;
 using backend.Domain.Enum;
 using backend.Infrastructure.DTO.Spotify;
 
 namespace backend.Infrastructure.Mapper.Spotify;
 
 public static class SpotifyPlaylistMapper {
-  public static List<ProviderPlaylist> ToProviderPlaylists(string providerId, SpotifyPlaylistsResponse response) {
+  public static List<ProviderPlaylist> ToProviderPlaylists(string providerId,
+    SpotifyPlaylistsResponse response) {
     if (response?.Items == null) {
       return new List<ProviderPlaylist>();
     }
@@ -28,7 +30,7 @@ public static class SpotifyPlaylistMapper {
   }
 
   public static List<ProviderTrack> ToProviderTracks(List<SpotifyPlaylistTrackItem> items) {
-    List<ProviderTrack> tracks = new List<ProviderTrack>();
+    List<ProviderTrack> tracks = new();
 
     foreach (var item in items) {
       SpotifyTrack? t = item.Track;
@@ -49,5 +51,31 @@ public static class SpotifyPlaylistMapper {
     }
 
     return tracks;
+  }
+
+  public static List<ProviderTrack> ToProviderTracksFromSearch(SpotifySearchResult searchResult) {
+    var providerTracks = new List<ProviderTrack>();
+
+    foreach (var item in searchResult.Tracks.Items) {
+      string id = item.Id;
+      string title = item.Name;
+      string artist = string.Join(", ", item.Artists.Select(a => a.Name));
+      string album = item.Album.Name;
+      string? thumbnail = item.Album.Images.FirstOrDefault()?.Url;
+      int durationMs = item.DurationMs;
+
+      providerTracks.Add(new ProviderTrack {
+        Id = id,
+        TrackUrl = $"https://open.spotify.com/track/{id}",
+        Title = title,
+        Artist = artist,
+        Album = album,
+        ThumbnailUrl = thumbnail,
+        DurationMs = durationMs,
+        Provider = OAuthProvider.Spotify
+      });
+    }
+
+    return providerTracks;
   }
 }

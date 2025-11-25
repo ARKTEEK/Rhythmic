@@ -127,4 +127,22 @@ public class GoogleProviderClient : IProviderClient {
 
     response.EnsureSuccessStatusCode();
   }
+
+  public async Task<List<ProviderTrack>> Search(string accessKey, string query) {
+    string? apiKey = _configuration["Google:ApiKey"];
+    if (string.IsNullOrWhiteSpace(apiKey)) {
+      throw new InvalidOperationException("YouTube API key is required for search.");
+    }
+
+    string url =
+      $"https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=10&q={Uri.EscapeDataString(query)}&key={apiKey}";
+
+    HttpResponseMessage response = await _http.GetAsync(url);
+    response.EnsureSuccessStatusCode();
+
+    string json = await response.Content.ReadAsStringAsync();
+    YouTubeSearchResult result = JsonSerializer.Deserialize<YouTubeSearchResult>(json)!;
+
+    return GooglePlaylistMapper.ToProviderTracksFromSearch(result);
+  }
 }

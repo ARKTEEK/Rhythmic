@@ -11,4 +11,5 @@ public interface IProviderClient {
   Task<TokenRefreshInfo> RefreshTokenAsync(string refreshToken);
   Task<ProviderProfile> GetProfileAsync(string accessToken);
   Task DisconnectAsync(string refreshToken);
+  Task<List<ProviderTrack>> Search(string accessToken, string query);
 }

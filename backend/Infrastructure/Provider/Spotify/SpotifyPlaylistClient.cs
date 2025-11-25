@@ -16,6 +16,7 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
   }
 
   public OAuthProvider Provider => OAuthProvider.Spotify;
+  public IReadOnlySet<PlaylistVisibility> SupportedVisibilities { get; }
 
   public async Task<List<ProviderPlaylist>>
     GetPlaylistsAsync(string providerId, string accessToken) {
@@ -81,6 +82,23 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
     return SpotifyPlaylistMapper.ToProviderTracks(allTrackItems);
   }
 
+  public Task<ProviderPlaylist> CreatePlaylistAsync(string accessToken,
+    PlaylistCreateRequest request) {
+    throw new NotImplementedException();
+  }
+
+  public async Task DeletePlaylistAsync(string accessToken, string playlistId) {
+    string url = $"https://api.spotify.com/v1/playlists/{playlistId}/followers";
+    HttpRequestMessage req = new(HttpMethod.Delete, url);
+    req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+    HttpResponseMessage res = await _http.SendAsync(req);
+    if (!res.IsSuccessStatusCode) {
+      string msg = await res.Content.ReadAsStringAsync();
+      throw new HttpRequestException($"Spotify playlist delete failed ({res.StatusCode}): {msg}");
+    }
+  }
+
   private async Task<SpotifyPlaylistTracksResponse> FetchTrackPageAsync(string accessToken,
     string url) {
     HttpRequestMessage request = new(HttpMethod.Get, url);
@@ -97,9 +115,5 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
     SpotifyPlaylistTracksResponse page =
       JsonSerializer.Deserialize<SpotifyPlaylistTracksResponse>(json)!;
     return page;
-  }
-
-  public Task SavePlaylistAsync(string accessToken, ProviderPlaylist playlist) {
-    throw new NotImplementedException();
   }
 }

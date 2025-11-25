@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Headers;
-using System.Text.Json;
+﻿using System.Text.Json;
 using backend.Application.Interface;
 using backend.Application.Model;
 using backend.Domain.Enum;
@@ -16,6 +15,15 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
   }
 
   public OAuthProvider Provider => OAuthProvider.Google;
+
+  private static readonly IReadOnlySet<PlaylistVisibility> Visibilities =
+    new HashSet<PlaylistVisibility> {
+      PlaylistVisibility.Public,
+      PlaylistVisibility.Private,
+      PlaylistVisibility.Unlisted
+    };
+
+  public IReadOnlySet<PlaylistVisibility> SupportedVisibilities => Visibilities;
 
   public async Task<List<ProviderPlaylist>>
     GetPlaylistsAsync(string providerId, string accessToken) {
@@ -69,8 +77,19 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
     return tracks;
   }
 
-
-  public Task SavePlaylistAsync(string accessToken, ProviderPlaylist playlist) {
+  public Task<ProviderPlaylist> CreatePlaylistAsync(string accessToken, PlaylistCreateRequest request) {
     throw new NotImplementedException();
+  }
+
+  public async Task DeletePlaylistAsync(string accessToken, string playlistId) {
+    string url = $"https://www.googleapis.com/youtube/v3/playlists?id={playlistId}";
+    HttpRequestMessage req = new(HttpMethod.Delete, url);
+    req.Headers.Add("Authorization", $"Bearer {accessToken}");
+
+    HttpResponseMessage res = await _http.SendAsync(req);
+    if (!res.IsSuccessStatusCode) {
+      string msg = await res.Content.ReadAsStringAsync();
+      throw new HttpRequestException($"YouTube delete failed ({res.StatusCode}): {msg}");
+    }
   }
 }

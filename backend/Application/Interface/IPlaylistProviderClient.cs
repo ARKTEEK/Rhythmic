@@ -4,9 +4,22 @@ using backend.Domain.Enum;
 namespace backend.Application.Interface;
 
 public interface IPlaylistProviderClient {
-  OAuthProvider Provider { get; }
+  public OAuthProvider Provider { get; }
+  public IReadOnlySet<PlaylistVisibility> SupportedVisibilities { get; }
 
-  Task<List<ProviderPlaylist>> GetPlaylistsAsync(string providerId, string accessToken);
-  Task<List<ProviderTrack>> GetPlaylistTracksAsync(string accessToken, string playlistId);
-  Task SavePlaylistAsync(string accessToken, ProviderPlaylist playlist);
+  public Task<List<ProviderPlaylist>> GetPlaylistsAsync(
+    string providerId,
+    string accessToken);
+
+  public Task<List<ProviderTrack>> GetPlaylistTracksAsync(
+    string accessToken,
+    string playlistId);
+
+  public Task<ProviderPlaylist> CreatePlaylistAsync(
+    string accessToken,
+    PlaylistCreateRequest request);
+
+  public Task DeletePlaylistAsync(
+    string accessToken,
+    string playlistId);
 }
