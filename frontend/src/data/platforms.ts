@@ -1,12 +1,14 @@
 ﻿import { Platform } from "../models/Connection.ts";
-import { FaAmazon, FaApple, FaDeezer, FaGoogle, FaSoundcloud, FaSpotify, } from "react-icons/fa";
 import {
-  amazonOAuth,
-  appleOAuth,
-  deezerOAuth,
+  FaGoogle,
+  FaMusic,
+  FaSoundcloud,
+  FaSpotify,
+} from "react-icons/fa";
+import {
   googleOAuth,
   soundCloudOAuth,
-  spotifyOAuth
+  spotifyOAuth, tidalOAuth
 } from "../config/Config.ts";
 
 export const platforms: Platform[] = [
@@ -29,15 +31,6 @@ export const platforms: Platform[] = [
     accounts: [],
   },
   {
-    redirect: deezerOAuth,
-    name: "Deezer",
-    icon: FaDeezer,
-    color: "bg-purple-400",
-    ribbonColor: "bg-purple-300",
-    windowColor: "bg-purple-50",
-    accounts: [],
-  },
-  {
     redirect: soundCloudOAuth,
     name: "SoundCloud",
     icon: FaSoundcloud,
@@ -47,21 +40,12 @@ export const platforms: Platform[] = [
     accounts: [],
   },
   {
-    redirect: appleOAuth,
-    name: "Apple Music",
-    icon: FaApple,
-    color: "bg-pink-400",
-    ribbonColor: "bg-pink-300",
-    windowColor: "bg-pink-50",
+    redirect: tidalOAuth,
+    name: "Tidal Music",
+    icon: FaMusic,
+    color: "bg-[#0ab2a5]",
+    ribbonColor: "bg-[#26c2b8]",
+    windowColor: "bg-[#e0f7f5]",
     accounts: [],
   },
-  {
-    redirect: amazonOAuth,
-    name: "Amazon Music",
-    icon: FaAmazon,
-    color: "bg-yellow-400",
-    ribbonColor: "bg-yellow-300",
-    windowColor: "bg-yellow-50",
-    accounts: [],
-  }
 ];

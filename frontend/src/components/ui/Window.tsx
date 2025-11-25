@@ -24,7 +24,7 @@ export default function Window({
       <Ribbon className={ ribbonClassName }>{ ribbonContent }</Ribbon>
       <div
         className={ `
-          p-4 rounded-b-lg flex flex-col flex-grow
+          p-2 rounded-b-lg flex flex-col flex-grow
           ${ windowClassName || "bg-brown-100" }` }
         style={ {
           flexGrow: 1,

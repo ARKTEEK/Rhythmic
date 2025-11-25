@@ -6,9 +6,12 @@ import Window from "../../components/ui/Window.tsx";
 import LoadingWindow from "../../components/ui/Window/LoadingWindow.tsx";
 import PlaylistDetailsModal from "../../components/playlists/PlaylistDetailsModal.tsx";
 import { FaCloud, FaCompactDisc, FaLink, FaListOl, FaMusic, FaSort, FaTools } from "react-icons/fa";
-import { CopyX, Edit, Trash2 } from "lucide-react";
+import { CopyX, Trash2 } from "lucide-react";
 import { usePlaylistSelection } from "../../hooks/playlists/usePlaylistSelection.tsx";
 import PlaylistActions from "../../components/playlists/PlaylistActionts.tsx";
+import { deletePlaylist } from "../../services/PlaylistsService.ts";
+import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
+import ConfirmWindow from "../../components/ui/Window/ConfirmWindow.tsx";
 
 export default function PlaylistsPage() {
   const {
@@ -30,6 +33,8 @@ export default function PlaylistsPage() {
     isTracksError,
   } = usePlaylistSongsManagement(effectivePlaylists);
 
+  const [playlistToDelete, setPlaylistToDelete] = useState<ProviderPlaylist | null>(null);
+
   const [page, setPage] = useState(1);
   const pageSize = 10;
   const totalPages = Math.ceil(effectivePlaylists.length / pageSize);
@@ -38,14 +43,9 @@ export default function PlaylistsPage() {
   const handleOpenModal = (playlistId: string) => setFocusedPlaylistId(playlistId);
   const handleCloseModal = () => setFocusedPlaylistId(null);
 
-  const handleEdit = (e: React.MouseEvent, id: string) => {
+  const handleDelete = (e: React.MouseEvent, playlist: ProviderPlaylist) => {
     e.stopPropagation();
-    console.log("Edit playlist:", id);
-  };
-
-  const handleDelete = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    console.log("Delete playlist:", id);
+    setPlaylistToDelete(playlist);
   };
 
   const handleFindDuplicates = (e: React.MouseEvent, id: string) => {
@@ -212,7 +212,7 @@ export default function PlaylistsPage() {
                               </div>
                             ) }
 
-                            <div className="min-w-0">
+                            <div className="min-w-0 max-w-[300px]">
                               <div className="font-bold truncate">{ playlist.title }</div>
                               <div className="text-xs text-gray-700 truncate">
                                 { playlist.description || "No description" }
@@ -226,7 +226,7 @@ export default function PlaylistsPage() {
                         </td>
 
                         <td className="px-2 text-center align-middle">
-                          <span className="px-2 py-0.5 bg-[#5cb973] text-black font-bold box-style-sm">
+                          <span className={ `px-2 py-0.5 ${ getProviderColors(providerName).accent } text-black font-bold box-style-sm` }>
                             { providerName === "Google" ? "YouTube" : providerName }
                           </span>
                         </td>
@@ -238,20 +238,14 @@ export default function PlaylistsPage() {
                         <td className="px-2 text-center align-middle">
                           <div className="flex justify-center gap-2">
                             <button
-                              onClick={ e => handleEdit(e, playlist.id) }
-                              className="p-1 bg-[#63d079] hover:bg-[#4ec767] border-black box-style-md">
-                              <Edit className="w-4 h-4 text-black"/>
-                            </button>
-
-                            <button
                               onClick={ e => handleFindDuplicates(e, playlist.id) }
-                              className="p-1 bg-[#ffb74a] hover:bg-[#ffa726] border-black box-style-md">
+                              className="p-1 bg-[#ffb74a] hover:bg-[#ffa726] border-black box-style-md hover:cursor-pointer">
                               <CopyX className="w-4 h-4 text-black"/>
                             </button>
 
                             <button
-                              onClick={ e => handleDelete(e, playlist.id) }
-                              className="p-1 bg-[#f26b6b] hover:bg-[#e55d5d] border-black box-style-md">
+                              onClick={ e => handleDelete(e, playlist) }
+                              className="p-1 bg-[#f26b6b] hover:bg-[#e55d5d] border-black box-style-md hover:cursor-pointer">
                               <Trash2 className="w-4 h-4 text-black"/>
                             </button>
                           </div>
@@ -291,15 +285,37 @@ export default function PlaylistsPage() {
         <PlaylistDetailsModal
           playlist={ focusedPlaylist }
           onClose={ handleCloseModal }
-          getPlaylistMeta={ getPlaylistMeta }
           getSongsForPlaylist={ getSongsForPlaylist }
           onAddSong={ handleAddSong }
           onRemoveSong={ handleRemoveSong }
-          accent={ providerColors.accent }
           accentSoft={ providerColors.accentSoft }
           accentText={ providerColors.text }
           isLoadingSongs={ isLoadingTracks }
           isSongsError={ isTracksError }
+        />
+      ) }
+
+      { playlistToDelete && (
+        <ConfirmWindow
+          height="200px"
+          confirmTitle="Delete Playlist?"
+          confirmMessage={ `Are you sure you want to delete ${ getProviderName(playlistToDelete.provider) } playlist "${ playlistToDelete.title }"?` }
+          onCancel={ () => setPlaylistToDelete(null) }
+          onConfirm={ async () => {
+            try {
+              await deletePlaylist(
+                getProviderName(playlistToDelete.provider),
+                playlistToDelete.id,
+                playlistToDelete.providerId
+              );
+              await refetch();
+            } catch (err) {
+              console.error(err);
+              alert("Failed to delete playlist.");
+            } finally {
+              setPlaylistToDelete(null);
+            }
+          } }
         />
       ) }
     </>

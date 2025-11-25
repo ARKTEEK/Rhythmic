@@ -1,4 +1,5 @@
 ﻿import { OAuthProvider } from "../models/Connection.ts";
+import { platforms } from "../data/platforms.ts";
 
 export function getProviderName(provider: OAuthProvider | number): string {
   return OAuthProviderNames[provider as OAuthProvider] ?? "Unknown";
@@ -50,13 +51,24 @@ const providerColors = {
   }
 };
 
-type ProviderKey = keyof typeof providerColors;
+export const getProviderColors = (providerName: string) => {
+  const platform = platforms.find(
+    p =>
+      p.name.toLowerCase() === providerName.toLowerCase() ||
+      (providerName === "YouTube" && p.name === "Google")
+  );
 
-export const getProviderColors = (provider: string) => {
-  const lowerProvider = provider.toLowerCase() as ProviderKey;
-
-  if (providerColors[lowerProvider]) {
-    return providerColors[lowerProvider];
+  if (!platform) {
+    return {
+      accent: "bg-gray-500",
+      accentSoft: "bg-gray-100",
+      text: "text-black",
+    };
   }
-  return providerColors.default;
+
+  return {
+    accent: platform.color,
+    accentSoft: platform.ribbonColor,
+    text: "text-black",
+  };
 };

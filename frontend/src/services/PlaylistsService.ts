@@ -6,6 +6,7 @@ import { ProviderPlaylist } from "../models/ProviderPlaylist.ts";
 export const getPlaylists = async (): Promise<ProviderPlaylist[]> => {
   try {
     const response = await axios.get<ProviderPlaylist[]>(`${ API_BASE_URL }/playlists`);
+    console.log(response);
     return response.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
@@ -27,5 +28,27 @@ export const getTracks = async (
     `${ API_BASE_URL }/${ provider }/${ playlistId }/tracks`,
     { params: { providerAccountId } }
   );
+  return response.data;
+};
+
+export const deletePlaylist = async (
+  provider: string,
+  playlistId: string,
+  providerAccountId: string
+): Promise<void> => {
+  const response = await axios.delete(
+    `${ API_BASE_URL }/${ provider }/${ playlistId }`,
+    { params: { providerAccountId } }
+  );
+  return response.data;
+};
+
+export const searchSong = async (
+  provider: string,
+  providerAccountId: string,
+  query: string,
+): Promise<ProviderTrack[]> => {
+  const response = await axios.get<ProviderTrack[]>(`${ API_BASE_URL }/${ provider }/search/${ query }`,
+    { params: { providerAccountId } });
   return response.data;
 };
