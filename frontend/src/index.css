@@ -78,6 +78,24 @@
   }
 }
 
+.Toastify__toast {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border: none !important;
+  overflow: visible !important;
+}
+
+.Toastify__toast-body {
+  margin: 0 !important;
+  padding: 0 !important;
+  align-items: flex-start !important;
+}
+
+.Toastify__close-button {
+  display: none !important;
+}
+
 html, body, #root {
   height: 100%;
   margin: 0;

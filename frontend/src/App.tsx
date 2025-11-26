@@ -40,7 +40,8 @@ const App = () => {
         </Routes>
       </BrowserRouter>
     </OAuthAccessProvider>
-  );
+  )
+    ;
 };
 
 export default App;
