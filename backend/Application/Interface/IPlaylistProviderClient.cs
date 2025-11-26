@@ -19,6 +19,10 @@ public interface IPlaylistProviderClient {
     string accessToken,
     PlaylistCreateRequest request);
 
+  public Task UpdatePlaylistAsync(
+    string accessToken,
+    PlaylistUpdateRequest request);
+
   public Task DeletePlaylistAsync(
     string accessToken,
     string playlistId);

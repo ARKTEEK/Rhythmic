@@ -81,6 +81,10 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
     throw new NotImplementedException();
   }
 
+  public Task UpdatePlaylistAsync(string accessToken, PlaylistUpdateRequest request) {
+    throw new NotImplementedException();
+  }
+
   public async Task DeletePlaylistAsync(string accessToken, string playlistId) {
     string url = $"https://www.googleapis.com/youtube/v3/playlists?id={playlistId}";
     HttpRequestMessage req = new(HttpMethod.Delete, url);

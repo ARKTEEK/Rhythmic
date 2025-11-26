@@ -36,6 +36,15 @@ public class PlaylistService : IPlaylistService {
     return await client.CreatePlaylistAsync(accessToken, request);
   }
 
+  public async Task UpdatePlaylistAsync(OAuthProvider provider, string providerAccountId,
+    PlaylistUpdateRequest request) {
+    AccountToken token = await _tokensService.GetAccountToken(providerAccountId, provider);
+
+    IPlaylistProviderClient client = _factory.GetClient(provider);
+
+    await client.UpdatePlaylistAsync(token.AccessToken, request);
+  }
+
   public async Task<List<ProviderPlaylist>> GetAllUserPlaylistsAsync(
     string userId) {
     List<ProviderPlaylist> playlists = new();

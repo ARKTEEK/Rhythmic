@@ -59,6 +59,30 @@ public class PlaylistsController : ControllerBase {
   }
 
   [Authorize]
+  [HttpPut("{provider}/{playlistId}")]
+  public async Task<IActionResult> UpdatePlaylistAsync(
+    OAuthProvider provider,
+    [FromRoute] string playlistId,
+    [FromQuery] string providerAccountId,
+    [FromBody] PlaylistUpdateRequest request) {
+    User? user = await this.GetCurrentUserAsync(_userManager);
+    if (user == null) {
+      return Unauthorized();
+    }
+
+    if (string.IsNullOrWhiteSpace(providerAccountId)) {
+      return BadRequest("providerAccountId is required.");
+    }
+
+    request.Id = playlistId;
+    request.Provider = provider;
+
+    await _playlistService.UpdatePlaylistAsync(provider, providerAccountId, request);
+
+    return NoContent();
+  }
+
+  [Authorize]
   [HttpDelete("{provider}/{playlistId}")]
   public async Task<IActionResult> DeletePlaylistAsync(
     OAuthProvider provider,

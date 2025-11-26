@@ -9,6 +9,11 @@ public interface IPlaylistService {
     string accessToken,
     PlaylistCreateRequest request);
 
+  public Task UpdatePlaylistAsync(
+    OAuthProvider provider,
+    string providerAccountId,
+    PlaylistUpdateRequest request);
+
   public Task<List<ProviderPlaylist>> GetAllUserPlaylistsAsync(
     string userId);
 

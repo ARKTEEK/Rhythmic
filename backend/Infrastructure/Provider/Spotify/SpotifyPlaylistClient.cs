@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 using backend.Application.Interface;
 using backend.Application.Model;
@@ -16,7 +17,15 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
   }
 
   public OAuthProvider Provider => OAuthProvider.Spotify;
-  public IReadOnlySet<PlaylistVisibility> SupportedVisibilities { get; }
+
+  private static readonly IReadOnlySet<PlaylistVisibility> Visibilities =
+    new HashSet<PlaylistVisibility> {
+      PlaylistVisibility.Public,
+      PlaylistVisibility.Private,
+    };
+
+  public IReadOnlySet<PlaylistVisibility> SupportedVisibilities => Visibilities;
+
 
   public async Task<List<ProviderPlaylist>>
     GetPlaylistsAsync(string providerId, string accessToken) {
@@ -85,6 +94,66 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
   public Task<ProviderPlaylist> CreatePlaylistAsync(string accessToken,
     PlaylistCreateRequest request) {
     throw new NotImplementedException();
+  }
+
+  public async Task UpdatePlaylistAsync(string accessToken, PlaylistUpdateRequest request) {
+    _http.DefaultRequestHeaders.Authorization =
+      new AuthenticationHeaderValue("Bearer", accessToken);
+
+    static string ToSpotifyUri(ProviderTrack t) =>
+      !string.IsNullOrEmpty(t.Id)
+        ? $"spotify:track:{t.Id}"
+        : throw new InvalidOperationException("ProviderTrackId must contain Spotify track id.");
+
+    if (request.AddItems != null && request.AddItems.Any()) {
+      List<string> uris = request.AddItems.Select(ToSpotifyUri).ToList();
+
+      for (int i = 0; i < uris.Count; i += 100) {
+        List<string> chunk = uris.Skip(i).Take(100).ToList();
+        await AddTracksAsync(request.Id, chunk);
+      }
+    }
+
+    if (request.RemoveItems != null) {
+      var tracksPayload = request.RemoveItems
+        .Select(t => new { uri = ToSpotifyUri(t) })
+        .ToList();
+      if (request.RemoveItems != null && request.RemoveItems.Any()) {
+        var removeBody = new {
+          tracks = tracksPayload,
+        };
+
+        await DeleteTracksAsync(request.Id, removeBody);
+      }
+    }
+  }
+
+  private async Task AddTracksAsync(string playlistId, List<string> uris) {
+    string url = $"https://api.spotify.com/v1/playlists/{Uri.EscapeDataString(playlistId)}/tracks";
+    var body = new { uris };
+    HttpRequestMessage req = new(HttpMethod.Post, url) {
+      Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json")
+    };
+
+    HttpResponseMessage res = await _http.SendAsync(req);
+    if (!res.IsSuccessStatusCode) {
+      string err = await res.Content.ReadAsStringAsync();
+      throw new HttpRequestException($"Spotify AddTracks failed ({res.StatusCode}): {err}");
+    }
+  }
+
+  private async Task DeleteTracksAsync(string playlistId, object removeBody) {
+    string url = $"https://api.spotify.com/v1/playlists/{Uri.EscapeDataString(playlistId)}/tracks";
+    HttpRequestMessage req = new(HttpMethod.Delete, url) {
+      Content = new StringContent(JsonSerializer.Serialize(removeBody), Encoding.UTF8,
+        "application/json")
+    };
+
+    HttpResponseMessage res = await _http.SendAsync(req);
+    if (!res.IsSuccessStatusCode) {
+      string err = await res.Content.ReadAsStringAsync();
+      throw new HttpRequestException($"Spotify DeleteTracks failed ({res.StatusCode}): {err}");
+    }
   }
 
   public async Task DeletePlaylistAsync(string accessToken, string playlistId) {
