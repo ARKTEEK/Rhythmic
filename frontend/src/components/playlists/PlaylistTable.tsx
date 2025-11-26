@@ -1,0 +1,177 @@
+﻿import { getProviderColors, getProviderName } from "../../utils/providerUtils.tsx";
+import { Cloud, CopyX, Disc3, Link, List, Music, SortDesc, ToolCase, Trash2 } from "lucide-react";
+import React from "react";
+import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
+import { PlaylistMeta } from "../../hooks/playlists/usePlaylistData.tsx";
+
+interface PlaylistTableProps {
+  playlists: ProviderPlaylist[];
+  visiblePlaylists: ProviderPlaylist[];
+  selectedIds: Set<string>;
+  handleToggleSelect: (id: string) => void;
+  handleOpenModal: (playlist: ProviderPlaylist) => void;
+  handleDelete: (playlist: ProviderPlaylist) => void;
+  handleFindDuplicates: (playlist: ProviderPlaylist) => void;
+  getPlaylistMeta: (id: string, fallbackCount: number) => PlaylistMeta;
+}
+
+export function PlaylistTable({
+                                playlists,
+                                visiblePlaylists,
+                                selectedIds,
+                                handleToggleSelect,
+                                handleOpenModal,
+                                handleDelete,
+                                handleFindDuplicates,
+                                getPlaylistMeta,
+                              }: PlaylistTableProps) {
+
+  return (
+    <div className="flex-1 overflow-y-auto box-style-md rounded-lg">
+      <table className="w-full border-separate border-spacing-0 text-sm">
+        <colgroup>
+          <col className="w-[3rem]"/>
+          <col className="w-[45%]"/>
+          <col className="w-[10%]"/>
+          <col className="w-[15%]"/>
+          <col className="w-[15%]"/>
+          <col className="w-[12%]"/>
+        </colgroup>
+
+        <thead className="bg-[#f3d99c] border-b-4 border-black sticky top-0 z-10">
+        <tr className="h-[48px]">
+          <th className="px-2 text-center"></th>
+
+          <th className="px-2 text-left font-extrabold uppercase tracking-wider">
+            <div className="flex items-center gap-1">
+              <Disc3 className="w-4 h-4 text-[#f38ca7]"/>
+              Playlist
+              <SortDesc className="w-3 h-3 text-xs opacity-70"/>
+            </div>
+          </th>
+
+          <th className="px-2 text-center font-extrabold uppercase tracking-wider">
+            <div className="flex items-center justify-center gap-1">
+              <List className="w-4 h-4 text-[#5cb973]"/>
+              Tracks
+              <SortDesc className="w-3 h-3 text-xs opacity-70"/>
+            </div>
+          </th>
+
+          <th className="px-2 text-center font-extrabold uppercase tracking-wider">
+            <div className="flex items-center justify-center gap-1">
+              <Cloud className="w-4 h-4 text-[#40a8d0]"/>
+              Provider
+              <SortDesc className="w-3 h-3 text-xs opacity-70"/>
+            </div>
+          </th>
+
+          <th className="px-2 text-left font-extrabold uppercase tracking-wider">
+            <div className="flex items-center gap-1">
+              <Link className="w-4 h-4 text-[#9b88c7]"/>
+              Linked
+              <SortDesc className="w-3 h-3 text-xs opacity-70"/>
+            </div>
+          </th>
+
+          <th className="px-2 text-center font-extrabold uppercase tracking-wider">
+            <div className="flex items-center justify-center gap-1">
+              <ToolCase className="w-4 h-4 text-[#d46a5d]"/>
+              Actions
+            </div>
+          </th>
+        </tr>
+        </thead>
+
+        <tbody>
+        { visiblePlaylists.map((playlist, i) => {
+          const meta = getPlaylistMeta(playlist.id, playlist.itemCount);
+          const providerName = getProviderName(playlist.provider);
+          const linkedTitle = playlists.find(
+            p => p.id === playlist.linkedPlaylistId
+          )?.title;
+          const isSelected = selectedIds.has(playlist.id);
+
+          return (
+            <tr
+              key={ playlist.id }
+              className={ `
+                        transition-all cursor-pointer h-[56px]
+                        ${ i % 2 === 0 ? "bg-[#fffaf0]" : "bg-[#fff3e6]" }
+                        hover:bg-[#ffe9c2]
+                        ${ isSelected ? "outline outline-blue-400" : "" }` }>
+              <td className="text-center align-middle">
+                <input
+                  type="checkbox"
+                  className="accent-[#f38ca7] w-4 h-4"
+                  checked={ isSelected }
+                  onChange={ () => handleToggleSelect(playlist.id) }
+                  onClick={ e => e.stopPropagation() }
+                />
+              </td>
+
+              <td
+                className="px-2 align-middle cursor-pointer"
+                onClick={ () => {
+                  handleOpenModal(playlist);
+                  console.log("Provider: " + playlist.provider + " Provider Id: " + playlist.providerId + " Id: " + playlist.id);
+                } }>
+                <div className="flex items-center gap-3">
+                  { playlist.thumbnailUrl ? (
+                    <img
+                      src={ playlist.thumbnailUrl }
+                      alt={ playlist.title }
+                      className="w-10 h-10 border-2 border-black box-style-md"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 bg-[#fffaf5] border-2 border-black flex items-center justify-center text-gray-500">
+                      <Music className="w-4 h-4 text-sm"/>
+                    </div>
+                  ) }
+
+                  <div className="min-w-0 max-w-[300px]">
+                    <div className="font-bold truncate">{ playlist.title }</div>
+                    <div className="text-xs text-gray-700 truncate">
+                      { playlist.description || "No description" }
+                    </div>
+                  </div>
+                </div>
+              </td>
+
+              <td className="px-2 text-center font-semibold text-gray-800 align-middle">
+                { meta.trackCount }
+              </td>
+
+              <td className="px-2 text-center align-middle">
+                <span className={ `px-2 py-0.5 ${ getProviderColors(providerName).accent } text-black font-bold box-style-sm` }>
+                  { providerName === "Google" ? "YouTube" : providerName }
+                </span>
+              </td>
+
+              <td className="px-2 text-left text-xs text-gray-700 align-middle truncate">
+                { linkedTitle || <span className="italic text-gray-500">N/A</span> }
+              </td>
+
+              <td className="px-2 text-center align-middle">
+                <div className="flex justify-center gap-2">
+                  <button
+                    onClick={ () => handleFindDuplicates(playlist) }
+                    className="p-1 bg-[#ffb74a] hover:bg-[#ffa726] border-black box-style-md hover:cursor-pointer">
+                    <CopyX className="w-4 h-4 text-black"/>
+                  </button>
+
+                  <button
+                    onClick={ () => handleDelete(playlist) }
+                    className="p-1 bg-[#f26b6b] hover:bg-[#e55d5d] border-black box-style-md hover:cursor-pointer">
+                    <Trash2 className="w-4 h-4 text-black"/>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          );
+        }) }
+        </tbody>
+      </table>
+    </div>
+  )
+}

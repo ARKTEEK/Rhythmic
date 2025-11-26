@@ -6,7 +6,7 @@ import { useSongSearch } from "../../hooks/playlists/useSongSearch.tsx";
 
 interface SongsSearchPanelProps {
   currentPlaylist: ProviderPlaylist;
-  accentSoft: string;
+  accentSoft?: string;
   accentText: string;
   open: boolean;
   onClose: () => void;

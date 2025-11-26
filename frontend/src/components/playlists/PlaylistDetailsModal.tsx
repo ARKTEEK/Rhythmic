@@ -8,10 +8,10 @@ import SongSearchPanel from "./SongSearchPanel.tsx";
 interface PlaylistDetailModalProps {
   playlist: ProviderPlaylist;
   onClose: () => void
-  getSongsForPlaylist: (id: string) => ProviderTrack[]
-  onAddSong: (playlistId: string, song: ProviderTrack) => void
-  onRemoveSong: (playlistId: string, songId: string) => void
-  accentSoft: string
+  getSongsForPlaylist: (playlist: ProviderPlaylist) => ProviderTrack[]
+  onAddSong: (playlist: ProviderPlaylist, track: ProviderTrack) => void
+  onRemoveSong: (playlist: ProviderPlaylist, track: ProviderTrack) => void
+  accentSoft?: string
   accentText: string
   isLoadingSongs: boolean
   isSongsError: boolean
@@ -28,7 +28,7 @@ export default function PlaylistDetailsModal({
                                                isLoadingSongs,
                                                isSongsError,
                                              }: PlaylistDetailModalProps) {
-  const songs = getSongsForPlaylist(playlist.id) || []
+  const songs = getSongsForPlaylist(playlist) || []
   const provider = getProviderName(playlist.provider)
 
   const [isSearchOpen, setIsSearchOpen] = useState(false)
@@ -130,7 +130,7 @@ export default function PlaylistDetailsModal({
 
                           <td className="px-2 py-1 text-center">
                             <button
-                              onClick={ () => onRemoveSong(playlist.id, song.id) }
+                              onClick={ () => onRemoveSong(playlist, song) }
                               className="p-1 bg-[#f26b6b] hover:bg-[#e55d5d] box-style-md hover:cursor-pointer">
                               <Trash2 className="w-4 h-4 text-black"/>
                             </button>
@@ -152,7 +152,7 @@ export default function PlaylistDetailsModal({
             open={ isSearchOpen }
             onClose={ () => setIsSearchOpen(false) }
             onSelectSong={ (track) => {
-              onAddSong(playlist.id, track)
+              onAddSong(playlist, track)
             } }
           />
         </div>

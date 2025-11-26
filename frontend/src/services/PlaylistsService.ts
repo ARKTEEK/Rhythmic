@@ -2,6 +2,7 @@ import axios from "axios";
 import { API_BASE_URL } from "../config/Config.ts";
 import { ProviderTrack } from "../models/ProviderTrack.ts";
 import { ProviderPlaylist } from "../models/ProviderPlaylist.ts";
+import { PlaylistUpdateRequest } from "../models/PlaylistUpdateRequest.ts";
 
 export const getPlaylists = async (): Promise<ProviderPlaylist[]> => {
   try {
@@ -31,6 +32,19 @@ export const getTracks = async (
   return response.data;
 };
 
+export const updatePlaylist = async (
+  provider: string,
+  playlistId: string,
+  providerAccountId: string,
+  body: PlaylistUpdateRequest
+): Promise<void> => {
+  await axios.put(
+    `${ API_BASE_URL }/${ provider }/${ playlistId }`,
+    body,
+    { params: { providerAccountId } }
+  );
+};
+
 export const deletePlaylist = async (
   provider: string,
   playlistId: string,
@@ -48,7 +62,8 @@ export const searchSong = async (
   providerAccountId: string,
   query: string,
 ): Promise<ProviderTrack[]> => {
-  const response = await axios.get<ProviderTrack[]>(`${ API_BASE_URL }/${ provider }/search/${ query }`,
+  const response = await axios.get<ProviderTrack[]>(
+    `${ API_BASE_URL }/${ provider }/search/${ query }`,
     { params: { providerAccountId } });
   return response.data;
 };
