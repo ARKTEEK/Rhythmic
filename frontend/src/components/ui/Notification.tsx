@@ -26,7 +26,7 @@ export default function Notification({
 
       <div
         className={ `w-full px-3 py-2 border-b-2 border-black font-extrabold uppercase 
-                        tracking-wider text-sm ${ headerColorClass }` }>
+                     tracking-wider text-sm ${ headerColorClass }` }>
         { data.title }
       </div>
 

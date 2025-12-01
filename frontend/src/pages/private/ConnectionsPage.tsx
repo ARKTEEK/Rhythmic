@@ -67,8 +67,8 @@ export default function ConnectionsPage() {
           <Window
             containerClassName={ "h-[420px] w-[380px]" }
             key={ platform.name }
-            ribbonClassName={ platform.ribbonColor }
-            windowClassName={ `${ platform.windowColor }` }>
+            ribbonClassName={ platform.accent }
+            windowClassName={ `${ platform.secondaryAccent }` }>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
                 <div className={ `${ platform.color } p-3 box-style-md` }>
@@ -128,7 +128,7 @@ export default function ConnectionsPage() {
               onClick={ platform.redirect }
               disabled={ platform.accounts.length >= 3 }
               className={ `box-style-md w-full py-3 border-2 border-brown-800
-                           ${ platform.ribbonColor || "bg-brown-200" }
+                           ${ platform.accent || "bg-brown-200" }
                            transition-all duration-200 group font-bold text-brown-900 mt-auto
                            ${ platform.accounts.length >= 3 ? "opacity-50 cursor-not-allowed" : "hover:opacity-80 hover:cursor-pointer" }` }>
               <div className="flex items-center justify-center space-x-2">

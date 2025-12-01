@@ -1,8 +1,19 @@
-﻿import { getProviderColors, getProviderName } from "../../utils/providerUtils.tsx";
-import { Cloud, CopyX, Disc3, Link, List, Music, SortDesc, ToolCase, Trash2 } from "lucide-react";
+﻿import { getProviderName } from "../../utils/providerUtils.tsx";
+import {
+  Cloud,
+  Disc3,
+  ExternalLink,
+  Link,
+  List,
+  Music,
+  SortDesc,
+  ToolCase,
+  Trash2
+} from "lucide-react";
 import React from "react";
 import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
 import { PlaylistMeta } from "../../hooks/playlists/usePlaylistData.tsx";
+import PlatformIcon from "../ui/Icon/PlatformIcon.tsx";
 
 interface PlaylistTableProps {
   playlists: ProviderPlaylist[];
@@ -67,7 +78,7 @@ export function PlaylistTable({
           </th>
 
           <th className="px-2 text-left font-extrabold uppercase tracking-wider">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center justify-center gap-1">
               <Link className="w-4 h-4 text-[#9b88c7]"/>
               Linked
               <SortDesc className="w-3 h-3 text-xs opacity-70"/>
@@ -96,10 +107,10 @@ export function PlaylistTable({
             <tr
               key={ playlist.id }
               className={ `
-                        transition-all cursor-pointer h-[56px]
+                        transition-all cursor-pointer h-[56px] hover:cursor-pointer
                         ${ i % 2 === 0 ? "bg-[#fffaf0]" : "bg-[#fff3e6]" }
                         hover:bg-[#ffe9c2]
-                        ${ isSelected ? "outline outline-blue-400" : "" }` }>
+                        ${ isSelected ? "bg-[#ffe9c2]" : "" }` }>
               <td className="text-center align-middle">
                 <input
                   type="checkbox"
@@ -143,13 +154,17 @@ export function PlaylistTable({
               </td>
 
               <td className="px-2 text-center align-middle">
-                <span className={ `px-2 py-0.5 ${ getProviderColors(providerName).accent } text-black font-bold box-style-sm` }>
-                  { providerName === "Google" ? "YouTube" : providerName }
-                </span>
+                <div className="flex items-center justify-center">
+                  <PlatformIcon
+                    providerName={ providerName }
+                    label={ providerName }
+                  />
+                </div>
               </td>
 
-              <td className="px-2 text-left text-xs text-gray-700 align-middle truncate">
-                { linkedTitle || <span className="italic text-gray-500">N/A</span> }
+
+              <td className="text-center text-xs text-gray-700 align-middle">
+                { linkedTitle || <span className="text-gray-500">N/A</span> }
               </td>
 
               <td className="px-2 text-center align-middle">
@@ -157,7 +172,7 @@ export function PlaylistTable({
                   <button
                     onClick={ () => handleFindDuplicates(playlist) }
                     className="p-1 bg-[#ffb74a] hover:bg-[#ffa726] border-black box-style-md hover:cursor-pointer">
-                    <CopyX className="w-4 h-4 text-black"/>
+                    <ExternalLink className="w-4 h-4 text-black"/>
                   </button>
 
                   <button

@@ -25,7 +25,7 @@ export type Platform = {
   name: string;
   icon: IconType;
   color: string;
-  ribbonColor?: string;
-  windowColor?: string;
+  accent?: string;
+  secondaryAccent?: string;
   accounts: Account[];
 };

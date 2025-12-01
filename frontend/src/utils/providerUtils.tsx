@@ -1,4 +1,4 @@
-﻿import { FaGoogle, FaMusic, FaSoundcloud, FaSpotify, } from "react-icons/fa";
+﻿import { FaMusic, FaSoundcloud, FaSpotify, FaYoutube, } from "react-icons/fa6";
 import { OAuthProvider, Platform } from "../models/Connection.ts";
 import { googleOAuth, soundCloudOAuth, spotifyOAuth, tidalOAuth, } from "../config/Config.ts";
 
@@ -8,17 +8,17 @@ export const platforms: Platform[] = [
     name: "Spotify",
     icon: FaSpotify,
     color: "bg-green-400",
-    ribbonColor: "bg-green-300",
-    windowColor: "bg-green-50",
+    accent: "bg-green-300",
+    secondaryAccent: "bg-green-50",
     accounts: [],
   },
   {
     redirect: googleOAuth,
     name: "Google",
-    icon: FaGoogle,
+    icon: FaYoutube,
     color: "bg-red-400",
-    ribbonColor: "bg-red-300",
-    windowColor: "bg-red-50",
+    accent: "bg-red-300",
+    secondaryAccent: "bg-red-50",
     accounts: [],
   },
   {
@@ -26,17 +26,17 @@ export const platforms: Platform[] = [
     name: "SoundCloud",
     icon: FaSoundcloud,
     color: "bg-orange-400",
-    ribbonColor: "bg-orange-300",
-    windowColor: "bg-orange-50",
+    accent: "bg-orange-300",
+    secondaryAccent: "bg-orange-50",
     accounts: [],
   },
   {
     redirect: tidalOAuth,
-    name: "Tidal Music",
+    name: "Tidal",
     icon: FaMusic,
     color: "bg-[#0ab2a5]",
-    ribbonColor: "bg-[#26c2b8]",
-    windowColor: "bg-[#e0f7f5]",
+    accent: "bg-[#26c2b8]",
+    secondaryAccent: "bg-[#e0f7f5]",
     accounts: [],
   },
 ];
@@ -80,7 +80,7 @@ export const getProviderColors = (providerName: string) => {
 
   return {
     accent: platform.color,
-    accentSoft: platform.ribbonColor,
+    accentSoft: platform.accent,
     text: "text-black",
   };
 };

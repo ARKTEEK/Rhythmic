@@ -1,4 +1,4 @@
-﻿import { ArrowLeft, Link, Plus } from "lucide-react"
+﻿import { ArrowLeft, ExternalLink, Plus, Search } from "lucide-react"
 import { useState } from "react"
 import { ProviderTrack } from "../../models/ProviderTrack.ts";
 import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
@@ -45,7 +45,7 @@ export default function SongSearchPanel({
       } overflow-hidden` }>
       <div className="w-[360px] h-full flex flex-col">
         <div
-          className={ `w-full px-4 py-2 border-b-4 border-black font-extrabold rounded-t-lg 
+          className={ `w-full px-7 py-2 border-b-4 border-black font-extrabold rounded-t-lg 
                        uppercase tracking-wider flex items-center justify-between 
                        ${ accentSoft } ${ accentText }` }>
           <div className="flex items-center gap-2 text-black">
@@ -61,14 +61,19 @@ export default function SongSearchPanel({
         </div>
 
         <div className="p-4 bg-[#fff5df] border-b-2 border-black">
-          <input
-            type="text"
-            placeholder="Search for a song..."
-            value={ query }
-            onChange={ (e) => setQuery(e.target.value) }
-            className="w-full p-2 border-2 border-black box-style-sm bg-white"
-            autoFocus={ open }
-          />
+          <div className="relative w-full">
+            <Search
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
+            />
+            <input
+              type="text"
+              placeholder="Search for a song..."
+              value={ query }
+              onChange={ (e) => setQuery(e.target.value) }
+              className="w-full pl-8 py-2 border-2 border-black box-style-sm bg-white"
+              autoFocus={ open }
+            />
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto retro-scrollbar">
@@ -104,16 +109,16 @@ export default function SongSearchPanel({
                   <button
                     onClick={ () => onSelectSong(track) }
                     className="px-2 py-1 bg-[#63d079] hover:bg-[#4ec767] border-2
-                             border-black box-style-sm text-xs uppercase shrink-0
-                             hover:cursor-pointer">
+                               border-black box-style-sm text-xs uppercase shrink-0
+                               hover:cursor-pointer">
                     <Plus className="w-4 h-4 text-black"/>
                   </button>
                   <button
                     onClick={ () => window.open(track.trackUrl) }
                     className="px-2 py-1 bg-yellow-500 hover:bg-yellow-600 border-2
-                             border-black box-style-sm text-xs uppercase shrink-0
-                             hover:cursor-pointer">
-                    <Link className="w-4 h-4 text-black"/>
+                               border-black box-style-sm text-xs uppercase shrink-0
+                               hover:cursor-pointer">
+                    <ExternalLink className="w-4 h-4 text-black"/>
                   </button>
                 </div>
               </div>

@@ -4,6 +4,8 @@ import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
 import { ProviderTrack } from "../../models/ProviderTrack.ts";
 import { getProviderName } from "../../utils/providerUtils.tsx";
 import SongSearchPanel from "./SongSearchPanel.tsx";
+import Spinner from "../ui/Spinner.tsx";
+import PlatformIcon from "../ui/Icon/PlatformIcon.tsx";
 
 interface PlaylistDetailModalProps {
   playlist: ProviderPlaylist;
@@ -38,7 +40,7 @@ export default function PlaylistDetailsModal({
       <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 font-mono overflow-x-auto">
         <div className="flex items-stretch justify-center w-auto p-10 transition-all duration-300">
 
-          <div className="relative w-[90vw] max-w-4xl max-h-[92vh] flex flex-col bg-[#fff9ec] box-style-lg overflow-hidden shrink-0 transition-all">
+          <div className="relative w-[90vw] max-w-4xl max-h-fit min-h-fit flex flex-col bg-[#fff9ec] box-style-lg overflow-hidden shrink-0 transition-all">
             <div
               className={ `w-full px-4 py-2 border-b-4 border-black font-extrabold rounded-t-lg uppercase tracking-wider flex items-center justify-between ${ accentSoft } ${ accentText }` }>
               <div className="flex items-center gap-2 text-black">
@@ -75,14 +77,15 @@ export default function PlaylistDetailsModal({
                   </div>
 
                   <div className="flex gap-2 flex-wrap mt-2">
-                  <span className="px-2 py-1 bg-[#5cb973] text-black font-bold box-style-sm border-2 border-black">
-                    { provider }
-                  </span>
+                    <PlatformIcon
+                      providerName={ provider }
+                      label={ provider }
+                    />
                   </div>
                 </div>
               </div>
 
-              <div className="w-full flex flex-col box-style-md bg-[#fff9ec] retro-scrollbar">
+              <div className="w-full flex flex-col box-style-md bg-[#fff9ec] retro-scrollbar h-full">
                 <div className="bg-[#f3d99c] border-b-4 border-black rounded-t-lg flex items-center justify-between px-4 py-2 font-extrabold uppercase text-sm">
                   <span>Tracks ({ songs.length })</span>
 
@@ -93,10 +96,10 @@ export default function PlaylistDetailsModal({
                   </button>
                 </div>
 
-                <div className="max-h-[45vh] overflow-y-auto">
+                <div className="max-h-[50vh] min-h-[50vh] overflow-y-auto">
                   { isLoadingSongs ? (
-                    <div className="p-4 text-center italic text-gray-500">
-                      Loading songs…
+                    <div className="flex items-center justify-center h-[50vh]">
+                      <Spinner/>
                     </div>
                   ) : isSongsError ? (
                     <div className="p-4 text-center italic text-red-600">
@@ -108,6 +111,7 @@ export default function PlaylistDetailsModal({
                     </div>
                   ) : (
                     <table className="w-full border-collapse text-sm">
+
                       <thead className="bg-[#ffe9c2] border-b-4 border-black sticky top-0 z-10">
                       <tr className="h-[36px]">
                         <th className="px-2 text-left w-10">#</th>
@@ -125,8 +129,12 @@ export default function PlaylistDetailsModal({
                             i % 2 === 0 ? "bg-[#fffaf0]" : "bg-[#fff3e6]"
                           } hover:bg-[#ffe9c2] transition-all` }>
                           <td className="px-2 py-1">{ i + 1 }</td>
-                          <td className="px-2 py-1 truncate">{ song.title || "Untitled" }</td>
-                          <td className="px-2 py-1 truncate">{ song.artist || "Unknown" }</td>
+                          <td
+                            className="px-2 py-1 max-w-[20ch] truncate"
+                            title={ song.title }>{ song.title || "Untitled" }</td>
+                          <td
+                            className="px-2 py-1 max-w-[20ch] truncate"
+                            title={ song.artist }>{ song.artist || "Unknown" }</td>
 
                           <td className="px-2 py-1 text-center">
                             <button

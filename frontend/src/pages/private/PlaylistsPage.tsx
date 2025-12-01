@@ -42,7 +42,7 @@ export default function PlaylistsPage() {
   const [playlistToDelete, setPlaylistToDelete] = useState<ProviderPlaylist | null>(null);
 
   const [page, setPage] = useState(1);
-  const pageSize = 10;
+  const pageSize = 11;
   const totalPages = Math.ceil(effectivePlaylists.length / pageSize);
   const visiblePlaylists = effectivePlaylists.slice((page - 1) * pageSize, page * pageSize);
 
@@ -58,7 +58,7 @@ export default function PlaylistsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center font-mono bg-[#faf2e0]">
+      <div className="flex items-center justify-center font-mono">
         <LoadingWindow
           loadingSpeed={ 200 }
           status="loading"
