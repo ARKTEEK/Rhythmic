@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 using backend.Application.Interface;
 using backend.Application.Model;
 using backend.Domain.Enum;
@@ -53,36 +55,84 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
     List<ProviderTrack> tracks = new();
     string? nextPageToken = null;
 
-    string url =
-      $"https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId={playlistId}&maxResults=50";
-    if (!string.IsNullOrEmpty(nextPageToken)) {
-      url += $"&pageToken={nextPageToken}";
-    }
+    do {
+      string url =
+        $"https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId={playlistId}&maxResults=50";
+      if (!string.IsNullOrEmpty(nextPageToken)) {
+        url += $"&pageToken={nextPageToken}";
+      }
 
-    HttpRequestMessage request = new(HttpMethod.Get, url);
-    request.Headers.Add("Authorization", $"Bearer {accessToken}");
+      HttpRequestMessage request = new(HttpMethod.Get, url);
+      request.Headers.Add("Authorization", $"Bearer {accessToken}");
 
-    HttpResponseMessage response = await _http.SendAsync(request);
+      HttpResponseMessage response = await _http.SendAsync(request);
 
-    if (!response.IsSuccessStatusCode) {
-      string content = await response.Content.ReadAsStringAsync();
-      throw new HttpRequestException($"YouTube API failed ({response.StatusCode}): {content}");
-    }
+      if (!response.IsSuccessStatusCode) {
+        string content = await response.Content.ReadAsStringAsync();
+        throw new HttpRequestException($"YouTube API failed ({response.StatusCode}): {content}");
+      }
 
-    string json = await response.Content.ReadAsStringAsync();
-    GooglePlaylistTracksResponse playlistResponse =
-      JsonSerializer.Deserialize<GooglePlaylistTracksResponse>(json)!;
+      string json = await response.Content.ReadAsStringAsync();
+      GooglePlaylistTracksResponse playlistResponse =
+        JsonSerializer.Deserialize<GooglePlaylistTracksResponse>(json)!;
 
-    tracks.AddRange(GooglePlaylistMapper.ToProviderTracks(playlistResponse));
+      tracks.AddRange(GooglePlaylistMapper.ToProviderTracks(playlistResponse));
+
+      nextPageToken = playlistResponse.NextPageToken;
+    } while (!string.IsNullOrEmpty(nextPageToken));
+
     return tracks;
   }
 
-  public Task<ProviderPlaylist> CreatePlaylistAsync(string accessToken, PlaylistCreateRequest request) {
+  public Task<ProviderPlaylist> CreatePlaylistAsync(string accessToken,
+    PlaylistCreateRequest request) {
     throw new NotImplementedException();
   }
 
-  public Task UpdatePlaylistAsync(string accessToken, PlaylistUpdateRequest request) {
-    throw new NotImplementedException();
+  public async Task UpdatePlaylistAsync(string accessToken, PlaylistUpdateRequest request) {
+    _http.DefaultRequestHeaders.Authorization =
+      new AuthenticationHeaderValue("Bearer", accessToken);
+
+    if (request.AddItems != null && request.AddItems.Any()) {
+      List<string> uris = request.AddItems.Select(GooglePlaylistMapper.ToYouTubeUri).ToList();
+
+      for (int i = 0; i < uris.Count; i += 1) {
+        string chunk = uris.Skip(i).Take(1).First();
+        await AddTracksAsync(request.Id, chunk);
+      }
+    }
+  }
+
+  private async Task AddTracksAsync(string playlistId, string videoId,
+    string onBehalfOfContentOwner = "") {
+    string url = "https://www.googleapis.com/youtube/v3/playlistItems";
+
+    Dictionary<string, string> query = new() {
+      { "part", "snippet" }
+    };
+
+    if (!string.IsNullOrEmpty(onBehalfOfContentOwner)) {
+      query.Add("onBehalfOfContentOwner", onBehalfOfContentOwner);
+    }
+
+    UriBuilder uriBuilder = new(url) {
+      Query = string.Join("&", query.Select(kvp => $"{kvp.Key}={Uri.EscapeDataString(kvp.Value)}"))
+    };
+
+    var body = GooglePlaylistMapper.CreatePlaylistItemInsertBody(playlistId, videoId);
+
+    HttpRequestMessage request = new(HttpMethod.Post, uriBuilder.Uri) {
+      Content = new StringContent(
+        JsonSerializer.Serialize(body),
+        Encoding.UTF8,
+        "application/json")
+    };
+
+    HttpResponseMessage res = await _http.SendAsync(request);
+    if (!res.IsSuccessStatusCode) {
+      string err = await res.Content.ReadAsStringAsync();
+      throw new HttpRequestException($"YouTube API failed ({res.StatusCode}): {err}");
+    }
   }
 
   public async Task DeletePlaylistAsync(string accessToken, string playlistId) {

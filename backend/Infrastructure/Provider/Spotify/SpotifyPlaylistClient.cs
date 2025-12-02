@@ -100,13 +100,8 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
     _http.DefaultRequestHeaders.Authorization =
       new AuthenticationHeaderValue("Bearer", accessToken);
 
-    static string ToSpotifyUri(ProviderTrack t) =>
-      !string.IsNullOrEmpty(t.Id)
-        ? $"spotify:track:{t.Id}"
-        : throw new InvalidOperationException("ProviderTrackId must contain Spotify track id.");
-
     if (request.AddItems != null && request.AddItems.Any()) {
-      List<string> uris = request.AddItems.Select(ToSpotifyUri).ToList();
+      List<string> uris = request.AddItems.Select(SpotifyPlaylistMapper.ToSpotifyUri).ToList();
 
       for (int i = 0; i < uris.Count; i += 100) {
         List<string> chunk = uris.Skip(i).Take(100).ToList();
@@ -116,7 +111,7 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
 
     if (request.RemoveItems != null) {
       var tracksPayload = request.RemoveItems
-        .Select(t => new { uri = ToSpotifyUri(t) })
+        .Select(t => new { uri = SpotifyPlaylistMapper.ToSpotifyUri(t) })
         .ToList();
       if (request.RemoveItems != null && request.RemoveItems.Any()) {
         var removeBody = new {
@@ -132,7 +127,11 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
     string url = $"https://api.spotify.com/v1/playlists/{Uri.EscapeDataString(playlistId)}/tracks";
     var body = new { uris };
     HttpRequestMessage req = new(HttpMethod.Post, url) {
-      Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json")
+      Content = new StringContent(
+        JsonSerializer.Serialize(body),
+        Encoding.UTF8,
+        "application/json"
+      )
     };
 
     HttpResponseMessage res = await _http.SendAsync(req);
@@ -145,8 +144,11 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
   private async Task DeleteTracksAsync(string playlistId, object removeBody) {
     string url = $"https://api.spotify.com/v1/playlists/{Uri.EscapeDataString(playlistId)}/tracks";
     HttpRequestMessage req = new(HttpMethod.Delete, url) {
-      Content = new StringContent(JsonSerializer.Serialize(removeBody), Encoding.UTF8,
-        "application/json")
+      Content = new StringContent(
+        JsonSerializer.Serialize(removeBody),
+        Encoding.UTF8,
+        "application/json"
+      )
     };
 
     HttpResponseMessage res = await _http.SendAsync(req);

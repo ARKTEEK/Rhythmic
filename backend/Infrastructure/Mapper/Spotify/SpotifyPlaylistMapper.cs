@@ -78,4 +78,12 @@ public static class SpotifyPlaylistMapper {
 
     return providerTracks;
   }
+
+  public static string ToSpotifyUri(ProviderTrack track) {
+    if (string.IsNullOrEmpty(track.Id)) {
+      throw new InvalidOperationException("ProviderTrackId must contain Spotify track id.");
+    }
+
+    return $"spotify:track:{track.Id}";
+  }
 }

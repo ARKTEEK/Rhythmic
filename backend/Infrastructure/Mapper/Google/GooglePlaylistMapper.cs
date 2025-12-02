@@ -41,7 +41,7 @@ public static class GooglePlaylistMapper {
       .Where(item => item.Snippet != null && item.ContentDetails != null)
       .Select(item => {
         string title = item.Snippet!.Title ?? string.Empty;
-        (string artist, string track) = MappingUtils.ParseYoutubeTitle(title);
+        (string artist, string track) = MappingUtils.ParseAndClean(title);
 
         if (string.IsNullOrWhiteSpace(artist)) {
           artist = item.Snippet.VideoOwnerChannelTitle ?? string.Empty;
@@ -74,5 +74,25 @@ public static class GooglePlaylistMapper {
       DurationMs = 0,
       Provider = OAuthProvider.Google
     }).ToList();
+  }
+
+  public static string ToYouTubeUri(ProviderTrack track) {
+    if (string.IsNullOrEmpty(track.Id)) {
+      throw new InvalidOperationException("ProviderTrackId must contain YouTube track id.");
+    }
+
+    return track.Id;
+  }
+
+  public static object CreatePlaylistItemInsertBody(string playlistId, string videoId) {
+    return new {
+      snippet = new {
+        playlistId = playlistId,
+        resourceId = new {
+          kind = "youtube#video",
+          videoId = videoId
+        }
+      }
+    };
   }
 }
