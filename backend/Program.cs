@@ -1,5 +1,7 @@
 using System.Text;
+using backend.Api.Hub;
 using backend.Application.Interface;
+using backend.Application.Model;
 using backend.Application.Service;
 using backend.Domain.Entity;
 using backend.Infrastructure.Factory;
@@ -73,6 +75,12 @@ builder.Services.AddAuthentication(options => {
   });
 
 
+builder.Services.AddSignalR();
+
+builder.Services.AddSingleton<IJobQueue, JobQueue>();
+builder.Services.AddSingleton<JobCancellationStore>();
+builder.Services.AddHostedService<JobProcessingService>();
+
 builder.Services.AddHttpClient();
 
 builder.Services.AddScoped<IProviderClient, GoogleProviderClient>();
@@ -94,6 +102,7 @@ builder.Services.AddScoped<IAccountProfileService, AccountProfileService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<AuthService>();
 
+
 WebApplication app = builder.Build();
 
 app.UseHttpsRedirection();
@@ -102,5 +111,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<ProgressHub>("/progressHub");
 
 app.Run();
