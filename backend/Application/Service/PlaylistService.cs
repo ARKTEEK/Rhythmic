@@ -3,6 +3,7 @@ using backend.Application.Interface;
 using backend.Application.Model;
 using backend.Domain.Entity;
 using backend.Domain.Enum;
+using F23.StringSimilarity;
 
 namespace backend.Application.Service;
 
@@ -96,5 +97,48 @@ public class PlaylistService : IPlaylistService {
     List<ProviderTrack> tracks = await client.Search(token.AccessToken, searchQuery);
 
     return tracks;
+  }
+
+  public async Task FindDuplicateTracksAsync(
+    OAuthProvider provider,
+    string providerAccountId,
+    string playlistId,
+    Func<int, ProviderTrack, bool, Task> onProgress,
+    CancellationToken ct
+  ) {
+    double similarityThreshold = 0.9;
+
+    List<ProviderTrack> tracks = await GetTracksByPlaylistIdAsync(
+      provider,
+      playlistId,
+      providerAccountId
+    );
+
+    var jaroWinkler = new JaroWinkler();
+    var duplicateIndexes = new HashSet<int>();
+
+    for (int i = 0; i < tracks.Count; i++) {
+      ct.ThrowIfCancellationRequested();
+
+      for (int j = i + 1; j < tracks.Count; j++) {
+        bool isDuplicate = (!string.IsNullOrEmpty(tracks[i].TrackUrl) &&
+                            tracks[i].TrackUrl == tracks[j].TrackUrl) ||
+                           (jaroWinkler.Similarity(tracks[i].Title, tracks[j].Title) >=
+                            similarityThreshold &&
+                            jaroWinkler.Similarity(tracks[i].Artist, tracks[j].Artist) >=
+                            similarityThreshold);
+
+        if (isDuplicate) {
+          duplicateIndexes.Add(i);
+          duplicateIndexes.Add(j);
+        }
+      }
+    }
+
+    for (int i = 0; i < tracks.Count; i++) {
+      bool isDuplicate = duplicateIndexes.Contains(i);
+      await onProgress(i + 1, tracks[i], isDuplicate);
+      await Task.Delay(30, ct);
+    }
   }
 }

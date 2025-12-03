@@ -31,4 +31,11 @@ public interface IPlaylistService {
     OAuthProvider provider,
     string providerAccountId,
     string searchQuery);
+
+  public Task FindDuplicateTracksAsync(
+    OAuthProvider provider,
+    string providerAccountId,
+    string playlistId,
+    Func<int, ProviderTrack, bool, Task> onProgress,
+    CancellationToken ct);
 }

@@ -1,6 +1,7 @@
 ﻿using backend.Api.Hub;
 using backend.Application.Interface;
 using backend.Application.Model;
+using backend.Domain.Enum;
 
 namespace backend.Application.Service;
 
@@ -43,6 +44,8 @@ public class JobProcessingService : BackgroundService {
 
       try {
         using IServiceScope scope = _services.CreateScope();
+        IPlaylistService playlistService =
+          scope.ServiceProvider.GetRequiredService<IPlaylistService>();
 
         async Task OnProgress(int idx, ProviderTrack track, bool removed) {
           var payload = new {
@@ -52,6 +55,16 @@ public class JobProcessingService : BackgroundService {
             removed
           };
           await _hub.Clients.Group(job.JobId).SendAsync("ProgressUpdate", payload, cts.Token);
+        }
+
+        if (job.JobType == JobType.FindDuplicateTracks) {
+          await playlistService.FindDuplicateTracksAsync(
+            job.Provider,
+            job.ProviderAccountId,
+            job.PlaylistId,
+            OnProgress,
+            cts.Token
+          );
         }
 
         await _hub.Clients
