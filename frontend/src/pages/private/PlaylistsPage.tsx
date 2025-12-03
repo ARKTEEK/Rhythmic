@@ -12,6 +12,8 @@ import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
 import ConfirmWindow from "../../components/ui/Window/ConfirmWindow.tsx";
 import { PaginationControls } from "../../components/playlists/PaginationControls.tsx";
 import { PlaylistTable } from "../../components/playlists/PlaylistTable.tsx";
+import { useSignalR } from "../../hooks/useSignalR.tsx";
+import { JobType } from "../../enums/JobType.ts";
 
 export default function PlaylistsPage() {
   const {
@@ -39,6 +41,14 @@ export default function PlaylistsPage() {
     isTracksError,
   } = usePlaylistSongsManagement();
 
+  const {
+    currentTrack,
+    isScanning,
+    duplicateTracks,
+    startJob,
+    cancelJob
+  } = useSignalR();
+
   const [playlistToDelete, setPlaylistToDelete] = useState<ProviderPlaylist | null>(null);
 
   const [page, setPage] = useState(1);
@@ -47,6 +57,19 @@ export default function PlaylistsPage() {
   const visiblePlaylists = effectivePlaylists.slice((page - 1) * pageSize, page * pageSize);
 
   const handleCloseModal = () => setFocusedPlaylist(null);
+
+  const handleFindDuplicates = async (playlist: ProviderPlaylist) => {
+    startJob({
+      provider: playlist.provider,
+      providerAccountId: playlist.providerId,
+      playlistId: playlist.id,
+      jobType: JobType.FindDuplicateTracks
+    });
+  };
+
+  const handleCancelJob = async () => {
+    cancelJob();
+  };
 
   const providerColors = focusedPlaylist
     ? getProviderColors(getProviderName(focusedPlaylist.provider))
@@ -109,8 +132,7 @@ export default function PlaylistsPage() {
                 handleToggleSelect={ handleToggleSelect }
                 handleOpenModal={ setFocusedPlaylist }
                 handleDelete={ setPlaylistToDelete }
-                handleFindDuplicates={ () => {
-                } }
+                handleFindDuplicates={ handleFindDuplicates }
                 getPlaylistMeta={ getPlaylistMeta }
               />
 
@@ -134,6 +156,11 @@ export default function PlaylistsPage() {
           accentText={ providerColors.text }
           isLoadingSongs={ isLoadingTracks }
           isSongsError={ isTracksError }
+          isScanning={ isScanning }
+          currentTrack={ currentTrack! }
+          duplicateTracks={ duplicateTracks }
+          onStartScan={ () => handleFindDuplicates(focusedPlaylist) }
+          onCancelScan={ () => handleCancelJob() }
         />
       ) }
 

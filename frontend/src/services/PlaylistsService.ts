@@ -7,7 +7,6 @@ import { PlaylistUpdateRequest } from "../models/PlaylistUpdateRequest.ts";
 export const getPlaylists = async (): Promise<ProviderPlaylist[]> => {
   try {
     const response = await axios.get<ProviderPlaylist[]>(`${ API_BASE_URL }/playlists`);
-    console.log(response);
     return response.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
