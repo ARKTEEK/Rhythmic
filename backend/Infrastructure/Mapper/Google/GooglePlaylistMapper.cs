@@ -45,6 +45,7 @@ public static class GooglePlaylistMapper {
 
         if (string.IsNullOrWhiteSpace(artist)) {
           artist = item.Snippet.VideoOwnerChannelTitle ?? string.Empty;
+          artist = MappingUtils.CleanArtist(artist);
         }
 
         return new ProviderTrack {
