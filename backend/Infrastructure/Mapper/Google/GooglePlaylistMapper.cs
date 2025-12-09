@@ -65,15 +65,25 @@ public static class GooglePlaylistMapper {
   }
 
   public static List<ProviderTrack> ToProviderTracksFromSearch(YouTubeSearchResult searchResult) {
-    return searchResult.Items.Select(item => new ProviderTrack {
-      Id = item.Id.VideoId,
-      TrackUrl = $"https://www.youtube.com/watch?v={item.Id.VideoId}",
-      Title = item.Snippet.Title,
-      Artist = item.Snippet.ChannelTitle,
-      Album = string.Empty,
-      ThumbnailUrl = item.Snippet.Thumbnails.Default?.Url,
-      DurationMs = 0,
-      Provider = OAuthProvider.Google
+    return searchResult.Items.Select(item => {
+      string title = item.Snippet!.Title ?? string.Empty;
+      (string artist, string track) = MappingUtils.ParseAndClean(title);
+
+      if (string.IsNullOrWhiteSpace(artist)) {
+        artist = item.Snippet.ChannelTitle ?? string.Empty;
+        artist = MappingUtils.CleanArtist(artist);
+      }
+
+      return new ProviderTrack {
+        Id = item.Id.VideoId,
+        TrackUrl = $"https://www.youtube.com/watch?v={item.Id.VideoId}",
+        Title = track,
+        Artist = artist,
+        Album = string.Empty,
+        ThumbnailUrl = item.Snippet.Thumbnails.Default?.Url,
+        DurationMs = 0,
+        Provider = OAuthProvider.Google
+      };
     }).ToList();
   }
 
