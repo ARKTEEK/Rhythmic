@@ -1,5 +1,4 @@
-﻿import { getProviderName } from "../../utils/providerUtils.tsx";
-import {
+﻿import {
   Cloud,
   Disc3,
   ExternalLink,
@@ -10,9 +9,9 @@ import {
   ToolCase,
   Trash2
 } from "lucide-react";
-import React from "react";
-import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
 import { PlaylistMeta } from "../../hooks/playlists/usePlaylistData.tsx";
+import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
+import { getProviderName } from "../../utils/providerUtils.tsx";
 import PlatformIcon from "../ui/Icon/PlatformIcon.tsx";
 
 interface PlaylistTableProps {
@@ -24,6 +23,7 @@ interface PlaylistTableProps {
   handleDelete: (playlist: ProviderPlaylist) => void;
   handleFindDuplicates: (playlist: ProviderPlaylist) => void;
   getPlaylistMeta: (id: string, fallbackCount: number) => PlaylistMeta;
+  clearDuplicates: () => void;
 }
 
 export function PlaylistTable({
@@ -35,6 +35,7 @@ export function PlaylistTable({
                                 handleDelete,
                                 handleFindDuplicates,
                                 getPlaylistMeta,
+                                clearDuplicates
                               }: PlaylistTableProps) {
 
   return (
@@ -124,8 +125,8 @@ export function PlaylistTable({
               <td
                 className="px-2 align-middle cursor-pointer"
                 onClick={ () => {
+                  clearDuplicates();
                   handleOpenModal(playlist);
-                  console.log("Provider: " + playlist.provider + " Provider Id: " + playlist.providerId + " Id: " + playlist.id);
                 } }>
                 <div className="flex items-center gap-3">
                   { playlist.thumbnailUrl ? (

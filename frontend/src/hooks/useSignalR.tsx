@@ -1,12 +1,12 @@
-﻿import { useCallback, useRef, useState } from "react";
-import * as signalR from "@microsoft/signalr";
+﻿import * as signalR from "@microsoft/signalr";
+import { useCallback, useRef, useState } from "react";
+import { Payload } from "../models/JobPayload.ts";
 import { ProviderTrack } from "../models/ProviderTrack.ts";
 import {
   cancelJobRequest,
   createHubConnection,
   startJobRequest
 } from "../services/SignalRService.ts";
-import { Payload } from "../models/JobPayload.ts";
 
 export function useSignalR() {
   const [jobId, setJobId] = useState<string | null>(null);
@@ -15,6 +15,13 @@ export function useSignalR() {
   const [duplicateTracks, setDuplicateTracks] = useState<ProviderTrack[]>([]);
 
   const hubRef = useRef<signalR.HubConnection | null>(null);
+
+  const clearDuplicates = useCallback(() => {
+    setDuplicateTracks([]);
+    setCurrentTrack(null);
+    setIsRunning(false);
+    setJobId(null);
+  }, []);
 
   const startJob = useCallback(async (requestBody: object) => {
     const data = await startJobRequest(requestBody);
@@ -67,5 +74,6 @@ export function useSignalR() {
     duplicateTracks,
     startJob,
     cancelJob,
+    clearDuplicates
   };
 }

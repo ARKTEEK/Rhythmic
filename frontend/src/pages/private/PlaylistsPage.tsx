@@ -1,19 +1,19 @@
-import React, { useState } from "react";
-import { usePlaylistData } from "../../hooks/playlists/usePlaylistData.tsx";
-import { usePlaylistSongsManagement } from "../../hooks/playlists/usePlaylistSongsManagement.tsx";
-import { getProviderColors, getProviderName } from "../../utils/providerUtils.tsx";
-import Window from "../../components/ui/Window.tsx";
-import LoadingWindow from "../../components/ui/Window/LoadingWindow.tsx";
-import PlaylistDetailsModal from "../../components/playlists/PlaylistDetailsModal.tsx";
-import { usePlaylistSelection } from "../../hooks/playlists/usePlaylistSelection.tsx";
-import PlaylistActions from "../../components/playlists/PlaylistActionts.tsx";
-import { deletePlaylist } from "../../services/PlaylistsService.ts";
-import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
-import ConfirmWindow from "../../components/ui/Window/ConfirmWindow.tsx";
+import { useState } from "react";
 import { PaginationControls } from "../../components/playlists/PaginationControls.tsx";
+import PlaylistActions from "../../components/playlists/PlaylistActionts.tsx";
+import PlaylistDetailsModal from "../../components/playlists/PlaylistDetailsModal.tsx";
 import { PlaylistTable } from "../../components/playlists/PlaylistTable.tsx";
-import { useSignalR } from "../../hooks/useSignalR.tsx";
+import Window from "../../components/ui/Window.tsx";
+import ConfirmWindow from "../../components/ui/Window/ConfirmWindow.tsx";
+import LoadingWindow from "../../components/ui/Window/LoadingWindow.tsx";
 import { JobType } from "../../enums/JobType.ts";
+import { usePlaylistData } from "../../hooks/playlists/usePlaylistData.tsx";
+import { usePlaylistSelection } from "../../hooks/playlists/usePlaylistSelection.tsx";
+import { usePlaylistSongsManagement } from "../../hooks/playlists/usePlaylistSongsManagement.tsx";
+import { useSignalR } from "../../hooks/useSignalR.tsx";
+import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
+import { deletePlaylist } from "../../services/PlaylistsService.ts";
+import { getProviderColors, getProviderName } from "../../utils/providerUtils.tsx";
 
 export default function PlaylistsPage() {
   const {
@@ -46,7 +46,8 @@ export default function PlaylistsPage() {
     isScanning,
     duplicateTracks,
     startJob,
-    cancelJob
+    cancelJob,
+    clearDuplicates
   } = useSignalR();
 
   const [playlistToDelete, setPlaylistToDelete] = useState<ProviderPlaylist | null>(null);
@@ -134,6 +135,7 @@ export default function PlaylistsPage() {
                 handleDelete={ setPlaylistToDelete }
                 handleFindDuplicates={ handleFindDuplicates }
                 getPlaylistMeta={ getPlaylistMeta }
+                clearDuplicates={ clearDuplicates }
               />
 
               <PaginationControls
@@ -161,6 +163,7 @@ export default function PlaylistsPage() {
           duplicateTracks={ duplicateTracks }
           onStartScan={ () => handleFindDuplicates(focusedPlaylist) }
           onCancelScan={ () => handleCancelJob() }
+          clearSignalR={() => clearDuplicates }
         />
       ) }
 
