@@ -52,6 +52,7 @@ public static class GooglePlaylistMapper {
           Id = item.ContentDetails?.VideoId ?? string.Empty,
           TrackUrl = "https://www.youtube.com/watch?v=" + item.ContentDetails.VideoId,
           Title = track,
+          Position = item.Snippet.Position,
           Artist = artist,
           Album = string.Empty,
           ThumbnailUrl = item.Snippet.Thumbnails?.High?.Url

@@ -2,19 +2,18 @@
 
 using System.Text.Json.Serialization;
 
-public class SpotifyPlaylistTracksResponse
-{
-    [JsonPropertyName("items")]
-    public List<SpotifyPlaylistTrackItem> Items { get; set; }
+public class SpotifyPlaylistTracksResponse {
+  [JsonPropertyName("items")]
+  public List<SpotifyPlaylistTrackItem> Items { get; set; }
 
-    [JsonPropertyName("next")]
-    public string? Next { get; set; }
+  [JsonPropertyName("next")]
+  public string? Next { get; set; }
 
-    [JsonPropertyName("total")]
-    public int Total { get; set; }
+  [JsonPropertyName("total")]
+  public int Total { get; set; }
 
-    [JsonPropertyName("limit")]
-    public int Limit { get; set; }
+  [JsonPropertyName("limit")]
+  public int Limit { get; set; }
 }
 
 

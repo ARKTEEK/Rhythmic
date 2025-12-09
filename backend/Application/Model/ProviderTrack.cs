@@ -5,6 +5,7 @@ namespace backend.Application.Model;
 public class ProviderTrack {
   public string Id { get; set; }
   public string TrackUrl { get; set; }
+  public int? Position { get; set; }
   public string Title { get; set; }
   public string Artist { get; set; }
   public string Album { get; set; }

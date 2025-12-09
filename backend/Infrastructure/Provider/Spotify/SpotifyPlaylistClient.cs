@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+
 using backend.Application.Interface;
 using backend.Application.Model;
 using backend.Domain.Enum;
@@ -98,10 +99,12 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
 
   public async Task UpdatePlaylistAsync(string accessToken, PlaylistUpdateRequest request) {
     _http.DefaultRequestHeaders.Authorization =
-      new AuthenticationHeaderValue("Bearer", accessToken);
+        new AuthenticationHeaderValue("Bearer", accessToken);
 
-    if (request.AddItems != null && request.AddItems.Any()) {
-      List<string> uris = request.AddItems.Select(SpotifyPlaylistMapper.ToSpotifyUri).ToList();
+    if (request.AddItems?.Any() == true) {
+      List<string> uris = request.AddItems
+          .Select(SpotifyPlaylistMapper.ToSpotifyUri)
+          .ToList();
 
       for (int i = 0; i < uris.Count; i += 100) {
         List<string> chunk = uris.Skip(i).Take(100).ToList();
@@ -109,19 +112,12 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
       }
     }
 
-    if (request.RemoveItems != null) {
-      var tracksPayload = request.RemoveItems
-        .Select(t => new { uri = SpotifyPlaylistMapper.ToSpotifyUri(t) })
-        .ToList();
-      if (request.RemoveItems != null && request.RemoveItems.Any()) {
-        var removeBody = new {
-          tracks = tracksPayload,
-        };
-
-        await DeleteTracksAsync(request.Id, removeBody);
-      }
+    if (request.RemoveItems?.Any() == true) {
+      object removeBody = SpotifyPlaylistMapper.ToSpotifyDeleteBody(request.RemoveItems);
+      await DeleteTracksAsync(request.Id, removeBody);
     }
   }
+
 
   private async Task AddTracksAsync(string playlistId, List<string> uris) {
     string url = $"https://api.spotify.com/v1/playlists/{Uri.EscapeDataString(playlistId)}/tracks";
