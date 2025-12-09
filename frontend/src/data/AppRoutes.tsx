@@ -1,21 +1,20 @@
 import React from "react";
 import { IconType } from "react-icons";
-import AuthPage from "../pages/public/AuthPage.tsx";
-import HomePage from "../pages/public/HomePage.tsx";
-import OAuthCallback from "../pages/oauth/OAuthCallback.tsx";
 import {
   FaCog,
-  FaCompass,
   FaHome,
   FaLink,
   FaList,
   FaListAlt,
-  FaQuestionCircle,
+  FaQuestionCircle
 } from "react-icons/fa";
-import PlaceholderPage from "../pages/private/PlaceholderPage.tsx";
-import DashboardPage from "../pages/private/DashboardPage.tsx";
+import OAuthCallback from "../pages/oauth/OAuthCallback.tsx";
 import ConnectionsPage from "../pages/private/ConnectionsPage.tsx";
+import DashboardPage from "../pages/private/DashboardPage.tsx";
+import PlaceholderPage from "../pages/private/PlaceholderPage.tsx";
 import PlaylistsPage from "../pages/private/PlaylistsPage.tsx";
+import AuthPage from "../pages/public/AuthPage.tsx";
+import HomePage from "../pages/public/HomePage.tsx";
 
 export interface AppRoute {
   path: string;
@@ -55,15 +54,6 @@ export const AppRoutes: AppRoute[] = [
     private: true,
     icon: FaList,
     category: "My Library",
-  },
-
-  // Discover
-  {
-    path: "/hub",
-    element: <PlaceholderPage/>,
-    label: "Discovery Hub",
-    icon: FaCompass,
-    category: "Discover",
   },
 
   // Manage
