@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+
 using backend.Application.Interface;
 using backend.Application.Model;
 using backend.Domain.Enum;
@@ -101,6 +102,12 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
         await AddTracksAsync(request.Id, chunk);
       }
     }
+
+    if (request.RemoveItems?.Any() == true) {
+      foreach (var track in request.RemoveItems) {
+        await DeleteTracksAsync(track.PlaylistId);
+      }
+    }
   }
 
   private async Task AddTracksAsync(string playlistId, string videoId,
@@ -134,6 +141,16 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
       throw new HttpRequestException($"YouTube API failed ({res.StatusCode}): {err}");
     }
   }
+
+  private async Task DeleteTracksAsync(string playlistItemId) {
+    var url = $"https://www.googleapis.com/youtube/v3/playlistItems?id={playlistItemId}";
+
+    var request = new HttpRequestMessage(HttpMethod.Delete, url);
+    var response = await _http.SendAsync(request);
+
+    response.EnsureSuccessStatusCode();
+  }
+
 
   public async Task DeletePlaylistAsync(string accessToken, string playlistId) {
     string url = $"https://www.googleapis.com/youtube/v3/playlists?id={playlistId}";

@@ -21,6 +21,7 @@ public class PlaylistRootItem {
 }
 
 public class Snippet {
+  [JsonPropertyName("id")] public string Id { get; set; }
   [JsonPropertyName("publishedAt")] public DateTime PublishedAt { get; set; }
   [JsonPropertyName("channelId")] public string? ChannelId { get; set; }
   [JsonPropertyName("title")] public string? Title { get; set; }

@@ -9,6 +9,8 @@ public class GooglePlaylistTracksResponse {
 }
 
 public class GooglePlaylistTrackItem {
+  [JsonPropertyName("id")] public string? Id { get; set; }
+
   [JsonPropertyName("snippet")] public Snippet? Snippet { get; set; }
 
   [JsonPropertyName("contentDetails")] public VideoContentDetails? ContentDetails { get; set; }
