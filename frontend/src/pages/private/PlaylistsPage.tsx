@@ -47,7 +47,8 @@ export default function PlaylistsPage() {
     duplicateTracks,
     startJob,
     cancelJob,
-    clearDuplicates
+    clearDuplicates,
+    setDuplicateTracks
   } = useSignalR();
 
   const [playlistToDelete, setPlaylistToDelete] = useState<ProviderPlaylist | null>(null);
@@ -84,7 +85,7 @@ export default function PlaylistsPage() {
     return (
       <div className="flex items-center justify-center font-mono">
         <LoadingWindow
-          loadingSpeed={ 200 }
+          loadingSpeed={200}
           status="loading"
           loadingMessage="Loading playlists..."
         />
@@ -96,11 +97,11 @@ export default function PlaylistsPage() {
     <>
       <div className="p-6 font-mono flex flex-col text-black h-full w-full overflow-hidden">
         <PlaylistActions
-          selectedIds={ selectedIds }
-          hasSelection={ hasSelection }
-          isFetching={ isFetching }
-          playlists={ playlists }
-          refetchPlaylists={ refetch }
+          selectedIds={selectedIds}
+          hasSelection={hasSelection}
+          isFetching={isFetching}
+          playlists={playlists}
+          refetchPlaylists={refetch}
         />
 
         <Window
@@ -110,11 +111,11 @@ export default function PlaylistsPage() {
           ribbonContent={
             <div className="flex items-center justify-between w-full px-4 py-1">
               <h2 className="text-lg text-black uppercase tracking-wider">
-                Your Playlists ({ effectivePlaylists.length })
+                Your Playlists ({effectivePlaylists.length})
               </h2>
             </div>
           }>
-          { effectivePlaylists.length === 0 ? (
+          {effectivePlaylists.length === 0 ? (
             <div className="flex items-center justify-center h-64 italic text-gray-700 text-lg">
               No playlists found.
             </div>
@@ -124,56 +125,56 @@ export default function PlaylistsPage() {
                 className="w-full box-style-md bg-[#fffaf5] text-black px-2 py-1.5 text-sm mb-2
                            placeholder-gray-500 focus:outline-none"
                 placeholder="Search by playlist, provider, or tracks…"
-                onChange={ () => {
-                } }/>
+                onChange={() => {
+                }} />
               <PlaylistTable
-                playlists={ playlists }
-                visiblePlaylists={ visiblePlaylists }
-                selectedIds={ selectedIds }
-                handleToggleSelect={ handleToggleSelect }
-                handleOpenModal={ setFocusedPlaylist }
-                handleDelete={ setPlaylistToDelete }
-                handleFindDuplicates={ handleFindDuplicates }
-                getPlaylistMeta={ getPlaylistMeta }
-                clearDuplicates={ clearDuplicates }
+                playlists={playlists}
+                visiblePlaylists={visiblePlaylists}
+                selectedIds={selectedIds}
+                handleToggleSelect={handleToggleSelect}
+                handleOpenModal={setFocusedPlaylist}
+                handleDelete={setPlaylistToDelete}
+                handleFindDuplicates={handleFindDuplicates}
+                getPlaylistMeta={getPlaylistMeta}
+                clearDuplicates={clearDuplicates}
               />
 
               <PaginationControls
-                page={ page }
-                totalPages={ totalPages }
-                onPageChange={ setPage }/>
+                page={page}
+                totalPages={totalPages}
+                onPageChange={setPage} />
             </div>
-          ) }
+          )}
         </Window>
       </div>
 
-      { focusedPlaylist && (
+      {focusedPlaylist && (
         <PlaylistDetailsModal
-          playlist={ focusedPlaylist }
-          onClose={ handleCloseModal }
-          getSongsForPlaylist={ getSongsForPlaylist }
-          onAddSong={ handleAddSong }
-          onRemoveSong={ handleRemoveSong }
-          accentSoft={ providerColors.accentSoft }
-          accentText={ providerColors.text }
-          isLoadingSongs={ isLoadingTracks }
-          isSongsError={ isTracksError }
-          isScanning={ isScanning }
-          currentTrack={ currentTrack! }
-          duplicateTracks={ duplicateTracks }
-          onStartScan={ () => handleFindDuplicates(focusedPlaylist) }
-          onCancelScan={ () => handleCancelJob() }
-          clearSignalR={() => clearDuplicates }
+          playlist={focusedPlaylist}
+          onClose={handleCloseModal}
+          getSongsForPlaylist={getSongsForPlaylist}
+          onAddSong={handleAddSong}
+          onRemoveSong={handleRemoveSong}
+          accentSoft={providerColors.accentSoft}
+          accentText={providerColors.text}
+          isLoadingSongs={isLoadingTracks}
+          isSongsError={isTracksError}
+          isScanning={isScanning}
+          currentTrack={currentTrack!}
+          duplicateTracks={duplicateTracks}
+          setDuplicateTracks={setDuplicateTracks}
+          onStartScan={() => handleFindDuplicates(focusedPlaylist)}
+          onCancelScan={() => handleCancelJob()}
         />
-      ) }
+      )}
 
-      { playlistToDelete && (
+      {playlistToDelete && (
         <ConfirmWindow
           height="200px"
           confirmTitle="Delete Playlist?"
-          confirmMessage={ `Are you sure you want to delete ${ getProviderName(playlistToDelete.provider) } playlist "${ playlistToDelete.title }"?` }
-          onCancel={ () => setPlaylistToDelete(null) }
-          onConfirm={ async () => {
+          confirmMessage={`Are you sure you want to delete ${getProviderName(playlistToDelete.provider)} playlist "${playlistToDelete.title}"?`}
+          onCancel={() => setPlaylistToDelete(null)}
+          onConfirm={async () => {
             try {
               await deletePlaylist(
                 getProviderName(playlistToDelete.provider),
@@ -187,9 +188,9 @@ export default function PlaylistsPage() {
             } finally {
               setPlaylistToDelete(null);
             }
-          } }
+          }}
         />
-      ) }
+      )}
     </>
   );
 }

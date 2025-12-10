@@ -1,8 +1,8 @@
 ﻿import { ArrowLeft, ExternalLink, Plus, SearchIcon } from "lucide-react";
 import { useState } from "react";
-import { useSongSearch } from "../../hooks/playlists/useSongSearch.tsx";
-import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
-import { ProviderTrack } from "../../models/ProviderTrack.ts";
+import { useSongSearch } from "../../../hooks/playlists/useSongSearch.tsx";
+import { ProviderPlaylist } from "../../../models/ProviderPlaylist.ts";
+import { ProviderTrack } from "../../../models/ProviderTrack.ts";
 
 interface SongsSearchPanelProps {
   currentPlaylist: ProviderPlaylist;

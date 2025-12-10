@@ -1,12 +1,13 @@
-﻿import { useEffect, useState } from "react";
+﻿import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import Notification from "../../components/ui/Notification.tsx";
+import { OAuthProvider } from "../../models/Connection.ts";
+import { PlaylistUpdateRequest } from "../../models/PlaylistUpdateRequest.ts";
+import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
 import { ProviderTrack } from "../../models/ProviderTrack.ts";
 import { getTracks, updatePlaylist } from "../../services/PlaylistsService.ts";
 import { getProviderName, getProviderValue } from "../../utils/providerUtils.tsx";
-import { useQuery } from "@tanstack/react-query";
-import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
-import { PlaylistUpdateRequest } from "../../models/PlaylistUpdateRequest.ts";
-import { toast } from "react-toastify";
-import Notification from "../../components/ui/Notification.tsx";
 
 interface UsePlaylistSongsManagementResult {
   focusedPlaylist: ProviderPlaylist | null;
@@ -65,7 +66,7 @@ export const usePlaylistSongsManagement = (): UsePlaylistSongsManagementResult =
       toast.success(Notification, {
         data: {
           title: 'Added to Playlist',
-          content: `${ track.title } added successfully.`,
+          content: `${track.title} added successfully.`,
         },
         icon: false,
       });
@@ -88,9 +89,21 @@ export const usePlaylistSongsManagement = (): UsePlaylistSongsManagementResult =
   };
 
   const handleRemoveSong = async (playlist: ProviderPlaylist, track: ProviderTrack) => {
+    const isGoogle = track.provider === OAuthProvider.Google;
+    const removalKey = isGoogle ? track.playlistId : track.id;
+
+    console.log(track.provider + " " + OAuthProvider.Google.toString())
+    console.log(isGoogle + " " + removalKey);
+
     setPlaylistIdToSongs(prev => {
       const current = prev[playlist.id] || [];
-      return { ...prev, [playlist.id]: current.filter(s => s.id !== track.id) };
+      return {
+        ...prev,
+        [playlist.id]: current.filter(s => {
+          const compareKey = isGoogle ? s.playlistId : s.id;
+          return compareKey !== removalKey;
+        })
+      };
     });
 
     const providerName = getProviderName(playlist.provider);
@@ -99,32 +112,35 @@ export const usePlaylistSongsManagement = (): UsePlaylistSongsManagementResult =
       id: playlist.id,
       addItems: [],
       removeItems: [track],
-      provider: getProviderValue(providerName)!,
+      provider: getProviderValue(providerName)!
     };
 
     try {
       await updatePlaylist(providerName, playlist.id, playlist.providerId, updateBody);
       toast.info(Notification, {
         data: {
-          title: 'Removed Song',
-          content: `Removed "${ track.title }" from playlist.`,
+          title: "Removed Song",
+          content: `Removed "${track.title}" from playlist.`
         },
-        icon: false,
+        icon: false
       });
     } catch (err) {
       console.error("Failed to remove track from playlist:", err);
 
       setPlaylistIdToSongs(prev => {
         const current = prev[playlist.id] || [];
-        return { ...prev, [playlist.id]: [...current, track] };
+        return {
+          ...prev,
+          [playlist.id]: [...current, track]
+        };
       });
 
       toast.error(Notification, {
         data: {
-          title: 'Error',
-          content: 'Failed to remove song.',
+          title: "Error",
+          content: "Failed to remove song."
         },
-        icon: false,
+        icon: false
       });
     }
   };

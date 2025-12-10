@@ -1,5 +1,6 @@
 ﻿export interface ProviderTrack {
   id: string;
+  playlistId?: string;
   trackUrl: string;
   title: string;
   artist: string;

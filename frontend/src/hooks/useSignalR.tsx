@@ -72,6 +72,7 @@ export function useSignalR() {
     currentTrack,
     isScanning: isRunning,
     duplicateTracks,
+    setDuplicateTracks,
     startJob,
     cancelJob,
     clearDuplicates

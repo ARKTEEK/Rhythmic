@@ -1,7 +1,7 @@
 import { ArrowLeft, ExternalLink, Play, Square, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { ProviderPlaylist } from "../../models/ProviderPlaylist";
-import { ProviderTrack } from "../../models/ProviderTrack";
+import { ProviderPlaylist } from "../../../models/ProviderPlaylist";
+import { ProviderTrack } from "../../../models/ProviderTrack";
 
 interface DuplicateSearchPanelProps {
   open: boolean;

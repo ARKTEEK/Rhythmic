@@ -5,8 +5,8 @@ import { ProviderTrack } from "../../models/ProviderTrack.ts";
 import { getProviderName } from "../../utils/providerUtils.tsx";
 import PlatformIcon from "../ui/Icon/PlatformIcon.tsx";
 import Spinner from "../ui/Spinner.tsx";
-import DuplicateSearchPanel from "./DuplicateSearchPanel.tsx";
-import SongSearchPanel from "./SongSearchPanel.tsx";
+import DuplicateSearchPanel from "./panels/DuplicateSearchPanel.tsx";
+import SongSearchPanel from "./panels/SongSearchPanel.tsx";
 
 interface PlaylistDetailModalProps {
   playlist: ProviderPlaylist;
@@ -22,9 +22,9 @@ interface PlaylistDetailModalProps {
   isScanning?: boolean;
   currentTrack?: ProviderTrack;
   duplicateTracks?: ProviderTrack[];
+  setDuplicateTracks?: (tracks: ProviderTrack[]) => void;
   onStartScan?: () => void;
   onCancelScan?: () => void;
-  clearDuplicates: () => void;
 }
 
 export default function PlaylistDetailsModal({
@@ -42,7 +42,7 @@ export default function PlaylistDetailsModal({
   onStartScan,
   onCancelScan,
   duplicateTracks,
-  clearDuplicates
+  setDuplicateTracks,
 }: PlaylistDetailModalProps) {
   const duplicateIds = useMemo(() => new Set(duplicateTracks.map(t => t.id)), [duplicateTracks]);
   const songs = useMemo(() => getSongsForPlaylist(playlist) || [], [getSongsForPlaylist, playlist]);
@@ -206,9 +206,13 @@ export default function PlaylistDetailsModal({
           duplicates={duplicateTracks || []}
           onDeleteSelected={(tracks) => {
             tracks.forEach(t => onRemoveSong(playlist, t));
-            clearDuplicates();
+
+            setDuplicateTracks!(prev =>
+              prev.filter(t => !tracks.some(del => del.id === t.id))
+            );
           }}
         />
+
       </div>
     </div>
   );
