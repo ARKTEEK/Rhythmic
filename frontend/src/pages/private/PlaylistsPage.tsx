@@ -11,6 +11,7 @@ import ConfirmWindow from "../../components/ui/Window/ConfirmWindow.tsx";
 import LoadingWindow from "../../components/ui/Window/LoadingWindow.tsx";
 import { JobType } from "../../enums/JobType.ts";
 import { usePlaylistData } from "../../hooks/playlists/usePlaylistData.tsx";
+import { usePlaylistFilter } from "../../hooks/playlists/usePlaylistFilter.tsx";
 import { usePlaylistSelection } from "../../hooks/playlists/usePlaylistSelection.tsx";
 import { usePlaylistSongsManagement } from "../../hooks/playlists/usePlaylistSongsManagement.tsx";
 import { useSignalR } from "../../hooks/useSignalR.tsx";
@@ -30,6 +31,12 @@ export default function PlaylistsPage() {
     isFetching,
     getPlaylistMeta,
   } = usePlaylistData();
+
+  const {
+    searchQuery,
+    setSearchQuery,
+    filteredPlaylists,
+  } = usePlaylistFilter(effectivePlaylists);
 
   const {
     selectedIds,
@@ -64,8 +71,8 @@ export default function PlaylistsPage() {
 
   const [page, setPage] = useState(1);
   const pageSize = 11;
-  const totalPages = Math.ceil(effectivePlaylists.length / pageSize);
-  const visiblePlaylists = effectivePlaylists.slice((page - 1) * pageSize, page * pageSize);
+  const totalPages = Math.ceil(filteredPlaylists.length / pageSize);
+  const visiblePlaylists = filteredPlaylists.slice((page - 1) * pageSize, page * pageSize);
 
   const platformsWithAccounts = platforms.map(platform => {
     const matchedConnections = connections
@@ -157,7 +164,7 @@ export default function PlaylistsPage() {
           ribbonContent={
             <div className="flex items-center justify-between w-full px-4 py-1">
               <h2 className="text-lg text-black uppercase tracking-wider">
-                Your Playlists ({effectivePlaylists.length})
+                Your Playlists ({filteredPlaylists.length}{filteredPlaylists.length !== effectivePlaylists.length ? `/${effectivePlaylists.length}` : ""})
               </h2>
             </div>
           }>
@@ -167,12 +174,19 @@ export default function PlaylistsPage() {
             </div>
           ) : (
             <div className="flex flex-col h-full p-3 pt-2 overflow-hidden">
-              <input
-                className="w-full box-style-md bg-[#fffaf5] text-black px-2 py-1.5 text-sm mb-2
-                           placeholder-gray-500 focus:outline-none"
-                placeholder="Search by playlist, provider, or tracks…"
-                onChange={() => {
-                }} />
+              <div className="mb-2">
+                <input
+                  className="w-full box-style-md bg-[#fffaf5] text-black px-3 py-2 text-sm
+                             placeholder-gray-500 focus:outline-none border-2 border-black"
+                  placeholder='Search: "title & tracks > 10 & provider = spotify"'
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)} />
+                {searchQuery && (
+                  <p className="text-xs text-gray-600 mt-1 px-1">
+                    Syntax: "title" & "tracks {'>'} {'<'} = number" & "provider = spotify/google/soundcloud/tidal"
+                  </p>
+                )}
+              </div>
               <PlaylistTable
                 playlists={playlists}
                 visiblePlaylists={visiblePlaylists}
