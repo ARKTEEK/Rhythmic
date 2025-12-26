@@ -1,8 +1,11 @@
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { PaginationControls } from "../../components/playlists/PaginationControls.tsx";
 import PlaylistActions from "../../components/playlists/PlaylistActionts.tsx";
 import PlaylistDetailsModal from "../../components/playlists/PlaylistDetailsModal.tsx";
+import PlaylistHistoryModal from "../../components/playlists/PlaylistHistoryModal.tsx";
 import { PlaylistTable } from "../../components/playlists/PlaylistTable.tsx";
+import { PlaylistTransferModal } from "../../components/playlists/PlaylistTransferModal.tsx";
 import Window from "../../components/ui/Window.tsx";
 import ConfirmWindow from "../../components/ui/Window/ConfirmWindow.tsx";
 import LoadingWindow from "../../components/ui/Window/LoadingWindow.tsx";
@@ -11,9 +14,12 @@ import { usePlaylistData } from "../../hooks/playlists/usePlaylistData.tsx";
 import { usePlaylistSelection } from "../../hooks/playlists/usePlaylistSelection.tsx";
 import { usePlaylistSongsManagement } from "../../hooks/playlists/usePlaylistSongsManagement.tsx";
 import { useSignalR } from "../../hooks/useSignalR.tsx";
+import { OAuthProvider } from "../../models/Connection.ts";
 import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
+import { ProviderTrack } from "../../models/ProviderTrack.ts";
+import createConnectionsQueryOptions from "../../queries/createConnectionsQueryOptions.ts";
 import { deletePlaylist } from "../../services/PlaylistsService.ts";
-import { getProviderColors, getProviderName } from "../../utils/providerUtils.tsx";
+import { getProviderColors, getProviderName, OAuthProviderNames, platforms } from "../../utils/providerUtils.tsx";
 
 export default function PlaylistsPage() {
   const {
@@ -42,32 +48,64 @@ export default function PlaylistsPage() {
   } = usePlaylistSongsManagement();
 
   const {
-    currentTrack,
-    isScanning,
-    duplicateTracks,
     startJob,
     cancelJob,
-    clearDuplicates,
-    setDuplicateTracks
+    isRunning,
+    activeJobType,
+    processedTracksMap,
+    setProcessedTracksMap,
+    currentTrack
   } = useSignalR();
 
   const [playlistToDelete, setPlaylistToDelete] = useState<ProviderPlaylist | null>(null);
+  const [transferPlaylist, setTransferPlaylist] = useState<ProviderPlaylist | null>(null);
+  const [historyPlaylist, setHistoryPlaylist] = useState<ProviderPlaylist | null>(null);
+  const { data: connections = [] } = useQuery(createConnectionsQueryOptions());
 
   const [page, setPage] = useState(1);
   const pageSize = 11;
   const totalPages = Math.ceil(effectivePlaylists.length / pageSize);
   const visiblePlaylists = effectivePlaylists.slice((page - 1) * pageSize, page * pageSize);
 
+  const platformsWithAccounts = platforms.map(platform => {
+    const matchedConnections = connections
+      .filter(conn => OAuthProviderNames[conn.provider] === platform.name)
+      .map(conn => ({
+        id: conn.id,
+        username: conn.displayname,
+        email: conn.email,
+      }));
+
+    return {
+      ...platform,
+      accounts: matchedConnections,
+    };
+  });
+
   const handleCloseModal = () => setFocusedPlaylist(null);
 
+  const handleTransfer = (playlist: ProviderPlaylist) => {
+    setTransferPlaylist(playlist);
+  };
+
   const handleFindDuplicates = async (playlist: ProviderPlaylist) => {
-    startJob({
+    startJob(JobType.FindDuplicateTracks, {
       provider: playlist.provider,
       providerAccountId: playlist.providerId,
       playlistId: playlist.id,
-      jobType: JobType.FindDuplicateTracks
     });
   };
+
+  const handleTrasnfer = async (playlist: ProviderPlaylist) => {
+    startJob(JobType.TransferPlaylist, {
+      sourceProvider: playlist.provider,
+      sourceAccountId: playlist.providerId,
+      sourcePlaylistId: playlist.id,
+      destinationProvider: OAuthProvider.Spotify,
+      destinationAccountId: "42ndxv2g3kzotdopmjj5orr6i",
+      destinationPlaylistId: "4R8EuAODGvhlrEwOYSx6hu",
+    });
+  }
 
   const handleCancelJob = async () => {
     cancelJob();
@@ -75,6 +113,14 @@ export default function PlaylistsPage() {
 
   const providerColors = focusedPlaylist
     ? getProviderColors(getProviderName(focusedPlaylist.provider))
+    : {
+      accent: "bg-gray-400",
+      accentSoft: "bg-gray-200",
+      text: "text-black",
+    };
+
+  const historyProviderColors = historyPlaylist
+    ? getProviderColors(getProviderName(historyPlaylist.provider))
     : {
       accent: "bg-gray-400",
       accentSoft: "bg-gray-200",
@@ -135,8 +181,9 @@ export default function PlaylistsPage() {
                 handleOpenModal={setFocusedPlaylist}
                 handleDelete={setPlaylistToDelete}
                 handleFindDuplicates={handleFindDuplicates}
+                handleTransfer={handleTransfer}
+                handleHistory={setHistoryPlaylist}
                 getPlaylistMeta={getPlaylistMeta}
-                clearDuplicates={clearDuplicates}
               />
 
               <PaginationControls
@@ -159,10 +206,16 @@ export default function PlaylistsPage() {
           accentText={providerColors.text}
           isLoadingSongs={isLoadingTracks}
           isSongsError={isTracksError}
-          isScanning={isScanning}
+          isScanning={isRunning}
           currentTrack={currentTrack!}
-          duplicateTracks={duplicateTracks}
-          setDuplicateTracks={setDuplicateTracks}
+          duplicateTracks={processedTracksMap[0]}
+          setDuplicateTracks={(tracks: ProviderTrack[]) => {
+            if (!activeJobType) return;
+            setProcessedTracksMap(prev => ({
+              ...prev,
+              [activeJobType]: tracks
+            }));
+          }}
           onStartScan={() => handleFindDuplicates(focusedPlaylist)}
           onCancelScan={() => handleCancelJob()}
         />
@@ -191,6 +244,28 @@ export default function PlaylistsPage() {
           }}
         />
       )}
+
+      {transferPlaylist && (
+        <PlaylistTransferModal
+          playlist={transferPlaylist}
+          platforms={platformsWithAccounts}
+          onClose={() => setTransferPlaylist(null)}
+        />
+      )}
+
+      {historyPlaylist && (
+        <PlaylistHistoryModal
+          playlist={historyPlaylist}
+          onClose={() => setHistoryPlaylist(null)}
+          accentSoft={historyProviderColors.accentSoft}
+          accentText={historyProviderColors.text}
+          onRevert={() => {
+            refetch();
+            setHistoryPlaylist(null);
+          }}
+        />
+      )}
+
     </>
   );
 }

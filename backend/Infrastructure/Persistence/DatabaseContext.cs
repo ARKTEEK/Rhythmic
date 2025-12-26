@@ -11,6 +11,7 @@ public class DatabaseContext : IdentityDbContext<User> {
 
   public DbSet<AccountToken> AccountTokens { get; set; }
   public DbSet<AccountProfile> AccountProfiles { get; set; }
+  public DbSet<PlaylistSnapshot> PlaylistSnapshots { get; set; }
 
   protected override void OnModelCreating(ModelBuilder builder) {
     base.OnModelCreating(builder);
@@ -43,5 +44,17 @@ public class DatabaseContext : IdentityDbContext<User> {
     builder.Entity<AccountProfile>()
       .Property(uc => uc.Provider)
       .HasConversion<string>();
+
+    builder.Entity<PlaylistSnapshot>()
+      .HasOne(ps => ps.User)
+      .WithMany()
+      .HasForeignKey(ps => ps.UserId);
+
+    builder.Entity<PlaylistSnapshot>()
+      .Property(ps => ps.Provider)
+      .HasConversion<string>();
+
+    builder.Entity<PlaylistSnapshot>()
+      .HasIndex(ps => new { ps.UserId, ps.Provider, ps.PlaylistId, ps.CreatedAt });
   }
 }

@@ -13,13 +13,16 @@ namespace backend.Api.Controller;
 [Route("api")]
 public class PlaylistsController : ControllerBase {
   private readonly IPlaylistService _playlistService;
+  private readonly IPlaylistSnapshotService _snapshotService;
   private readonly UserManager<User> _userManager;
 
   public PlaylistsController(
     UserManager<User> userManager,
-    IPlaylistService playlistService) {
+    IPlaylistService playlistService,
+    IPlaylistSnapshotService snapshotService) {
     _userManager = userManager;
     _playlistService = playlistService;
+    _snapshotService = snapshotService;
   }
 
   [Authorize]
@@ -55,6 +58,12 @@ public class PlaylistsController : ControllerBase {
       playlistId,
       providerAccountId);
 
+    try {
+      await _snapshotService.CreateSnapshotIfChangedAsync(
+        user.Id, provider, playlistId, providerAccountId, tracks);
+    } catch {
+    }
+
     return Ok(tracks);
   }
 
@@ -76,6 +85,19 @@ public class PlaylistsController : ControllerBase {
 
     request.Id = playlistId;
     request.Provider = provider;
+
+    bool isRevertOperation = Request.Headers.ContainsKey("X-Revert-Operation");
+
+    if (!isRevertOperation) {
+      List<ProviderTrack> currentTracks = await _playlistService.GetTracksByPlaylistIdAsync(
+        provider, playlistId, providerAccountId);
+
+      try {
+        await _snapshotService.CreateSnapshotAsync(
+          user.Id, provider, playlistId, providerAccountId, currentTracks);
+      } catch {
+      }
+    }
 
     await _playlistService.UpdatePlaylistAsync(provider, providerAccountId, request);
 
