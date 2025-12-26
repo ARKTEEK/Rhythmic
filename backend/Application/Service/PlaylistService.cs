@@ -1,8 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
-using backend.Application.Interface;
+﻿using backend.Application.Interface;
 using backend.Application.Model;
 using backend.Domain.Entity;
 using backend.Domain.Enum;
+
 using F23.StringSimilarity;
 
 namespace backend.Application.Service;
@@ -26,15 +26,7 @@ public class PlaylistService : IPlaylistService {
     OAuthProvider provider,
     string accessToken,
     PlaylistCreateRequest request) {
-    IPlaylistProviderClient client = _clientFactory.GetClient(provider);
-
-    if (!client.SupportedVisibilities.Contains(request.Visibility)) {
-      throw new ValidationException(
-        $"The visibility '{request.Visibility}' is not supported by {provider}."
-      );
-    }
-
-    return await client.CreatePlaylistAsync(accessToken, request);
+    throw new NotImplementedException();
   }
 
   public async Task UpdatePlaylistAsync(OAuthProvider provider, string providerAccountId,
@@ -141,4 +133,89 @@ public class PlaylistService : IPlaylistService {
       await Task.Delay(30, ct);
     }
   }
+
+  public async Task TransferPlaylistAsync(
+     OAuthProvider sourceProvider,
+     OAuthProvider destinationProvider,
+     string sourceAccountId,
+     string destinationAccountId,
+     string sourcePlaylistId,
+     Func<int, ProviderTrack, bool, Task> onProgress,
+     CancellationToken ct
+ ) {
+    const double similarityThreshold = 0.85;
+    const int maxSearchResults = 10;
+
+    var jaro = new JaroWinkler();
+
+    List<ProviderTrack> sourceTracks = await GetTracksByPlaylistIdAsync(
+        sourceProvider,
+        sourcePlaylistId,
+        sourceAccountId
+    );
+
+    AccountToken destToken = await _tokensService.GetAccountToken(destinationAccountId, destinationProvider);
+
+    IPlaylistProviderClient destClient = _factory.GetClient(destinationProvider);
+
+    ProviderPlaylist destPlaylist = await destClient.CreatePlaylistAsync(
+        destToken,
+        new PlaylistCreateRequest {
+          Title = $"• {DateTime.UtcNow:yyyy-MM-dd HH:mm}",
+          Description = $"Playlist transferred using Rhythmic.",
+          Visibility = PlaylistVisibility.Public
+        }
+    );
+
+    foreach (var (source, index) in sourceTracks.Select((t, i) => (t, i))) {
+      ct.ThrowIfCancellationRequested();
+
+      bool added = false;
+      string searchQuery = $"{source.Title} {source.Artist}";
+
+      List<ProviderTrack> candidates = await GetSearchResultsAsync(destinationProvider, destinationAccountId, searchQuery);
+
+      ProviderTrack? bestMatch = null;
+      double bestScore = 0.0;
+
+      foreach (var candidate in candidates.Take(maxSearchResults)) {
+        double titleScore = jaro.Similarity(source.Title.ToLowerInvariant(), candidate.Title.ToLowerInvariant());
+        double artistScore = jaro.Similarity(source.Artist.ToLowerInvariant(), candidate.Artist.ToLowerInvariant());
+
+        double durationScore = 0.0;
+        if (source.DurationMs > 0 && candidate.DurationMs > 0) {
+          double diff = Math.Abs(source.DurationMs - candidate.DurationMs);
+          double rel = diff / source.DurationMs;
+
+          if (rel <= 0.02) durationScore = 1.0;
+          else if (rel <= 0.05) durationScore = 0.5;
+        }
+
+        double totalScore = (0.5 * titleScore) + (0.3 * artistScore) + (0.2 * durationScore);
+
+        if (totalScore > bestScore) {
+          bestScore = totalScore;
+          bestMatch = candidate;
+        }
+      }
+
+      if (bestMatch != null && bestScore >= similarityThreshold) {
+        await UpdatePlaylistAsync(
+            destinationProvider,
+            destToken.Id,
+            new PlaylistUpdateRequest {
+              Id = destPlaylist.Id,
+              AddItems = new List<ProviderTrack> { bestMatch },
+              Provider = destinationProvider
+            }
+        );
+
+        added = true;
+      }
+
+      await onProgress(index + 1, source, added);
+      await Task.Delay(30, ct);
+    }
+  }
+
 }

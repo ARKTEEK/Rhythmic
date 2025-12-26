@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
 import { ProviderTrack } from "../../models/ProviderTrack.ts";
+import { formatDuration } from "../../utils/playlistUtils.tsx";
 import { getProviderName } from "../../utils/providerUtils.tsx";
 import PlatformIcon from "../ui/Icon/PlatformIcon.tsx";
 import Spinner from "../ui/Spinner.tsx";
@@ -44,7 +45,8 @@ export default function PlaylistDetailsModal({
   duplicateTracks,
   setDuplicateTracks,
 }: PlaylistDetailModalProps) {
-  const duplicateIds = useMemo(() => new Set(duplicateTracks.map(t => t.id)), [duplicateTracks]);
+  const duplicateIds = useMemo(() => new Set((duplicateTracks || []).map(t => t.id)), [duplicateTracks]);
+
   const songs = useMemo(() => getSongsForPlaylist(playlist) || [], [getSongsForPlaylist, playlist]);
   const provider = getProviderName(playlist.provider);
   const [isDuplicatePanelOpen, setIsDuplicatePanelOpen] = useState(false);
@@ -147,6 +149,7 @@ export default function PlaylistDetailsModal({
                         <th className="px-2 text-left w-10">#</th>
                         <th className="px-2 text-left uppercase">Title</th>
                         <th className="px-2 text-left uppercase">Artist</th>
+                        <th className="px-2 text-left uppercase w-16">Duration</th>
                         <th className="px-2 text-center uppercase w-20">Actions</th>
                       </tr>
                     </thead>
@@ -166,11 +169,11 @@ export default function PlaylistDetailsModal({
                             <td
                               className="px-2 py-1 max-w-[20ch] truncate"
                               title={song.artist}>{song.artist || "Unknown"}</td>
+                            <td className="px-2 py-1 text-center">{formatDuration(song.durationMs)}</td>
                             <td className="px-2 py-1 text-center">
                               <button
                                 onClick={() => onRemoveSong(playlist, song)}
-                                className="p-1 bg-[#f26b6b] hover:bg-[#e55d5d] box-style-md hover:cursor-pointer"
-                              >
+                                className="p-1 bg-[#f26b6b] hover:bg-[#e55d5d] box-style-md hover:cursor-pointer">
                                 <Trash2 className="w-4 h-4 text-black" />
                               </button>
                             </td>

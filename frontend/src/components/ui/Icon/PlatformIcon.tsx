@@ -1,5 +1,4 @@
-﻿import React from "react";
-import { getProviderColors } from "../../../utils/providerUtils.tsx";
+﻿import { getProviderColors } from "../../../utils/providerUtils.tsx";
 
 interface PlatformIconProps {
   providerName?: string;
@@ -7,9 +6,9 @@ interface PlatformIconProps {
 }
 
 export default function PlatformIcon({
-                                       providerName,
-                                       label,
-                                     }: PlatformIconProps) {
+  providerName,
+  label,
+}: PlatformIconProps) {
   const colors = providerName
     ? getProviderColors(providerName)
     : {
@@ -20,17 +19,17 @@ export default function PlatformIcon({
 
   return (
     <div
-      className={ `
+      className={`
         flex items-center justify-center
-        ${ colors.accentSoft }
-        box-style-md py-1 ${ colors.text } min-w-[80px]
+        ${colors.accentSoft}
+        box-style-md py-1 ${colors.text} min-w-[80px]
       ` }
-      title={ label || providerName }>
-      { label && (
+      title={label || providerName}>
+      {label && (
         <span className="truncate font-extrabold uppercase tracking-wide text-xs">
-          { label }
+          {label}
         </span>
-      ) }
+      )}
     </div>
   );
 }

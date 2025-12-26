@@ -1,4 +1,5 @@
 ﻿using backend.Application.Model;
+using backend.Domain.Entity;
 using backend.Domain.Enum;
 
 namespace backend.Application.Interface;
@@ -16,7 +17,7 @@ public interface IPlaylistProviderClient {
     string playlistId);
 
   public Task<ProviderPlaylist> CreatePlaylistAsync(
-    string accessToken,
+    AccountToken accountToken,
     PlaylistCreateRequest request);
 
   public Task UpdatePlaylistAsync(

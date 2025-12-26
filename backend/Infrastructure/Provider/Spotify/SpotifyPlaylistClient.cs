@@ -4,6 +4,8 @@ using System.Text.Json;
 
 using backend.Application.Interface;
 using backend.Application.Model;
+using backend.Application.Service;
+using backend.Domain.Entity;
 using backend.Domain.Enum;
 using backend.Infrastructure.DTO.Spotify;
 using backend.Infrastructure.Mapper.Spotify;
@@ -92,9 +94,47 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
     return SpotifyPlaylistMapper.ToProviderTracks(allTrackItems);
   }
 
-  public Task<ProviderPlaylist> CreatePlaylistAsync(string accessToken,
-    PlaylistCreateRequest request) {
-    throw new NotImplementedException();
+  public async Task<ProviderPlaylist> CreatePlaylistAsync(
+      AccountToken accountToken,
+      PlaylistCreateRequest request
+  ) {
+    string userId = accountToken.Id;
+
+    var createBody = new {
+      name = request.Title,
+      description = request.Description,
+      @public = request.Visibility == PlaylistVisibility.Public
+    };
+
+    var createReq = new HttpRequestMessage(
+        HttpMethod.Post,
+        $"https://api.spotify.com/v1/users/{Uri.EscapeDataString(userId)}/playlists"
+    ) {
+      Content = new StringContent(
+            JsonSerializer.Serialize(createBody),
+            Encoding.UTF8,
+            "application/json"
+        )
+    };
+
+    createReq.Headers.Authorization =
+        new AuthenticationHeaderValue("Bearer", accountToken.AccessToken);
+
+    var createRes = await _http.SendAsync(createReq);
+    if (!createRes.IsSuccessStatusCode) {
+      string err = await createRes.Content.ReadAsStringAsync();
+      throw new HttpRequestException($"Spotify CreatePlaylist failed ({createRes.StatusCode}): {err}");
+    }
+
+    string json = await createRes.Content.ReadAsStringAsync();
+    var created = JsonSerializer.Deserialize<SpotifyCreatePlaylistResponse>(json)!;
+
+    return new ProviderPlaylist {
+      Id = created.id,
+      Title = created.name,
+      Provider = OAuthProvider.Spotify,
+      ItemCount = request.TrackIds?.Count ?? 0
+    };
   }
 
   public async Task UpdatePlaylistAsync(string accessToken, PlaylistUpdateRequest request) {
@@ -117,7 +157,6 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
       await DeleteTracksAsync(request.Id, removeBody);
     }
   }
-
 
   private async Task AddTracksAsync(string playlistId, List<string> uris) {
     string url = $"https://api.spotify.com/v1/playlists/{Uri.EscapeDataString(playlistId)}/tracks";

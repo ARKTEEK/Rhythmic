@@ -1,5 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using backend.Application.Interface;
 using backend.Domain.Entity;
@@ -42,5 +43,24 @@ public class TokenService : ITokenService {
     JwtSecurityTokenHandler handler = new();
     JwtSecurityToken? token = handler.ReadJwtToken(jwt);
     return token.Claims.FirstOrDefault(c => c.Type == claimType)?.Value;
+  }
+
+  public string CreateCodeVerifier() {
+    byte[] bytes = new byte[32];
+    RandomNumberGenerator.Fill(bytes);
+    return Base64UrlEncode(bytes);
+  }
+
+  public string CreateCodeChallenge(string codeVerifier) {
+    using var sha = SHA256.Create();
+    byte[] hash = sha.ComputeHash(Encoding.ASCII.GetBytes(codeVerifier));
+    return Base64UrlEncode(hash);
+  }
+
+  public string Base64UrlEncode(byte[] input) {
+    return Convert.ToBase64String(input)
+      .Replace("+", "-")
+      .Replace("/", "_")
+      .Replace("=", "");
   }
 }

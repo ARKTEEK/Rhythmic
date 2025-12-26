@@ -1,5 +1,6 @@
 ﻿namespace backend.Domain.Enum;
 
 public enum JobType {
-  FindDuplicateTracks
+  FindDuplicateTracks,
+  TransferPlaylist
 }

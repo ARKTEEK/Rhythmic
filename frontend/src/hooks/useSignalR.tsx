@@ -1,66 +1,104 @@
 ﻿import * as signalR from "@microsoft/signalr";
-import { useCallback, useRef, useState } from "react";
-import { Payload } from "../models/JobPayload.ts";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { JobType } from "../enums/JobType.ts";
+import { ProgressPayload, StartJobResponse } from "../models/ProcessPayload.ts";
 import { ProviderTrack } from "../models/ProviderTrack.ts";
-import {
-  cancelJobRequest,
-  createHubConnection,
-  startJobRequest
-} from "../services/SignalRService.ts";
+import { cancelJobRequest, createHubConnection, startDuplicateScan, startTransferJob } from "../services/SignalRService.ts";
 
 export function useSignalR() {
   const [jobId, setJobId] = useState<string | null>(null);
-  const [currentTrack, setCurrentTrack] = useState<ProviderTrack | null>(null);
+  const [activeJobType, setActiveJobType] = useState<JobType | null>(null);
   const [isRunning, setIsRunning] = useState(false);
-  const [duplicateTracks, setDuplicateTracks] = useState<ProviderTrack[]>([]);
+
+  const [currentTrack, setCurrentTrack] = useState<ProviderTrack | null>(null);
+
+  const [processedTracksMap, setProcessedTracksMap] = useState<Partial<Record<JobType, ProviderTrack[]>>>({});
+
 
   const hubRef = useRef<signalR.HubConnection | null>(null);
 
-  const clearDuplicates = useCallback(() => {
-    setDuplicateTracks([]);
+  const resetState = useCallback(() => {
+    setProcessedTracksMap;
     setCurrentTrack(null);
     setIsRunning(false);
     setJobId(null);
+    setActiveJobType(null);
   }, []);
 
-  const startJob = useCallback(async (requestBody: object) => {
-    const data = await startJobRequest(requestBody);
-    const newJobId = data.jobId;
-    setJobId(newJobId);
-
-    const hub = createHubConnection();
-
-    hub.on("ProgressUpdate", (payload: Payload) => {
-      if (payload.jobId !== newJobId) return;
-
-      setCurrentTrack(payload.track);
-
-      if (payload.removed) {
-        setDuplicateTracks(prev => [...prev, payload.track]);
+  useEffect(() => {
+    return () => {
+      if (hubRef.current) {
+        hubRef.current.stop();
       }
-    });
-
-    hub.on("JobCompleted", (payload) => {
-      if (payload.jobId !== newJobId) return;
-      setIsRunning(false);
-    });
-
-    hub.on("JobCancelled", (payload) => {
-      if (payload.jobId !== newJobId) return;
-      setIsRunning(false);
-    });
-
-    hub.on("JobFailed", (payload) => {
-      if (payload.jobId !== newJobId) return;
-      setIsRunning(false);
-    });
-
-    await hub.start();
-    await hub.invoke("Subscribe", newJobId);
-
-    hubRef.current = hub;
-    setIsRunning(true);
+    };
   }, []);
+
+  const startJob = useCallback(async (type: JobType, requestBody: object) => {
+    resetState();
+
+    try {
+      let data: StartJobResponse;
+      if (type === JobType.FindDuplicateTracks) {
+        data = await startDuplicateScan(requestBody);
+      } else if (type === JobType.TransferPlaylist) {
+        data = await startTransferJob(requestBody);
+      } else {
+        throw new Error("Unknown Job Type");
+      }
+
+      const newJobId = data.jobId;
+      setJobId(newJobId);
+      setActiveJobType(type);
+
+      const hub = createHubConnection();
+
+      hub.on("ProgressUpdate", (payload: ProgressPayload) => {
+        if (payload.jobId !== newJobId) return;
+
+        setCurrentTrack(payload.track);
+
+        if (payload.removed) {
+          console.log(`[${type}] Matched track: ${payload.track.title} by ${payload.track.artist}`);
+          console.log(`Track URL: ${payload.track.trackUrl}`);
+
+          setProcessedTracksMap(prev => {
+            const existing = prev[type] || [];
+            return { ...prev, [type]: [...existing, payload.track] };
+          });
+        }
+      });
+
+      hub.on("JobCompleted", (payload) => {
+        if (payload.jobId !== newJobId) return;
+        setIsRunning(false);
+        // Optional: hub.stop();
+      });
+
+      hub.on("JobCancelled", (payload) => {
+        if (payload.jobId !== newJobId) return;
+        setIsRunning(false);
+        alert('Job was cancelled');
+      });
+
+      hub.on("JobFailed", (payload) => {
+        if (payload.jobId !== newJobId) return;
+        setIsRunning(false);
+        console.error("Job failed:", payload.error);
+        alert(`Job failed: ${payload.error}`);
+      });
+
+      // 3. Connect and Subscribe
+      await hub.start();
+      await hub.invoke("Subscribe", newJobId);
+
+      hubRef.current = hub;
+      setIsRunning(true);
+
+    } catch (error) {
+      console.error("Failed to start job", error);
+      setIsRunning(false);
+    }
+  }, [resetState]);
 
   const cancelJob = useCallback(async () => {
     if (!jobId) return;
@@ -69,12 +107,13 @@ export function useSignalR() {
 
   return {
     jobId,
+    activeJobType,
+    isRunning,
     currentTrack,
-    isScanning: isRunning,
-    duplicateTracks,
-    setDuplicateTracks,
+    processedTracksMap,
+    setProcessedTracksMap,
     startJob,
     cancelJob,
-    clearDuplicates
+    clearResults: resetState
   };
 }

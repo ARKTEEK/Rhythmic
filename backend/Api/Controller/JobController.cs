@@ -17,26 +17,50 @@ public class JobsController : ControllerBase {
     _cancelStore = cancelStore;
   }
 
-  [HttpPost("start")]
-  public IActionResult StartJob([FromBody] JobStartRequest req) {
-    if (string.IsNullOrWhiteSpace(req.ProviderAccountId)) {
-      return BadRequest("ProviderAccountId is required!");
-    }
+  [HttpPost("duplicates")]
+  public IActionResult StartFindDuplicates(
+    [FromBody] StartFindDuplicatesRequest req
+  ) {
+    if (string.IsNullOrWhiteSpace(req.ProviderAccountId))
+      return BadRequest("ProviderAccountId is required");
 
-    if (string.IsNullOrWhiteSpace(req.PlaylistId)) {
-      return BadRequest("PlaylistId is required!");
-    }
+    if (string.IsNullOrWhiteSpace(req.PlaylistId))
+      return BadRequest("PlaylistId is required");
 
-    JobRequest job = new() {
+    var job = new FindDuplicatesJob {
       Provider = req.Provider,
       ProviderAccountId = req.ProviderAccountId,
-      PlaylistId = req.PlaylistId,
-      JobType = req.JobType
+      PlaylistId = req.PlaylistId
     };
 
     _queue.Enqueue(job);
     return Ok(new { jobId = job.JobId });
   }
+
+
+  [HttpPost("transfer")]
+  public IActionResult StartTransfer(
+    [FromBody] StartTransferPlaylistRequest req
+  ) {
+    if (string.IsNullOrWhiteSpace(req.SourceAccountId) ||
+        string.IsNullOrWhiteSpace(req.DestinationAccountId))
+      return BadRequest("Both account IDs are required");
+
+    if (string.IsNullOrWhiteSpace(req.SourcePlaylistId))
+      return BadRequest("Both playlist IDs are required");
+
+    var job = new TransferPlaylistJob {
+      SourceProvider = req.SourceProvider,
+      SourceAccountId = req.SourceAccountId,
+      SourcePlaylistId = req.SourcePlaylistId,
+      DestinationProvider = req.DestinationProvider,
+      DestinationAccountId = req.DestinationAccountId,
+    };
+
+    _queue.Enqueue(job);
+    return Ok(new { jobId = job.JobId });
+  }
+
 
   [HttpPost("{jobId}/cancel")]
   public IActionResult CancelJob(string jobId) {

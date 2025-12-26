@@ -9,10 +9,12 @@ import {
   FaQuestionCircle
 } from "react-icons/fa";
 import OAuthCallback from "../pages/oauth/OAuthCallback.tsx";
+import AuditLogsPage from "../pages/private/AuditLogsPage.tsx";
 import ConnectionsPage from "../pages/private/ConnectionsPage.tsx";
 import DashboardPage from "../pages/private/DashboardPage.tsx";
 import PlaceholderPage from "../pages/private/PlaceholderPage.tsx";
 import PlaylistsPage from "../pages/private/PlaylistsPage.tsx";
+import UserSettingsPage from "../pages/private/SettingsPage.tsx";
 import AuthPage from "../pages/public/AuthPage.tsx";
 import HomePage from "../pages/public/HomePage.tsx";
 
@@ -30,7 +32,7 @@ export interface AppRoute {
 export const AppRoutes: AppRoute[] = [
   {
     path: "/",
-    element: <HomePage/>,
+    element: <HomePage />,
     label: "Home",
     icon: FaHome,
     category: "",
@@ -40,7 +42,7 @@ export const AppRoutes: AppRoute[] = [
 
   {
     path: "/dashboard",
-    element: <DashboardPage/>,
+    element: <DashboardPage />,
     label: "Dashboard",
     icon: FaHome,
     private: true
@@ -49,7 +51,7 @@ export const AppRoutes: AppRoute[] = [
   // My Library
   {
     path: "/playlists",
-    element: <PlaylistsPage/>,
+    element: <PlaylistsPage />,
     label: "Playlists",
     private: true,
     icon: FaList,
@@ -59,7 +61,7 @@ export const AppRoutes: AppRoute[] = [
   // Manage
   {
     path: "/activity",
-    element: <PlaceholderPage/>,
+    element: <AuditLogsPage />,
     label: "Activity",
     private: true,
     icon: FaListAlt,
@@ -67,7 +69,7 @@ export const AppRoutes: AppRoute[] = [
   },
   {
     path: "/connections",
-    element: <ConnectionsPage/>,
+    element: <ConnectionsPage />,
     label: "Connections",
     private: true,
     icon: FaLink,
@@ -75,7 +77,7 @@ export const AppRoutes: AppRoute[] = [
   },
   {
     path: "/settings",
-    element: <PlaceholderPage/>,
+    element: <UserSettingsPage />,
     label: "Settings",
     private: true,
     icon: FaCog,
@@ -85,7 +87,7 @@ export const AppRoutes: AppRoute[] = [
   // Support
   {
     path: "/help",
-    element: <PlaceholderPage/>,
+    element: <PlaceholderPage />,
     label: "Help",
     icon: FaQuestionCircle,
     category: "Support",
@@ -94,13 +96,13 @@ export const AppRoutes: AppRoute[] = [
   // Auth
   {
     path: "/auth",
-    element: <AuthPage/>,
+    element: <AuthPage />,
     publicOnly: true,
     noLayout: true,
   },
   {
     path: "/api/oauth/:provider/callback",
-    element: <OAuthCallback/>,
+    element: <OAuthCallback />,
     noLayout: true,
   },
 ];

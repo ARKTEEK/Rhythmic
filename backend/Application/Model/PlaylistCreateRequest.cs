@@ -10,3 +10,9 @@ public class PlaylistCreateRequest {
 
   public List<string>? TrackIds { get; set; }
 }
+
+public sealed class SpotifyCreatePlaylistResponse {
+  public string id { get; set; } = default!;
+  public string name { get; set; } = default!;
+  public bool @public { get; set; }
+}

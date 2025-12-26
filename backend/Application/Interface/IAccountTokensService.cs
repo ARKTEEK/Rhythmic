@@ -6,6 +6,7 @@ namespace backend.Application.Interface;
 
 public interface IAccountTokensService {
   Task<AccountToken> GetAccountToken(string providerId, OAuthProvider provider);
+  Task<AccountToken> GetAccountTokenByAccessTokenAsync(string accessToken, OAuthProvider provider);
   Task<List<AccountToken>> GetAccountTokens(string userId);
   Task<List<AccountToken>> GetAccountTokens(string userId, OAuthProvider provider);
   Task<List<AccountToken>> GetValidAccountTokens(string userId);

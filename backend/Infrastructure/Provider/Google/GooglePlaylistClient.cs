@@ -1,9 +1,11 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 using backend.Application.Interface;
 using backend.Application.Model;
+using backend.Domain.Entity;
 using backend.Domain.Enum;
 using backend.Infrastructure.DTO.Google;
 using backend.Infrastructure.Mapper.Google;
@@ -51,14 +53,13 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
     return GooglePlaylistMapper.ToProviderPlaylists(providerId, responsePlaylist);
   }
 
-  public async Task<List<ProviderTrack>> GetPlaylistTracksAsync(string accessToken,
-    string playlistId) {
+  public async Task<List<ProviderTrack>> GetPlaylistTracksAsync(string accessToken, string playlistId) {
     List<ProviderTrack> tracks = new();
     string? nextPageToken = null;
 
     do {
       string url =
-        $"https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId={playlistId}&maxResults=50";
+          $"https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId={playlistId}&maxResults=50";
       if (!string.IsNullOrEmpty(nextPageToken)) {
         url += $"&pageToken={nextPageToken}";
       }
@@ -67,25 +68,67 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
       request.Headers.Add("Authorization", $"Bearer {accessToken}");
 
       HttpResponseMessage response = await _http.SendAsync(request);
-
-      if (!response.IsSuccessStatusCode) {
-        string content = await response.Content.ReadAsStringAsync();
-        throw new HttpRequestException($"YouTube API failed ({response.StatusCode}): {content}");
-      }
+      response.EnsureSuccessStatusCode();
 
       string json = await response.Content.ReadAsStringAsync();
       GooglePlaylistTracksResponse playlistResponse =
-        JsonSerializer.Deserialize<GooglePlaylistTracksResponse>(json)!;
+          JsonSerializer.Deserialize<GooglePlaylistTracksResponse>(json)!;
 
       tracks.AddRange(GooglePlaylistMapper.ToProviderTracks(playlistResponse));
 
       nextPageToken = playlistResponse.NextPageToken;
     } while (!string.IsNullOrEmpty(nextPageToken));
 
+    // Fetch durations
+    var videoIds = tracks.Select(t => t.Id).Where(id => !string.IsNullOrEmpty(id)).ToList();
+    var durations = await GetVideoDurationsAsync(accessToken, videoIds);
+
+    foreach (var track in tracks) {
+      if (durations.TryGetValue(track.Id, out var durationMs)) {
+        track.DurationMs = durationMs;
+      }
+    }
+
     return tracks;
   }
 
-  public Task<ProviderPlaylist> CreatePlaylistAsync(string accessToken,
+
+  private async Task<Dictionary<string, int>> GetVideoDurationsAsync(string accessToken, List<string> videoIds) {
+    var durations = new Dictionary<string, int>();
+    const int batchSize = 50;
+
+    for (int i = 0; i < videoIds.Count; i += batchSize) {
+      var batchIds = videoIds.Skip(i).Take(batchSize);
+      string url = $"https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id={string.Join(",", batchIds)}";
+
+      HttpRequestMessage request = new(HttpMethod.Get, url);
+      request.Headers.Add("Authorization", $"Bearer {accessToken}");
+
+      HttpResponseMessage response = await _http.SendAsync(request);
+      response.EnsureSuccessStatusCode();
+
+      string json = await response.Content.ReadAsStringAsync();
+      var videoResponse = JsonSerializer.Deserialize<YouTubeVideosResponse>(json)!;
+
+      foreach (var item in videoResponse.Items) {
+        if (!string.IsNullOrEmpty(item.Id) && !string.IsNullOrEmpty(item.ContentDetails?.Duration)) {
+          durations[item.Id] = ParseYouTubeDurationToMs(item.ContentDetails.Duration);
+        }
+      }
+    }
+
+    return durations;
+  }
+
+  private static int ParseYouTubeDurationToMs(string isoDuration) {
+    var match = Regex.Match(isoDuration, @"PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?");
+    int hours = match.Groups[1].Success ? int.Parse(match.Groups[1].Value) : 0;
+    int minutes = match.Groups[2].Success ? int.Parse(match.Groups[2].Value) : 0;
+    int seconds = match.Groups[3].Success ? int.Parse(match.Groups[3].Value) : 0;
+    return ((hours * 3600) + (minutes * 60) + seconds) * 1000;
+  }
+
+  public Task<ProviderPlaylist> CreatePlaylistAsync(AccountToken accountToken,
     PlaylistCreateRequest request) {
     throw new NotImplementedException();
   }

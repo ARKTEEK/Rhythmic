@@ -57,14 +57,26 @@ public class JobProcessingService : BackgroundService {
           await _hub.Clients.Group(job.JobId).SendAsync("ProgressUpdate", payload, cts.Token);
         }
 
-        if (job.JobType == JobType.FindDuplicateTracks) {
+        if (job is FindDuplicatesJob dupJob) {
           await playlistService.FindDuplicateTracksAsync(
-            job.Provider,
-            job.ProviderAccountId,
-            job.PlaylistId,
+            dupJob.Provider,
+            dupJob.ProviderAccountId,
+            dupJob.PlaylistId,
             OnProgress,
             cts.Token
           );
+        } else if (job is TransferPlaylistJob transferJob) {
+          await playlistService.TransferPlaylistAsync(
+            transferJob.SourceProvider,
+            transferJob.DestinationProvider,
+            transferJob.SourceAccountId,
+            transferJob.DestinationAccountId,
+            transferJob.SourcePlaylistId,
+            OnProgress,
+            cts.Token
+          );
+        } else {
+          throw new InvalidOperationException($"Unsupported job type {job.JobType}");
         }
 
         await _hub.Clients

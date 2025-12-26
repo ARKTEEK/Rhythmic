@@ -38,4 +38,13 @@ public interface IPlaylistService {
     string playlistId,
     Func<int, ProviderTrack, bool, Task> onProgress,
     CancellationToken ct);
+
+  public Task TransferPlaylistAsync(
+    OAuthProvider sourceProvider,
+    OAuthProvider destinationProvider,
+    string sourceAccountId,
+    string destinationAccountId,
+    string sourcePlaylistId,
+    Func<int, ProviderTrack, bool, Task> onProgress,
+    CancellationToken ct);
 }

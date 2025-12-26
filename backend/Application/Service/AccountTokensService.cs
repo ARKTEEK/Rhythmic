@@ -4,6 +4,7 @@ using backend.Domain.Entity;
 using backend.Domain.Enum;
 using backend.Infrastructure.Mapper.Google;
 using backend.Infrastructure.Persistence;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Service;
@@ -15,6 +16,29 @@ public class AccountTokensService : IAccountTokensService {
   public AccountTokensService(DatabaseContext db, IProviderFactory providerFactory) {
     _db = db;
     _providerFactory = providerFactory;
+  }
+
+  public async Task<AccountToken> GetAccountTokenByAccessTokenAsync(string accessToken, OAuthProvider provider) {
+    if (string.IsNullOrWhiteSpace(accessToken))
+      throw new ArgumentException("Access token cannot be null or empty.", nameof(accessToken));
+
+    AccountToken? accountToken = await _db.AccountTokens
+        .FirstOrDefaultAsync(x => x.AccessToken == accessToken && x.Provider == provider);
+
+    if (accountToken == null)
+      throw new NullReferenceException($"No account token found for provider {provider} with the given access token.");
+
+    if (accountToken.ExpiresAt <= DateTime.UtcNow) {
+      TokenInfo refreshed = await RefreshAsync(accountToken.Id, accountToken.Provider);
+
+      accountToken.AccessToken = refreshed.AccessToken;
+      accountToken.RefreshToken = refreshed.RefreshToken;
+      accountToken.ExpiresAt = DateTime.UtcNow.AddSeconds(refreshed.ExpiresIn);
+      accountToken.Scope = refreshed.Scope;
+      accountToken.TokenType = refreshed.TokenType;
+    }
+
+    return accountToken;
   }
 
   public async Task<AccountToken> GetAccountToken(string providerId, OAuthProvider provider) {

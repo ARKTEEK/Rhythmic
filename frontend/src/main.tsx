@@ -1,11 +1,11 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
-import AuthProvider from "./context/AuthProvider.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { TopNavActionsProvider } from "./hooks/useTopNavActions.tsx";
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
 import { ToastContainer } from "react-toastify";
+import App from './App.tsx';
+import AuthProvider from "./context/AuthProvider.tsx";
+import { TopNavActionsProvider } from "./hooks/useTopNavActions.tsx";
+import './index.css';
 
 const queryClient = new QueryClient();
 
