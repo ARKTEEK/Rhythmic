@@ -137,12 +137,37 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
     _http.DefaultRequestHeaders.Authorization =
       new AuthenticationHeaderValue("Bearer", accessToken);
 
+    Console.WriteLine(request);
+
+
+    if (request.ReplaceAll == true && request.AddItems?.Any() == true) {
+      List<ProviderTrack> currentTracks = await GetPlaylistTracksAsync(accessToken, request.Id);
+
+      foreach (var track in currentTracks.OrderByDescending(t => t.Position ?? 0)) {
+        if (!string.IsNullOrEmpty(track.PlaylistId)) {
+          try {
+            await DeleteTracksAsync(track.PlaylistId);
+          } catch {
+            // Continue even if delete fails
+          }
+        }
+      }
+
+      foreach (var track in request.AddItems.OrderBy(t => t.Position ?? 0)) {
+        string videoId = GooglePlaylistMapper.ToYouTubeUri(track);
+        int position = track.Position ?? 0;
+        await AddTracksAsync(request.Id, videoId, position: position);
+      }
+
+      return;
+    }
+
     if (request.AddItems != null && request.AddItems.Any()) {
       List<string> uris = request.AddItems.Select(GooglePlaylistMapper.ToYouTubeUri).ToList();
 
       for (int i = 0; i < uris.Count; i += 1) {
         string chunk = uris.Skip(i).Take(1).First();
-        await AddTracksAsync(request.Id, chunk);
+        await AddTracksAsync(request.Id, chunk, position: request.AddItems[i].Position);
       }
     }
 
@@ -154,7 +179,7 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
   }
 
   private async Task AddTracksAsync(string playlistId, string videoId,
-    string onBehalfOfContentOwner = "") {
+    string onBehalfOfContentOwner = "", int? position = null) {
     string url = "https://www.googleapis.com/youtube/v3/playlistItems";
 
     Dictionary<string, string> query = new() {
@@ -169,7 +194,7 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
       Query = string.Join("&", query.Select(kvp => $"{kvp.Key}={Uri.EscapeDataString(kvp.Value)}"))
     };
 
-    var body = GooglePlaylistMapper.CreatePlaylistItemInsertBody(playlistId, videoId);
+    var body = GooglePlaylistMapper.CreatePlaylistItemInsertBody(playlistId, videoId, position);
 
     HttpRequestMessage request = new(HttpMethod.Post, uriBuilder.Uri) {
       Content = new StringContent(
@@ -193,7 +218,6 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
 
     response.EnsureSuccessStatusCode();
   }
-
 
   public async Task DeletePlaylistAsync(string accessToken, string playlistId) {
     string url = $"https://www.googleapis.com/youtube/v3/playlists?id={playlistId}";

@@ -39,6 +39,7 @@ public class PlaylistSnapshotService : IPlaylistSnapshotService {
       CreatedAt = DateTime.UtcNow
     };
 
+
     _context.PlaylistSnapshots.Add(snapshot);
     await _context.SaveChangesAsync();
   }
@@ -74,7 +75,7 @@ public class PlaylistSnapshotService : IPlaylistSnapshotService {
       return true;
     }
 
-    string GetTrackKey(ProviderTrack track) {
+    static string GetTrackKey(ProviderTrack track) {
       if (!string.IsNullOrWhiteSpace(track.TrackUrl)) {
         return track.TrackUrl.ToLowerInvariant().Trim();
       }
@@ -101,16 +102,29 @@ public class PlaylistSnapshotService : IPlaylistSnapshotService {
       .OrderByDescending(s => s.CreatedAt)
       .ToListAsync();
 
-    return snapshots.Select(s => {
-      List<ProviderTrack>? tracks = JsonSerializer.Deserialize<List<ProviderTrack>>(s.TracksJson, JsonOptions);
-      return new PlaylistSnapshotDto {
-        Id = s.Id,
-        Provider = s.Provider,
-        PlaylistId = s.PlaylistId,
-        CreatedAt = s.CreatedAt,
-        TrackCount = tracks?.Count ?? 0
-      };
+    var snapshotDetails = snapshots.Select(s => new {
+      Snapshot = s,
+      Tracks = JsonSerializer.Deserialize<List<ProviderTrack>>(s.TracksJson, JsonOptions) ?? new List<ProviderTrack>()
     }).ToList();
+
+    var result = new List<PlaylistSnapshotDto>();
+
+    for (int i = 0; i < snapshotDetails.Count; i++) {
+      var current = snapshotDetails[i];
+      var previousTracks = i < snapshotDetails.Count - 1
+        ? snapshotDetails[i + 1].Tracks
+        : new List<ProviderTrack>();
+
+      result.Add(new PlaylistSnapshotDto {
+        Id = current.Snapshot.Id,
+        Provider = current.Snapshot.Provider,
+        PlaylistId = current.Snapshot.PlaylistId,
+        CreatedAt = current.Snapshot.CreatedAt,
+        TrackCount = current.Tracks.Count,
+      });
+    }
+
+    return result;
   }
 
   public async Task<PlaylistSnapshotDto?> GetSnapshotAsync(int snapshotId) {
@@ -128,7 +142,7 @@ public class PlaylistSnapshotService : IPlaylistSnapshotService {
       Provider = snapshot.Provider,
       PlaylistId = snapshot.PlaylistId,
       CreatedAt = snapshot.CreatedAt,
-      TrackCount = tracks?.Count ?? 0
+      TrackCount = tracks?.Count ?? 0,
     };
   }
 
@@ -154,7 +168,7 @@ public class PlaylistSnapshotService : IPlaylistSnapshotService {
     List<ProviderTrack> currentTracks = await _playlistService.GetTracksByPlaylistIdAsync(
       provider, playlistId, providerAccountId);
 
-    string GetTrackKey(ProviderTrack track) {
+    static string GetTrackKey(ProviderTrack track) {
       if (!string.IsNullOrWhiteSpace(track.TrackUrl)) {
         return track.TrackUrl.ToLowerInvariant().Trim();
       }
@@ -181,7 +195,7 @@ public class PlaylistSnapshotService : IPlaylistSnapshotService {
         Provider = snapshot.Provider,
         PlaylistId = snapshot.PlaylistId,
         CreatedAt = snapshot.CreatedAt,
-        TrackCount = snapshotTracks.Count
+        TrackCount = snapshotTracks.Count,
       },
       CurrentTracks = currentTracks,
       SnapshotTracks = snapshotTracks,
@@ -208,7 +222,7 @@ public class PlaylistSnapshotService : IPlaylistSnapshotService {
     List<ProviderTrack> currentTracks = await _playlistService.GetTracksByPlaylistIdAsync(
       provider, playlistId, providerAccountId);
 
-    string GetTrackKey(ProviderTrack track) {
+    static string GetTrackKey(ProviderTrack track) {
       if (!string.IsNullOrWhiteSpace(track.TrackUrl)) {
         return track.TrackUrl.ToLowerInvariant().Trim();
       }
@@ -239,6 +253,18 @@ public class PlaylistSnapshotService : IPlaylistSnapshotService {
     if (tracksToAdd.Any() || tracksToRemove.Any()) {
       await _playlistService.UpdatePlaylistAsync(provider, providerAccountId, updateRequest);
     }
+  }
+
+  public async Task DeleteSnapshotAsync(string userId, int snapshotId) {
+    PlaylistSnapshot? snapshot = await _context.PlaylistSnapshots
+      .FirstOrDefaultAsync(s => s.Id == snapshotId && s.UserId == userId);
+
+    if (snapshot == null) {
+      throw new InvalidOperationException("Snapshot not found or you don't have permission to delete it");
+    }
+
+    _context.PlaylistSnapshots.Remove(snapshot);
+    await _context.SaveChangesAsync();
   }
 }
 

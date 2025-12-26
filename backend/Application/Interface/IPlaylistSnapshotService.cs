@@ -37,5 +37,7 @@ public interface IPlaylistSnapshotService {
     string playlistId,
     string providerAccountId,
     int snapshotId);
+
+  Task DeleteSnapshotAsync(string userId, int snapshotId);
 }
 

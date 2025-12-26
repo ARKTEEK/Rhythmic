@@ -43,3 +43,7 @@ export const revertToSnapshot = async (
   );
 };
 
+export const deleteSnapshot = async (snapshotId: number): Promise<void> => {
+  await axios.delete(`${API_BASE_URL}/snapshots/${snapshotId}`);
+};
+

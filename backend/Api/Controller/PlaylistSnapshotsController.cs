@@ -89,5 +89,22 @@ public class PlaylistSnapshotsController : ControllerBase {
       return NotFound(ex.Message);
     }
   }
+
+  [Authorize]
+  [HttpDelete("snapshots/{snapshotId}")]
+  public async Task<IActionResult> DeleteSnapshotAsync(
+    [FromRoute] int snapshotId) {
+    User? user = await this.GetCurrentUserAsync(_userManager);
+    if (user == null) {
+      return Unauthorized();
+    }
+
+    try {
+      await _snapshotService.DeleteSnapshotAsync(user.Id, snapshotId);
+      return NoContent();
+    } catch (InvalidOperationException ex) {
+      return NotFound(ex.Message);
+    }
+  }
 }
 

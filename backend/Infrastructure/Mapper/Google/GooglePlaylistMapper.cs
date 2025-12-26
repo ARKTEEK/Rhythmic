@@ -97,14 +97,15 @@ public static class GooglePlaylistMapper {
     return track.Id;
   }
 
-  public static object CreatePlaylistItemInsertBody(string playlistId, string videoId) {
+  public static object CreatePlaylistItemInsertBody(string playlistId, string videoId, int? position) {
     return new {
       snippet = new {
         playlistId = playlistId,
         resourceId = new {
           kind = "youtube#video",
           videoId = videoId
-        }
+        },
+        position = position ?? 0
       }
     };
   }

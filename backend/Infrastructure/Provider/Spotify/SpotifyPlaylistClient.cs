@@ -141,6 +141,16 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
     _http.DefaultRequestHeaders.Authorization =
         new AuthenticationHeaderValue("Bearer", accessToken);
 
+    if (request.ReplaceAll == true && request.AddItems?.Any() == true) {
+      List<string> uris = request.AddItems
+          .OrderBy(t => t.Position ?? 0)
+          .Select(SpotifyPlaylistMapper.ToSpotifyUri)
+          .ToList();
+
+      await ReplaceAllTracksAsync(request.Id, uris);
+      return;
+    }
+
     if (request.AddItems?.Any() == true) {
       List<string> uris = request.AddItems
           .Select(SpotifyPlaylistMapper.ToSpotifyUri)
@@ -148,7 +158,7 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
 
       for (int i = 0; i < uris.Count; i += 100) {
         List<string> chunk = uris.Skip(i).Take(100).ToList();
-        await AddTracksAsync(request.Id, chunk);
+        await AddTracksAsync(request.Id, chunk, request.AddItems[i].Position);
       }
     }
 
@@ -158,9 +168,55 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
     }
   }
 
-  private async Task AddTracksAsync(string playlistId, List<string> uris) {
+  private async Task ReplaceAllTracksAsync(string playlistId, List<string> uris) {
     string url = $"https://api.spotify.com/v1/playlists/{Uri.EscapeDataString(playlistId)}/tracks";
-    var body = new { uris };
+
+    if (uris.Count <= 100) {
+      var body = new { uris };
+      HttpRequestMessage req = new(HttpMethod.Put, url) {
+        Content = new StringContent(
+          JsonSerializer.Serialize(body),
+          Encoding.UTF8,
+          "application/json"
+        )
+      };
+
+      HttpResponseMessage res = await _http.SendAsync(req);
+      if (!res.IsSuccessStatusCode) {
+        string err = await res.Content.ReadAsStringAsync();
+        throw new HttpRequestException($"Spotify ReplaceAllTracks failed ({res.StatusCode}): {err}");
+      }
+    } else {
+      List<string> firstBatch = uris.Take(100).ToList();
+      var putBody = new { uris = firstBatch };
+      HttpRequestMessage putReq = new(HttpMethod.Put, url) {
+        Content = new StringContent(
+          JsonSerializer.Serialize(putBody),
+          Encoding.UTF8,
+          "application/json"
+        )
+      };
+
+      HttpResponseMessage putRes = await _http.SendAsync(putReq);
+      if (!putRes.IsSuccessStatusCode) {
+        string err = await putRes.Content.ReadAsStringAsync();
+        throw new HttpRequestException($"Spotify ReplaceAllTracks failed ({putRes.StatusCode}): {err}");
+      }
+
+      for (int i = 100; i < uris.Count; i += 100) {
+        List<string> chunk = uris.Skip(i).Take(100).ToList();
+        await AddTracksAsync(playlistId, chunk);
+      }
+    }
+  }
+
+  private async Task AddTracksAsync(string playlistId, List<string> uris, int? position = null) {
+    string url = $"https://api.spotify.com/v1/playlists/{Uri.EscapeDataString(playlistId)}/tracks";
+
+    object body = position.HasValue
+      ? new { uris, position = position.Value }
+      : new { uris };
+
     HttpRequestMessage req = new(HttpMethod.Post, url) {
       Content = new StringContent(
         JsonSerializer.Serialize(body),
