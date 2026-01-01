@@ -144,4 +144,40 @@ public class PlaylistsController : ControllerBase {
 
     return Ok(tracks);
   }
+
+  [Authorize]
+  [HttpPost("{provider}/{playlistId}/split")]
+  public async Task<IActionResult> SplitPlaylistAsync(
+    OAuthProvider provider,
+    [FromRoute] string playlistId,
+    [FromQuery] string providerAccountId,
+    [FromQuery] string destinationAccountId,
+    [FromBody] PlaylistSplitRequest request) {
+    User? user = await this.GetCurrentUserAsync(_userManager);
+    if (user == null) {
+      return Unauthorized();
+    }
+
+    if (string.IsNullOrWhiteSpace(providerAccountId)) {
+      return BadRequest("providerAccountId is required.");
+    }
+
+    if (string.IsNullOrWhiteSpace(destinationAccountId)) {
+      return BadRequest("destinationAccountId is required.");
+    }
+
+    request.Provider = provider;
+    request.PlaylistId = playlistId;
+    request.ProviderAccountId = providerAccountId;
+    request.DestinationProviderAccountId = destinationAccountId;
+
+    try {
+      List<ProviderPlaylist> createdPlaylists = await _playlistService.SplitPlaylistAsync(
+        provider, playlistId, providerAccountId, destinationAccountId, request);
+
+      return Ok(createdPlaylists);
+    } catch (Exception ex) {
+      return BadRequest(ex.Message);
+    }
+  }
 }

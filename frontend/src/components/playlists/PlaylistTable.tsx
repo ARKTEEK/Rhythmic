@@ -6,6 +6,7 @@
   Link,
   List,
   Music,
+  Scissors,
   Server,
   SortDesc,
   ToolCase,
@@ -26,6 +27,7 @@ interface PlaylistTableProps {
   handleFindDuplicates: (playlist: ProviderPlaylist) => void;
   handleTransfer: (playlist: ProviderPlaylist) => void;
   handleHistory: (playlist: ProviderPlaylist) => void;
+  handleSplit: (playlist: ProviderPlaylist) => void;
   getPlaylistMeta: (id: string, fallbackCount: number) => PlaylistMeta;
 }
 
@@ -39,6 +41,7 @@ export function PlaylistTable({
   handleFindDuplicates,
   handleTransfer,
   handleHistory,
+  handleSplit,
   getPlaylistMeta,
 }: PlaylistTableProps) {
 
@@ -186,19 +189,21 @@ export function PlaylistTable({
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleFindDuplicates(playlist);
+                        handleSplit(playlist);
                       }}
-                      className="p-1 bg-[#ffb74a] hover:bg-[#ffa726] border-black box-style-md hover:cursor-pointer">
-                      <ExternalLink className="w-4 h-4 text-black" />
+                      className="p-1 bg-[#9b88c7] hover:bg-[#8a77b6] border-black box-style-md hover:cursor-pointer"
+                      title="Split Playlist">
+                      <Scissors className="w-4 h-4 text-black" />
                     </button>
 
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDelete(playlist);
+                        handleFindDuplicates(playlist);
                       }}
-                      className="p-1 bg-[#f26b6b] hover:bg-[#e55d5d] border-black box-style-md hover:cursor-pointer">
-                      <Trash2 className="w-4 h-4 text-black" />
+                      className="p-1 bg-[#ffb74a] hover:bg-[#ffa726] border-black box-style-md hover:cursor-pointer"
+                      title="Find Duplicates">
+                      <ExternalLink className="w-4 h-4 text-black" />
                     </button>
 
                     <button
@@ -206,8 +211,19 @@ export function PlaylistTable({
                         e.stopPropagation();
                         handleTransfer(playlist);
                       }}
-                      className="p-1 bg-[#f26b6b] hover:bg-[#e55d5d] border-black box-style-md hover:cursor-pointer">
+                      className="p-1 bg-[#40a8d0] hover:bg-[#2f97bf] border-black box-style-md hover:cursor-pointer"
+                      title="Transfer Playlist">
                       <Server className="w-4 h-4 text-black" />
+                    </button>
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(playlist);
+                      }}
+                      className="p-1 bg-[#f26b6b] hover:bg-[#e55d5d] border-black box-style-md hover:cursor-pointer"
+                      title="Delete Playlist">
+                      <Trash2 className="w-4 h-4 text-black" />
                     </button>
                   </div>
                 </td>

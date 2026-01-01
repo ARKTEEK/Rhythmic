@@ -4,7 +4,6 @@ using System.Text.Json;
 
 using backend.Application.Interface;
 using backend.Application.Model;
-using backend.Application.Service;
 using backend.Domain.Entity;
 using backend.Domain.Enum;
 using backend.Infrastructure.DTO.Spotify;
@@ -156,9 +155,11 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
           .Select(SpotifyPlaylistMapper.ToSpotifyUri)
           .ToList();
 
+      // Add tracks in batches of 100
+      // For new playlists, we don't need positions - tracks are added in order
       for (int i = 0; i < uris.Count; i += 100) {
         List<string> chunk = uris.Skip(i).Take(100).ToList();
-        await AddTracksAsync(request.Id, chunk, request.AddItems[i].Position);
+        await AddTracksAsync(request.Id, chunk, position: null);
       }
     }
 
@@ -278,4 +279,8 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
       JsonSerializer.Deserialize<SpotifyPlaylistTracksResponse>(json)!;
     return page;
   }
+
+    public Task<Dictionary<string, int>> GetVideoDurationsAsync(string accessToken, List<string> videoIds) {
+        throw new NotImplementedException();
+    }
 }

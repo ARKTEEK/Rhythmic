@@ -1,9 +1,8 @@
-﻿import { useEffect, useMemo } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+﻿import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useMemo } from "react";
 import { FaDownload, FaRedo, FaSync } from "react-icons/fa";
 import { useSetTopNavActions } from "../../context/TopNavActionsContext.tsx";
 import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
-import { FaScissors } from "react-icons/fa6";
 
 interface PlaylistActionsProps {
   selectedIds: Set<string>;
@@ -49,15 +48,6 @@ export default function PlaylistActions({
       onClick: handleExport,
       active: hasSelection,
       Icon: FaDownload,
-      buttonClassName: "bg-yellow-200 border border-brown-800",
-      textClassName: "text-brown-900",
-    },
-    {
-      id: "split",
-      label: hasSelection ? `Split (${ selectedIds.size })` : "Split",
-      onClick: handleSync,
-      active: selectedIds.size === 1,
-      Icon: FaScissors,
       buttonClassName: "bg-yellow-200 border border-brown-800",
       textClassName: "text-brown-900",
     },

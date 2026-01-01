@@ -4,6 +4,7 @@ import { PaginationControls } from "../../components/playlists/PaginationControl
 import PlaylistActions from "../../components/playlists/PlaylistActionts.tsx";
 import PlaylistDetailsModal from "../../components/playlists/PlaylistDetailsModal.tsx";
 import PlaylistHistoryModal from "../../components/playlists/PlaylistHistoryModal.tsx";
+import PlaylistSplitModal from "../../components/playlists/PlaylistSplitModal.tsx";
 import { PlaylistTable } from "../../components/playlists/PlaylistTable.tsx";
 import { PlaylistTransferModal } from "../../components/playlists/PlaylistTransferModal.tsx";
 import Window from "../../components/ui/Window.tsx";
@@ -67,6 +68,7 @@ export default function PlaylistsPage() {
   const [playlistToDelete, setPlaylistToDelete] = useState<ProviderPlaylist | null>(null);
   const [transferPlaylist, setTransferPlaylist] = useState<ProviderPlaylist | null>(null);
   const [historyPlaylist, setHistoryPlaylist] = useState<ProviderPlaylist | null>(null);
+  const [splitPlaylist, setSplitPlaylist] = useState<ProviderPlaylist | null>(null);
   const { data: connections = [] } = useQuery(createConnectionsQueryOptions());
 
   const [page, setPage] = useState(1);
@@ -93,6 +95,10 @@ export default function PlaylistsPage() {
 
   const handleTransfer = (playlist: ProviderPlaylist) => {
     setTransferPlaylist(playlist);
+  };
+
+  const handleSplit = (playlist: ProviderPlaylist) => {
+    setSplitPlaylist(playlist);
   };
 
   const handleFindDuplicates = async (playlist: ProviderPlaylist) => {
@@ -197,6 +203,7 @@ export default function PlaylistsPage() {
                 handleFindDuplicates={handleFindDuplicates}
                 handleTransfer={handleTransfer}
                 handleHistory={setHistoryPlaylist}
+                handleSplit={handleSplit}
                 getPlaylistMeta={getPlaylistMeta}
               />
 
@@ -276,6 +283,19 @@ export default function PlaylistsPage() {
           onRevert={() => {
             refetch();
             setHistoryPlaylist(null);
+          }}
+        />
+      )}
+
+      {splitPlaylist && (
+        <PlaylistSplitModal
+          playlist={splitPlaylist}
+          onClose={() => setSplitPlaylist(null)}
+          accentSoft={getProviderColors(getProviderName(splitPlaylist.provider)).accentSoft}
+          accentText={getProviderColors(getProviderName(splitPlaylist.provider)).text}
+          onSplitSuccess={() => {
+            refetch();
+            setSplitPlaylist(null);
           }}
         />
       )}

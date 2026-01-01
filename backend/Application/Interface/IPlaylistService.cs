@@ -47,4 +47,11 @@ public interface IPlaylistService {
     string sourcePlaylistId,
     Func<int, ProviderTrack, bool, Task> onProgress,
     CancellationToken ct);
+
+  public Task<List<ProviderPlaylist>> SplitPlaylistAsync(
+    OAuthProvider provider,
+    string playlistId,
+    string providerAccountId,
+    string destinationAccountId,
+    PlaylistSplitRequest request);
 }

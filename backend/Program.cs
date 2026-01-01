@@ -1,4 +1,5 @@
 using System.Text;
+
 using backend.Api.Hub;
 using backend.Application.Interface;
 using backend.Application.Model;
@@ -8,6 +9,7 @@ using backend.Infrastructure.Factory;
 using backend.Infrastructure.Persistence;
 using backend.Infrastructure.Provider.Google;
 using backend.Infrastructure.Provider.Spotify;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -35,21 +37,21 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
     .EnableDetailedErrors());
 
 builder.Services.AddIdentity<User, IdentityRole>(options => {
-    options.Password.RequireDigit = true;
-    options.Password.RequiredLength = 8;
-  })
+  options.Password.RequireDigit = true;
+  options.Password.RequiredLength = 8;
+})
   .AddEntityFrameworkStores<DatabaseContext>();
 
 string jwtScheme = JwtBearerDefaults.AuthenticationScheme;
 
 builder.Services.AddAuthentication(options => {
-    options.DefaultAuthenticateScheme = jwtScheme;
-    options.DefaultChallengeScheme = jwtScheme;
-    options.DefaultForbidScheme = jwtScheme;
-    options.DefaultScheme = jwtScheme;
-    options.DefaultSignInScheme = jwtScheme;
-    options.DefaultSignOutScheme = jwtScheme;
-  })
+  options.DefaultAuthenticateScheme = jwtScheme;
+  options.DefaultChallengeScheme = jwtScheme;
+  options.DefaultForbidScheme = jwtScheme;
+  options.DefaultScheme = jwtScheme;
+  options.DefaultSignInScheme = jwtScheme;
+  options.DefaultSignOutScheme = jwtScheme;
+})
   .AddJwtBearer(options => {
     ConfigurationManager configuration = builder.Configuration;
     SymmetricSecurityKey signingKey = new(Encoding.UTF8.GetBytes(configuration["JWT:SigningKey"]));
@@ -82,6 +84,8 @@ builder.Services.AddSingleton<JobCancellationStore>();
 builder.Services.AddHostedService<JobProcessingService>();
 
 builder.Services.AddHttpClient();
+
+builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 
 builder.Services.AddScoped<IProviderClient, GoogleProviderClient>();
 builder.Services.AddScoped<IProviderClient, SpotifyProviderClient>();

@@ -1,30 +1,18 @@
+import { useQuery } from "@tanstack/react-query";
 import { Filter } from "lucide-react";
 import { useMemo, useState } from "react";
 import { AuditLogTable } from "../../components/audit/AuditLogsTable";
 import { PaginationControls } from "../../components/playlists/PaginationControls";
 import { SearchBar } from "../../components/ui/SearchBar";
 import Window from "../../components/ui/Window";
-import { AuditLog } from "../../models/AuditLog";
-
-const seedLogs: AuditLog[] = [
-  { id: "1", timestamp: "2025-12-11T08:12:00Z", action: "SYNC", details: "Placeholder", playlistId: "p1", playlistTitle: "Title", actor: "Displayname" },
-  { id: "2", timestamp: "2025-12-11T08:25:00Z", action: "DELETE_SONG", details: "Placeholder", playlistId: "p1", playlistTitle: "Title", actor: "Displayname" },
-  { id: "3", timestamp: "2025-12-11T09:02:00Z", action: "CONVERT", details: "Placeholder", playlistId: "p2", playlistTitle: "Title", actor: "Displayname" },
-  { id: "4", timestamp: "2025-12-11T10:11:00Z", action: "SYNC", details: "Placeholder", playlistId: "p3", playlistTitle: "Title", actor: "System" },
-  { id: "5", timestamp: "2025-12-11T10:35:00Z", action: "DELETE_SONG", details: "Placeholder", playlistId: "p4", playlistTitle: "Title", actor: "Displayname" },
-  { id: "6", timestamp: "2025-12-11T11:00:00Z", action: "SYNC", details: "Placeholder", playlistId: "p5", playlistTitle: "Title", actor: "System" },
-  { id: "7", timestamp: "2025-12-11T11:05:00Z", action: "DELETE_SONG", details: "Placeholder", playlistId: "p5", playlistTitle: "Title", actor: "Displayname" },
-  { id: "8", timestamp: "2025-12-11T12:24:00Z", action: "CONVERT", details: "Placeholder", playlistId: "p6", playlistTitle: "Title", actor: "Displayname" },
-  { id: "9", timestamp: "2025-12-11T12:33:00Z", action: "SYNC", details: "Placeholder", playlistId: "p6", playlistTitle: "Title", actor: "System" },
-  { id: "10", timestamp: "2025-12-10T23:50:00Z", action: "SYNC", details: "Placeholder", playlistId: "p3", playlistTitle: "Title", actor: "System" },
-];
+import { AuditLog, getActionString } from "../../models/AuditLog";
+import { getAuditLogs } from "../../services/AuditLogService";
 
 export default function AuditLogsPage() {
-  const [logs] = useState<AuditLog[]>(() =>
-    [...seedLogs].sort(
-      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    )
-  );
+  const { data: logs = [], isLoading } = useQuery<AuditLog[]>({
+    queryKey: ["audit-logs"],
+    queryFn: getAuditLogs,
+  });
 
   const [search, setSearch] = useState("");
   const [actionFilter, setActionFilter] = useState<"ALL" | string>("ALL");
@@ -33,13 +21,13 @@ export default function AuditLogsPage() {
 
   function filteredLogs(src: AuditLog[], s: string, action: string) {
     return src.filter((log) => {
+      const actionString = getActionString(log.type);
       const matchesSearch =
         !s.trim() ||
-        log.details.toLowerCase().includes(s.toLowerCase()) ||
-        log.action.toLowerCase().includes(s.toLowerCase()) ||
-        (log.playlistTitle || "").toLowerCase().includes(s.toLowerCase());
+        (log.description || "").toLowerCase().includes(s.toLowerCase()) ||
+        actionString.toLowerCase().includes(s.toLowerCase());
 
-      const matchesAction = action === "ALL" || log.action === action;
+      const matchesAction = action === "ALL" || actionString === action;
       return matchesSearch && matchesAction;
     });
   }
@@ -93,17 +81,27 @@ export default function AuditLogsPage() {
                     setPage(1);
                   }}>
                   <option value="ALL">All Actions</option>
-                  <option value="SYNC">Sync</option>
-                  <option value="DELETE_SONG">Delete Song</option>
-                  <option value="CONVERT">Convert</option>
+                  <option value="TRANSFER">Transfer</option>
+                  <option value="DELETE_PLAYLIST">Delete Playlist</option>
+                  <option value="UPDATE_PLAYLIST">Update Playlist</option>
+                  <option value="CREATE_PLAYLIST">Create Playlist</option>
+                  <option value="SPLIT_PLAYLIST">Split Playlist</option>
+                  <option value="ADD_TRACK">Add Track</option>
+                  <option value="REMOVE_TRACK">Remove Track</option>
                 </select>
               </div>
             </div>
           </div>
 
-          <AuditLogTable
-            logs={pageItems}
-            onSelectLog={setSelectedLog} />
+          {isLoading ? (
+            <div className="flex-1 flex items-center justify-center italic text-gray-600">
+              Loading audit logs...
+            </div>
+          ) : (
+            <AuditLogTable
+              logs={pageItems}
+              onSelectLog={setSelectedLog} />
+          )}
 
           <PaginationControls
             page={page}

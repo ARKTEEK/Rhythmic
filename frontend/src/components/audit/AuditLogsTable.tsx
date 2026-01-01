@@ -1,5 +1,5 @@
 import { Activity, Clock, FileText, Info, SortDesc, ToolCase } from "lucide-react";
-import { AuditLog } from "../../models/AuditLog";
+import { AuditLog, getActionString, getExecutorName } from "../../models/AuditLog";
 import { formatDateOnly, formatTime } from "../../utils/formatUtils";
 import ActionIcon from "../ui/Icon/ActionIcon";
 
@@ -60,7 +60,7 @@ export function AuditLogTable({ logs, onSelectLog }: AuditLogTableProps) {
         <tbody>
           {logs.map((log, i) => (
             <tr
-              key={log.id}
+              key={log.id.toString()}
               className={`
                 h-[56px] transition-all
                 ${i % 2 === 0 ? "bg-[#fffaf0]" : "bg-[#fff3e6]"}
@@ -69,34 +69,29 @@ export function AuditLogTable({ logs, onSelectLog }: AuditLogTableProps) {
               <td className="px-2 py-1 align-middle">
                 <div className="group inline-block">
                   <span className="text-xs font-bold" aria-hidden>
-                    {formatDateOnly(log.timestamp)}
+                    {formatDateOnly(log.createdAt)}
                   </span>
                   <span
                     tabIndex={0}
                     className="ml-2 text-xs opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-150 focus:outline-none"
-                    title={new Date(log.timestamp).toLocaleString()}
+                    title={new Date(log.createdAt).toLocaleString()}
                     style={{ textDecoration: "underline dotted" }}>
-                    {formatTime(log.timestamp)}
+                    {formatTime(log.createdAt)}
                   </span>
                 </div>
               </td>
 
               <td className="px-2 py-1 text-center align-middle">
                 <div className="flex justify-center">
-                  <ActionIcon action={log.action} label={log.action} />
+                  <ActionIcon action={getActionString(log.type)} label={getActionString(log.type)} />
                 </div>
               </td>
 
               <td className="pl-12 pr-2 py-2 align-middle max-w-[48ch] break-words">
-                <div className="text-sm font-medium">{log.details}</div>
+                <div className="text-sm font-medium">{log.description || "No description"}</div>
                 <div className="text-xs text-gray-600 mt-1 flex gap-2">
-                  {log.playlistTitle && (
-                    <span>
-                      <strong>PL:</strong> {log.playlistTitle}
-                    </span>
-                  )}
                   <span>
-                    <strong>By:</strong> {log.actor || "system"}
+                    <strong>By:</strong> {getExecutorName(log.executor)}
                   </span>
                 </div>
               </td>

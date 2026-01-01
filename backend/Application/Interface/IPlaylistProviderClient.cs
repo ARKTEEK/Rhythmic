@@ -27,4 +27,6 @@ public interface IPlaylistProviderClient {
   public Task DeletePlaylistAsync(
     string accessToken,
     string playlistId);
+
+  public Task<Dictionary<string, int>> GetVideoDurationsAsync(string accessToken, List<string> videoIds);
 }

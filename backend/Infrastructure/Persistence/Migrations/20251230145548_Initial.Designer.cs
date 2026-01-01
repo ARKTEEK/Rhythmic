@@ -12,7 +12,7 @@ using backend.Infrastructure.Persistence;
 namespace backend.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20250930161745_Initial")]
+    [Migration("20251230145548_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -24,6 +24,38 @@ namespace backend.Infrastructure.Persistence.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+
+            modelBuilder.Entity("AuditLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("Executor")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AuditLogs");
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -53,13 +85,13 @@ namespace backend.Infrastructure.Persistence.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "4ee6740c-a3ab-4cd9-8c66-084331e1ecfb",
+                            Id = "288fd75c-0471-4c64-9d8e-af206019088e",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "0e43f8f6-106e-418b-bca1-5e0e9d6154b6",
+                            Id = "020d4c18-5d3a-4380-836e-346b7b1a38ff",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -247,6 +279,44 @@ namespace backend.Infrastructure.Persistence.Migrations
                     b.ToTable("AccountTokens");
                 });
 
+            modelBuilder.Entity("backend.Domain.Entity.PlaylistSnapshot", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("PlaylistId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("ProviderAccountId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("TracksJson")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "Provider", "PlaylistId", "CreatedAt");
+
+                    b.ToTable("PlaylistSnapshots");
+                });
+
             modelBuilder.Entity("backend.Domain.Entity.User", b =>
                 {
                     b.Property<string>("Id")
@@ -309,6 +379,17 @@ namespace backend.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("AuditLog", b =>
+                {
+                    b.HasOne("backend.Domain.Entity.User", "user")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("user");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -377,6 +458,17 @@ namespace backend.Infrastructure.Persistence.Migrations
                 {
                     b.HasOne("backend.Domain.Entity.User", "User")
                         .WithMany("AccountTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("backend.Domain.Entity.PlaylistSnapshot", b =>
+                {
+                    b.HasOne("backend.Domain.Entity.User", "User")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

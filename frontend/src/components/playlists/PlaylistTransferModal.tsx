@@ -2,10 +2,10 @@ import { Music, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { JobType } from "../../enums/JobType";
 import { useSignalR } from "../../hooks/useSignalR";
-import { OAuthProvider, Platform } from "../../models/Connection";
+import { Platform } from "../../models/Connection";
 import { ProviderPlaylist } from "../../models/ProviderPlaylist";
 import { getConnections } from "../../services/OAuthService";
-import { getProviderName } from "../../utils/providerUtils";
+import { getProviderName, getProviderValue } from "../../utils/providerUtils";
 
 enum TransferStep {
   SelectPlatform,
@@ -61,9 +61,11 @@ export function PlaylistTransferModal({
       sourceProvider: playlist.provider,
       sourceAccountId: playlist.providerId,
       sourcePlaylistId: playlist.id,
-      destinationProvider: OAuthProvider.Spotify,
+      destinationProvider: getProviderValue(selectedPlatform.name),
       destinationAccountId: selectedAccountId,
     });
+
+    console.log(getProviderValue(selectedPlatform.name));
 
     setStep(TransferStep.InProgress);
   };

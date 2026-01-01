@@ -79,7 +79,6 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
       nextPageToken = playlistResponse.NextPageToken;
     } while (!string.IsNullOrEmpty(nextPageToken));
 
-    // Fetch durations
     var videoIds = tracks.Select(t => t.Id).Where(id => !string.IsNullOrEmpty(id)).ToList();
     var durations = await GetVideoDurationsAsync(accessToken, videoIds);
 
@@ -92,8 +91,7 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
     return tracks;
   }
 
-
-  private async Task<Dictionary<string, int>> GetVideoDurationsAsync(string accessToken, List<string> videoIds) {
+  public async Task<Dictionary<string, int>> GetVideoDurationsAsync(string accessToken, List<string> videoIds) {
     var durations = new Dictionary<string, int>();
     const int batchSize = 50;
 
@@ -128,17 +126,49 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
     return ((hours * 3600) + (minutes * 60) + seconds) * 1000;
   }
 
-  public Task<ProviderPlaylist> CreatePlaylistAsync(AccountToken accountToken,
-    PlaylistCreateRequest request) {
-    throw new NotImplementedException();
+  // TODO: Map utils
+  public async Task<ProviderPlaylist> CreatePlaylistAsync(
+      AccountToken accountToken,
+      PlaylistCreateRequest request) {
+    using var http = new HttpClient();
+
+    http.DefaultRequestHeaders.Authorization =
+        new AuthenticationHeaderValue("Bearer", accountToken.AccessToken);
+
+    var body = new {
+      snippet = new {
+        title = request.Title,
+        description = request.Description
+      },
+      status = new {
+        privacyStatus = "public"
+      }
+    };
+
+    var response = await http.PostAsJsonAsync(
+        "https://www.googleapis.com/youtube/v3/playlists?part=snippet,status",
+        body);
+
+    response.EnsureSuccessStatusCode();
+
+    var ytResponse = await response.Content
+        .ReadFromJsonAsync<YouTubeCreatePlaylistResponse>();
+
+    if (ytResponse == null) {
+      throw new InvalidOperationException("YouTube playlist creation failed.");
+    }
+
+    return new ProviderPlaylist {
+      Id = ytResponse.id,
+      Title = ytResponse.snippet.title,
+      Provider = OAuthProvider.Google,
+      ItemCount = 0
+    };
   }
 
   public async Task UpdatePlaylistAsync(string accessToken, PlaylistUpdateRequest request) {
     _http.DefaultRequestHeaders.Authorization =
       new AuthenticationHeaderValue("Bearer", accessToken);
-
-    Console.WriteLine(request);
-
 
     if (request.ReplaceAll == true && request.AddItems?.Any() == true) {
       List<ProviderTrack> currentTracks = await GetPlaylistTracksAsync(accessToken, request.Id);
@@ -154,6 +184,7 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
       }
 
       foreach (var track in request.AddItems.OrderBy(t => t.Position ?? 0)) {
+
         string videoId = GooglePlaylistMapper.ToYouTubeUri(track);
         int position = track.Position ?? 0;
         await AddTracksAsync(request.Id, videoId, position: position);
@@ -163,11 +194,11 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
     }
 
     if (request.AddItems != null && request.AddItems.Any()) {
-      List<string> uris = request.AddItems.Select(GooglePlaylistMapper.ToYouTubeUri).ToList();
-
-      for (int i = 0; i < uris.Count; i += 1) {
-        string chunk = uris.Skip(i).Take(1).First();
-        await AddTracksAsync(request.Id, chunk, position: request.AddItems[i].Position);
+      for (int i = 0; i < request.AddItems.Count; i++) {
+        var track = request.AddItems[i];
+        string videoId = GooglePlaylistMapper.ToYouTubeUri(track);
+        int? position = track.Position;
+        await AddTracksAsync(request.Id, videoId, position: position);
       }
     }
 

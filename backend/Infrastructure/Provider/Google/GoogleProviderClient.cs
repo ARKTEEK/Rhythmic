@@ -135,7 +135,7 @@ public class GoogleProviderClient : IProviderClient {
     }
 
     string url =
-      $"https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=10&q={Uri.EscapeDataString(query)}&key={apiKey}";
+      $"https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=5&q={Uri.EscapeDataString(query)}&key={apiKey}";
 
     HttpResponseMessage response = await _http.GetAsync(url);
     response.EnsureSuccessStatusCode();

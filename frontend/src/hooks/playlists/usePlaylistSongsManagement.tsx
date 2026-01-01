@@ -1,4 +1,4 @@
-﻿import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Notification from "../../components/ui/Notification.tsx";
@@ -23,6 +23,7 @@ interface UsePlaylistSongsManagementResult {
 export const usePlaylistSongsManagement = (): UsePlaylistSongsManagementResult => {
   const [playlistIdToSongs, setPlaylistIdToSongs] = useState<Record<string, ProviderTrack[]>>({});
   const [focusedPlaylist, setFocusedPlaylist] = useState<ProviderPlaylist | null>(null);
+  const queryClient = useQueryClient();
 
   const {
     data: focusedSongs,
@@ -85,7 +86,9 @@ export const usePlaylistSongsManagement = (): UsePlaylistSongsManagementResult =
         },
         icon: false,
       });
+      return;
     }
+    queryClient.invalidateQueries({ queryKey: ["playlists"] });
   };
 
   const handleRemoveSong = async (playlist: ProviderPlaylist, track: ProviderTrack) => {
@@ -142,7 +145,9 @@ export const usePlaylistSongsManagement = (): UsePlaylistSongsManagementResult =
         },
         icon: false
       });
+      return;
     }
+    queryClient.invalidateQueries({ queryKey: ["playlists"] });
   };
 
   const getSongsForPlaylist = (playlist: ProviderPlaylist): ProviderTrack[] => {

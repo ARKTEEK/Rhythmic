@@ -14,7 +14,6 @@ export function useSignalR() {
 
   const [processedTracksMap, setProcessedTracksMap] = useState<Partial<Record<JobType, ProviderTrack[]>>>({});
 
-
   const hubRef = useRef<signalR.HubConnection | null>(null);
 
   const resetState = useCallback(() => {
