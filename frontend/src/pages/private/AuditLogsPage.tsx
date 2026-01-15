@@ -17,7 +17,7 @@ export default function AuditLogsPage() {
   const [search, setSearch] = useState("");
   const [actionFilter, setActionFilter] = useState<"ALL" | string>("ALL");
   const [page, setPage] = useState(1);
-  const pageSize = 15;
+  const pageSize = 11;
 
   function filteredLogs(src: AuditLog[], s: string, action: string) {
     return src.filter((log) => {

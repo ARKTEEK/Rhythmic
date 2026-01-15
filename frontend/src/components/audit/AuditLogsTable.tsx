@@ -1,4 +1,4 @@
-import { Activity, Clock, FileText, Info, SortDesc, ToolCase } from "lucide-react";
+import { Activity, Clock, FileText, SortDesc } from "lucide-react";
 import { AuditLog, getActionString, getExecutorName } from "../../models/AuditLog";
 import { formatDateOnly, formatTime } from "../../utils/formatUtils";
 import ActionIcon from "../ui/Icon/ActionIcon";
@@ -23,8 +23,7 @@ export function AuditLogTable({ logs, onSelectLog }: AuditLogTableProps) {
         <colgroup>
           <col className="w-[12%]" />
           <col className="w-[15%]" />
-          <col className="w-[68%]" />
-          <col className="w-[10%]" />
+          <col className="w-[78%]" />
         </colgroup>
 
         <thead className="bg-[#f3d99c] border-b-4 border-black sticky top-0 z-10">
@@ -36,7 +35,7 @@ export function AuditLogTable({ logs, onSelectLog }: AuditLogTableProps) {
                 <SortDesc className="w-3 h-3 text-xs opacity-70" />
               </div>
             </th>
-            <th className="px-2 text-center font-extrabold uppercase tracking-wider">
+            <th className="px-2 text-center font-extrabold uppercase tracking-wider min-w-[70px]">
               <div className="flex items-center justify-center gap-1">
                 <Activity className="w-4 h-4 text-[#40a8d0]" />
                 Action
@@ -46,12 +45,6 @@ export function AuditLogTable({ logs, onSelectLog }: AuditLogTableProps) {
               <div className="flex items-center gap-1">
                 <FileText className="w-4 h-4 text-[#5cb973]" />
                 Details
-              </div>
-            </th>
-            <th className="px-2 text-center font-extrabold uppercase tracking-wider">
-              <div className="flex items-center justify-center gap-1">
-                <ToolCase className="w-4 h-4 text-[#d46a5d]" />
-                Actions
               </div>
             </th>
           </tr>
@@ -83,7 +76,15 @@ export function AuditLogTable({ logs, onSelectLog }: AuditLogTableProps) {
 
               <td className="px-2 py-1 text-center align-middle">
                 <div className="flex justify-center">
-                  <ActionIcon action={getActionString(log.type)} label={getActionString(log.type)} />
+                  {(() => {
+                    const actionLabel = getActionString(log.type).replace(/_/g, " ");
+                    return (
+                      <ActionIcon
+                        action={getActionString(log.type)}
+                        label={actionLabel}
+                      />
+                    );
+                  })()}
                 </div>
               </td>
 
@@ -93,16 +94,6 @@ export function AuditLogTable({ logs, onSelectLog }: AuditLogTableProps) {
                   <span>
                     <strong>By:</strong> {getExecutorName(log.executor)}
                   </span>
-                </div>
-              </td>
-
-              <td className="px-2 py-1 text-center align-middle">
-                <div className="flex justify-center">
-                  <button
-                    onClick={() => onSelectLog(log)}
-                    className="p-1 bg-[#8cc6f3] hover:bg-[#7bb6e3] border-2 border-black box-style-md cursor-pointer">
-                    <Info className="w-4 h-4 text-black" />
-                  </button>
                 </div>
               </td>
             </tr>

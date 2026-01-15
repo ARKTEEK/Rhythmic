@@ -26,7 +26,7 @@ export default function ActionIcon({ action, label }: ActionIconProps) {
       className={`
         flex items-center justify-center
         ${bgColor}
-        box-style-sm py-1 min-w-[80px] text-black
+        box-style-sm py-1 min-w-[110px] max-w-[110px] text-black
       `}
       title={label}>
       {label && (
