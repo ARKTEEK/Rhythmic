@@ -1,5 +1,5 @@
-﻿import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+﻿import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { toast } from "react-toastify";
 import Notification from "../../components/ui/Notification.tsx";
 import { OAuthProvider } from "../../models/Connection.ts";
@@ -11,22 +11,22 @@ import { getProviderName, getProviderValue } from "../../utils/providerUtils.tsx
 
 interface UsePlaylistSongsManagementResult {
   focusedPlaylist: ProviderPlaylist | null;
-  playlistIdToSongs: Record<string, ProviderTrack[]>;
   setFocusedPlaylist: (playlist: ProviderPlaylist | null) => void;
   handleAddSong: (playlist: ProviderPlaylist, track: ProviderTrack) => void;
   handleRemoveSong: (playlist: ProviderPlaylist, track: ProviderTrack) => void;
   getSongsForPlaylist: (playlist: ProviderPlaylist) => ProviderTrack[];
   isLoadingTracks: boolean;
   isTracksError: boolean;
+  tracks: ProviderTrack[];
 }
 
+
 export const usePlaylistSongsManagement = (): UsePlaylistSongsManagementResult => {
-  const [playlistIdToSongs, setPlaylistIdToSongs] = useState<Record<string, ProviderTrack[]>>({});
   const [focusedPlaylist, setFocusedPlaylist] = useState<ProviderPlaylist | null>(null);
   const queryClient = useQueryClient();
 
   const {
-    data: focusedSongs,
+    data: tracks = [],
     isLoading: isLoadingTracks,
     isError: isTracksError,
   } = useQuery({
@@ -39,31 +39,46 @@ export const usePlaylistSongsManagement = (): UsePlaylistSongsManagementResult =
     enabled: !!focusedPlaylist,
   });
 
-  useEffect(() => {
-    if (focusedPlaylist && focusedSongs && !playlistIdToSongs[focusedPlaylist.id]) {
-      setPlaylistIdToSongs(prev => ({
-        ...prev,
-        [focusedPlaylist.id]: focusedSongs
-      }));
-    }
-  }, [focusedSongs, focusedPlaylist, playlistIdToSongs]);
+  const getSongsForPlaylist = (playlist: ProviderPlaylist): ProviderTrack[] => {
+    return queryClient.getQueryData<ProviderTrack[]>(['tracks', playlist.id]) || [];
+  };
 
-  const handleAddSong = async (playlist: ProviderPlaylist, track: ProviderTrack) => {
-    setPlaylistIdToSongs(prev => {
-      const current = prev[playlist.id] || [];
-      return { ...prev, [playlist.id]: [...current, track] };
+  const updatePlaylistItemCount = (playlistId: string, delta: number) => {
+    queryClient.setQueryData<ProviderPlaylist[]>(["playlists"], (oldPlaylists) => {
+      if (!oldPlaylists) return oldPlaylists;
+      return oldPlaylists.map((p) =>
+        p.id === playlistId ? { ...p, itemCount: Math.max(0, (p.itemCount || 0) + delta) } : p
+      );
     });
-    const providerName = getProviderName(playlist.provider);
+  };
 
-    const updateBody: PlaylistUpdateRequest = {
-      id: playlist.id,
-      addItems: [track],
-      removeItems: [],
-      provider: getProviderValue(providerName)!
-    };
+  const addSongMutation = useMutation({
+    mutationFn: async ({ playlist, track }: { playlist: ProviderPlaylist; track: ProviderTrack }) => {
+      const providerName = getProviderName(playlist.provider);
+      const updateBody: PlaylistUpdateRequest = {
+        id: playlist.id,
+        addItems: [track],
+        removeItems: [],
+        provider: getProviderValue(providerName)!
+      };
+      return updatePlaylist(providerName, playlist.id, playlist.providerId, updateBody);
+    },
+    onMutate: async ({ playlist, track }) => {
+      await queryClient.cancelQueries({ queryKey: ['tracks', playlist.id] });
+      await queryClient.cancelQueries({ queryKey: ['playlists'] });
 
-    try {
-      await updatePlaylist(providerName, playlist.id, playlist.providerId, updateBody);
+      const previousTracks = queryClient.getQueryData<ProviderTrack[]>(['tracks', playlist.id]);
+      const previousPlaylists = queryClient.getQueryData<ProviderPlaylist[]>(['playlists']);
+
+      queryClient.setQueryData<ProviderTrack[]>(['tracks', playlist.id], (old) => {
+        return old ? [...old, track] : [track];
+      });
+
+      updatePlaylistItemCount(playlist.id, 1);
+
+      return { previousTracks, previousPlaylists, playlist };
+    },
+    onSuccess: (_, { playlist, track }) => {
       toast.success(Notification, {
         data: {
           title: 'Added to Playlist',
@@ -71,13 +86,16 @@ export const usePlaylistSongsManagement = (): UsePlaylistSongsManagementResult =
         },
         icon: false,
       });
-    } catch (err) {
+    },
+    onError: (err, { playlist }, context) => {
       console.error("Failed to add track to playlist:", err);
 
-      setPlaylistIdToSongs(prev => {
-        const current = prev[playlist.id] || [];
-        return { ...prev, [playlist.id]: current.filter(s => s.id !== track.id) };
-      });
+      if (context?.previousTracks) {
+        queryClient.setQueryData(['tracks', playlist.id], context.previousTracks);
+      }
+      if (context?.previousPlaylists) {
+        queryClient.setQueryData(['playlists'], context.previousPlaylists);
+      }
 
       toast.error(Notification, {
         data: {
@@ -86,40 +104,52 @@ export const usePlaylistSongsManagement = (): UsePlaylistSongsManagementResult =
         },
         icon: false,
       });
-      return;
-    }
-    queryClient.invalidateQueries({ queryKey: ["playlists"] });
-  };
+    },
+    onSettled: (_, __, { playlist }) => {
+      queryClient.invalidateQueries({ queryKey: ['tracks', playlist.id] });
+      queryClient.invalidateQueries({ queryKey: ['playlists'] });
+    },
+  });
 
-  const handleRemoveSong = async (playlist: ProviderPlaylist, track: ProviderTrack) => {
-    const isGoogle = track.provider === OAuthProvider.Google;
-    const removalKey = isGoogle ? track.playlistId : track.id;
-
-    console.log(track.provider + " " + OAuthProvider.Google.toString())
-    console.log(isGoogle + " " + removalKey);
-
-    setPlaylistIdToSongs(prev => {
-      const current = prev[playlist.id] || [];
-      return {
-        ...prev,
-        [playlist.id]: current.filter(s => {
-          const compareKey = isGoogle ? s.playlistId : s.id;
-          return compareKey !== removalKey;
-        })
+  const removeSongMutation = useMutation({
+    mutationFn: async ({ playlist, track }: { playlist: ProviderPlaylist; track: ProviderTrack }) => {
+      const providerName = getProviderName(playlist.provider);
+      const updateBody: PlaylistUpdateRequest = {
+        id: playlist.id,
+        addItems: [],
+        removeItems: [track],
+        provider: getProviderValue(providerName)!
       };
-    });
+      return updatePlaylist(providerName, playlist.id, playlist.providerId, updateBody);
+    },
+    onMutate: async ({ playlist, track }) => {
+      await queryClient.cancelQueries({ queryKey: ['tracks', playlist.id] });
+      await queryClient.cancelQueries({ queryKey: ['playlists'] });
 
-    const providerName = getProviderName(playlist.provider);
+      const previousTracks = queryClient.getQueryData<ProviderTrack[]>(['tracks', playlist.id]);
+      const previousPlaylists = queryClient.getQueryData<ProviderPlaylist[]>(['playlists']);
 
-    const updateBody: PlaylistUpdateRequest = {
-      id: playlist.id,
-      addItems: [],
-      removeItems: [track],
-      provider: getProviderValue(providerName)!
-    };
+      const isGoogle = getProviderValue(track.provider) === OAuthProvider.Google;
+      const removalKey = isGoogle ? track.playlistId : track.id;
 
-    try {
-      await updatePlaylist(providerName, playlist.id, playlist.providerId, updateBody);
+      queryClient.setQueryData<ProviderTrack[]>(['tracks', playlist.id], (old) => {
+        if (!old) return old;
+        return old.filter(t => {
+          const compareKey = isGoogle ? t.playlistId : t.id;
+          // Match by both ID and position to only remove the specific track instance
+          if (compareKey !== removalKey) return true;
+          if (track.position !== undefined && t.position !== undefined) {
+            return t.position !== track.position;
+          }
+          return false; // Remove if IDs match and positions not available
+        });
+      });
+
+      updatePlaylistItemCount(playlist.id, -1);
+
+      return { previousTracks, previousPlaylists, playlist };
+    },
+    onSuccess: (_, { track }) => {
       toast.info(Notification, {
         data: {
           title: "Removed Song",
@@ -127,16 +157,16 @@ export const usePlaylistSongsManagement = (): UsePlaylistSongsManagementResult =
         },
         icon: false
       });
-    } catch (err) {
+    },
+    onError: (err, { playlist }, context) => {
       console.error("Failed to remove track from playlist:", err);
 
-      setPlaylistIdToSongs(prev => {
-        const current = prev[playlist.id] || [];
-        return {
-          ...prev,
-          [playlist.id]: [...current, track]
-        };
-      });
+      if (context?.previousTracks) {
+        queryClient.setQueryData(['tracks', playlist.id], context.previousTracks);
+      }
+      if (context?.previousPlaylists) {
+        queryClient.setQueryData(['playlists'], context.previousPlaylists);
+      }
 
       toast.error(Notification, {
         data: {
@@ -145,23 +175,29 @@ export const usePlaylistSongsManagement = (): UsePlaylistSongsManagementResult =
         },
         icon: false
       });
-      return;
-    }
-    queryClient.invalidateQueries({ queryKey: ["playlists"] });
+    },
+    onSettled: (_, __, { playlist }) => {
+      queryClient.invalidateQueries({ queryKey: ['tracks', playlist.id] });
+      queryClient.invalidateQueries({ queryKey: ['playlists'] });
+    },
+  });
+
+  const handleAddSong = (playlist: ProviderPlaylist, track: ProviderTrack) => {
+    addSongMutation.mutate({ playlist, track });
   };
 
-  const getSongsForPlaylist = (playlist: ProviderPlaylist): ProviderTrack[] => {
-    return playlistIdToSongs[playlist.id] || [];
+  const handleRemoveSong = (playlist: ProviderPlaylist, track: ProviderTrack) => {
+    removeSongMutation.mutate({ playlist, track });
   };
 
   return {
     focusedPlaylist,
-    playlistIdToSongs,
     setFocusedPlaylist,
     handleAddSong,
     handleRemoveSong,
     getSongsForPlaylist,
     isLoadingTracks,
     isTracksError,
+    tracks,
   };
 };

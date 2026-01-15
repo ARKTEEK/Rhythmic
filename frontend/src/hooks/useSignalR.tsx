@@ -1,11 +1,14 @@
 ﻿import * as signalR from "@microsoft/signalr";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { JobType } from "../enums/JobType.ts";
+import { OAuthProvider } from "../models/Connection.ts";
 import { ProgressPayload, StartJobResponse } from "../models/ProcessPayload.ts";
 import { ProviderTrack } from "../models/ProviderTrack.ts";
 import { cancelJobRequest, createHubConnection, startDuplicateScan, startTransferJob } from "../services/SignalRService.ts";
 
 export function useSignalR() {
+  const queryClient = useQueryClient();
   const [jobId, setJobId] = useState<string | null>(null);
   const [activeJobType, setActiveJobType] = useState<JobType | null>(null);
   const [isRunning, setIsRunning] = useState(false);
@@ -17,7 +20,7 @@ export function useSignalR() {
   const hubRef = useRef<signalR.HubConnection | null>(null);
 
   const resetState = useCallback(() => {
-    setProcessedTracksMap;
+    setProcessedTracksMap({});
     setCurrentTrack(null);
     setIsRunning(false);
     setJobId(null);
@@ -38,9 +41,9 @@ export function useSignalR() {
     try {
       let data: StartJobResponse;
       if (type === JobType.FindDuplicateTracks) {
-        data = await startDuplicateScan(requestBody);
+        data = await startDuplicateScan(requestBody as { provider: OAuthProvider; providerAccountId: string; playlistId: string; });
       } else if (type === JobType.TransferPlaylist) {
-        data = await startTransferJob(requestBody);
+        data = await startTransferJob(requestBody as { sourceProvider: OAuthProvider; sourceAccountId: string; sourcePlaylistId: string; destinationProvider: OAuthProvider; destinationAccountId: string; });
       } else {
         throw new Error("Unknown Job Type");
       }
@@ -67,10 +70,13 @@ export function useSignalR() {
         }
       });
 
-      hub.on("JobCompleted", (payload) => {
+      hub.on("JobCompleted", async (payload) => {
         if (payload.jobId !== newJobId) return;
         setIsRunning(false);
-        // Optional: hub.stop();
+
+        if (type === JobType.TransferPlaylist) {
+          await queryClient.invalidateQueries({ queryKey: ["playlists"] });
+        }
       });
 
       hub.on("JobCancelled", (payload) => {
@@ -86,7 +92,6 @@ export function useSignalR() {
         alert(`Job failed: ${payload.error}`);
       });
 
-      // 3. Connect and Subscribe
       await hub.start();
       await hub.invoke("Subscribe", newJobId);
 
@@ -97,7 +102,7 @@ export function useSignalR() {
       console.error("Failed to start job", error);
       setIsRunning(false);
     }
-  }, [resetState]);
+  }, [resetState, queryClient]);
 
   const cancelJob = useCallback(async () => {
     if (!jobId) return;

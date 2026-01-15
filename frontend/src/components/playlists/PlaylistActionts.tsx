@@ -1,6 +1,6 @@
 ﻿import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
-import { FaDownload, FaRedo, FaSync } from "react-icons/fa";
+import { FaPlus, FaRedo } from "react-icons/fa";
 import { useSetTopNavActions } from "../../context/TopNavActionsContext.tsx";
 import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
 
@@ -10,15 +10,17 @@ interface PlaylistActionsProps {
   isFetching: boolean;
   playlists: ProviderPlaylist[];
   refetchPlaylists: () => void;
+  onCreatePlaylist: () => void;
 }
 
 export default function PlaylistActions({
-                                          selectedIds,
-                                          hasSelection,
-                                          isFetching,
-                                          playlists,
-                                          refetchPlaylists
-                                        }: PlaylistActionsProps) {
+  selectedIds,
+  hasSelection,
+  isFetching,
+  playlists,
+  refetchPlaylists,
+  onCreatePlaylist
+}: PlaylistActionsProps) {
 
   const setTopNavActions = useSetTopNavActions();
   const queryClient = useQueryClient();
@@ -28,37 +30,17 @@ export default function PlaylistActions({
     await refetchPlaylists();
   };
 
-  const handleExport = () => {
-    const selected = playlists.filter((p) => selectedIds.has(p.id));
-    const blob = new Blob([JSON.stringify(selected, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = selected.length > 0 ? `playlists-export-${ selected.length }.json` : "playlists-export.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
   const handleSync = () => void handleRefresh();
 
   const actions = useMemo(() => [
     {
-      id: "export",
-      label: hasSelection ? `Export (${ selectedIds.size })` : "Export",
-      onClick: handleExport,
-      active: hasSelection,
-      Icon: FaDownload,
-      buttonClassName: "bg-yellow-200 border border-brown-800",
-      textClassName: "text-brown-900",
-    },
-    {
-      id: "sync",
-      label: hasSelection ? `Sync (${ selectedIds.size })` : "Sync",
-      onClick: handleSync,
-      active: hasSelection,
-      Icon: FaSync,
-      buttonClassName: "bg-yellow-200 border border-brown-800",
-      textClassName: "text-brown-900",
+      id: "new",
+      label: "New",
+      onClick: onCreatePlaylist,
+      active: true,
+      Icon: FaPlus,
+      buttonClassName: "bg-yellow-200 border-2 border-black",
+      textClassName: "text-black",
     },
     {
       id: "refresh",
@@ -69,7 +51,7 @@ export default function PlaylistActions({
       buttonClassName: "bg-yellow-200 border border-brown-800",
       textClassName: "text-brown-900",
     },
-  ], [hasSelection, selectedIds.size, handleExport, handleSync, isFetching, handleRefresh]);
+  ], [onCreatePlaylist, hasSelection, selectedIds.size, handleSync, isFetching, handleRefresh]);
 
   useEffect(() => {
     setTopNavActions(actions);

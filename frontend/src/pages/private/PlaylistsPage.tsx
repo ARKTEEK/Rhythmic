@@ -1,10 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import CreatePlaylistModal from "../../components/playlists/CreatePlaylistModal.tsx";
 import { PaginationControls } from "../../components/playlists/PaginationControls.tsx";
 import PlaylistActions from "../../components/playlists/PlaylistActionts.tsx";
 import PlaylistDetailsModal from "../../components/playlists/PlaylistDetailsModal.tsx";
 import PlaylistHistoryModal from "../../components/playlists/PlaylistHistoryModal.tsx";
 import PlaylistSplitModal from "../../components/playlists/PlaylistSplitModal.tsx";
+import PlaylistSyncManagementModal from "../../components/playlists/PlaylistSyncManagementModal.tsx";
+import PlaylistSyncModal from "../../components/playlists/PlaylistSyncModal.tsx";
 import { PlaylistTable } from "../../components/playlists/PlaylistTable.tsx";
 import { PlaylistTransferModal } from "../../components/playlists/PlaylistTransferModal.tsx";
 import Window from "../../components/ui/Window.tsx";
@@ -15,8 +18,8 @@ import { usePlaylistData } from "../../hooks/playlists/usePlaylistData.tsx";
 import { usePlaylistFilter } from "../../hooks/playlists/usePlaylistFilter.tsx";
 import { usePlaylistSelection } from "../../hooks/playlists/usePlaylistSelection.tsx";
 import { usePlaylistSongsManagement } from "../../hooks/playlists/usePlaylistSongsManagement.tsx";
+import { usePlaylistSync } from "../../hooks/playlists/usePlaylistSync.tsx";
 import { useSignalR } from "../../hooks/useSignalR.tsx";
-import { OAuthProvider } from "../../models/Connection.ts";
 import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
 import { ProviderTrack } from "../../models/ProviderTrack.ts";
 import createConnectionsQueryOptions from "../../queries/createConnectionsQueryOptions.ts";
@@ -65,10 +68,23 @@ export default function PlaylistsPage() {
     currentTrack
   } = useSignalR();
 
+  const { handleSync, isSyncing, syncingGroups } = usePlaylistSync();
+
+  const { data: syncGroups = [] } = useQuery({
+    queryKey: ["sync-groups"],
+    queryFn: async () => {
+      const { getSyncGroups } = await import("../../services/PlaylistSyncService.ts");
+      return getSyncGroups();
+    },
+  });
+
   const [playlistToDelete, setPlaylistToDelete] = useState<ProviderPlaylist | null>(null);
   const [transferPlaylist, setTransferPlaylist] = useState<ProviderPlaylist | null>(null);
   const [historyPlaylist, setHistoryPlaylist] = useState<ProviderPlaylist | null>(null);
   const [splitPlaylist, setSplitPlaylist] = useState<ProviderPlaylist | null>(null);
+  const [syncModalPlaylist, setSyncModalPlaylist] = useState<ProviderPlaylist | null>(null);
+  const [manageSyncPlaylist, setManageSyncPlaylist] = useState<ProviderPlaylist | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const { data: connections = [] } = useQuery(createConnectionsQueryOptions());
 
   const [page, setPage] = useState(1);
@@ -91,7 +107,16 @@ export default function PlaylistsPage() {
     };
   });
 
-  const handleCloseModal = () => setFocusedPlaylist(null);
+  const handleCloseModal = () => {
+    setFocusedPlaylist(null);
+    // Clear duplicate tracks when closing modal
+    if (activeJobType === JobType.FindDuplicateTracks) {
+      setProcessedTracksMap(prev => ({
+        ...prev,
+        [JobType.FindDuplicateTracks]: []
+      }));
+    }
+  };
 
   const handleTransfer = (playlist: ProviderPlaylist) => {
     setTransferPlaylist(playlist);
@@ -101,6 +126,27 @@ export default function PlaylistsPage() {
     setSplitPlaylist(playlist);
   };
 
+  const handleConfigureSync = (playlist: ProviderPlaylist) => {
+    const existingGroup = syncGroups.find(
+      (sg) =>
+        (sg.masterPlaylistId === playlist.id &&
+          sg.masterProvider === playlist.provider &&
+          sg.masterProviderAccountId === playlist.providerId) ||
+        sg.children.some(
+          (c) =>
+            c.childPlaylistId === playlist.id &&
+            c.provider === playlist.provider &&
+            c.providerAccountId === playlist.providerId
+        )
+    );
+
+    if (existingGroup) {
+      setManageSyncPlaylist(playlist);
+    } else {
+      setSyncModalPlaylist(playlist);
+    }
+  };
+
   const handleFindDuplicates = async (playlist: ProviderPlaylist) => {
     startJob(JobType.FindDuplicateTracks, {
       provider: playlist.provider,
@@ -108,17 +154,6 @@ export default function PlaylistsPage() {
       playlistId: playlist.id,
     });
   };
-
-  const handleTrasnfer = async (playlist: ProviderPlaylist) => {
-    startJob(JobType.TransferPlaylist, {
-      sourceProvider: playlist.provider,
-      sourceAccountId: playlist.providerId,
-      sourcePlaylistId: playlist.id,
-      destinationProvider: OAuthProvider.Spotify,
-      destinationAccountId: "42ndxv2g3kzotdopmjj5orr6i",
-      destinationPlaylistId: "4R8EuAODGvhlrEwOYSx6hu",
-    });
-  }
 
   const handleCancelJob = async () => {
     cancelJob();
@@ -161,6 +196,7 @@ export default function PlaylistsPage() {
           isFetching={isFetching}
           playlists={playlists}
           refetchPlaylists={refetch}
+          onCreatePlaylist={() => setShowCreateModal(true)}
         />
 
         <Window
@@ -175,8 +211,8 @@ export default function PlaylistsPage() {
             </div>
           }>
           {effectivePlaylists.length === 0 ? (
-            <div className="flex items-center justify-center h-64 italic text-gray-700 text-lg">
-              No playlists found.
+            <div className="flex items-center text-center justify-center h-64 text-gray-700 text-lg">
+              No playlists found or no accounts connected. <br /> Please make sure you have connected your accounts in the Connections page.
             </div>
           ) : (
             <div className="flex flex-col h-full p-3 pt-2 overflow-hidden">
@@ -197,6 +233,8 @@ export default function PlaylistsPage() {
                 playlists={playlists}
                 visiblePlaylists={visiblePlaylists}
                 selectedIds={selectedIds}
+                syncGroups={syncGroups}
+                syncingGroupIds={syncingGroups}
                 handleToggleSelect={handleToggleSelect}
                 handleOpenModal={setFocusedPlaylist}
                 handleDelete={setPlaylistToDelete}
@@ -204,6 +242,9 @@ export default function PlaylistsPage() {
                 handleTransfer={handleTransfer}
                 handleHistory={setHistoryPlaylist}
                 handleSplit={handleSplit}
+                handleConfigureSync={handleConfigureSync}
+                handleSync={handleSync}
+                isSyncing={isSyncing}
                 getPlaylistMeta={getPlaylistMeta}
               />
 
@@ -229,7 +270,7 @@ export default function PlaylistsPage() {
           isSongsError={isTracksError}
           isScanning={isRunning}
           currentTrack={currentTrack!}
-          duplicateTracks={processedTracksMap[0]}
+          duplicateTracks={processedTracksMap[JobType.FindDuplicateTracks]}
           setDuplicateTracks={(tracks: ProviderTrack[]) => {
             if (!activeJobType) return;
             setProcessedTracksMap(prev => ({
@@ -300,6 +341,34 @@ export default function PlaylistsPage() {
         />
       )}
 
+      {syncModalPlaylist && (
+        <PlaylistSyncModal
+          playlist={syncModalPlaylist}
+          availablePlaylists={effectivePlaylists}
+          onClose={() => setSyncModalPlaylist(null)}
+          onCreate={() => {
+            refetch();
+            setSyncModalPlaylist(null);
+          }}
+        />
+      )}
+
+      {manageSyncPlaylist && (
+        <PlaylistSyncManagementModal
+          playlist={manageSyncPlaylist}
+          allPlaylists={effectivePlaylists}
+          onClose={() => setManageSyncPlaylist(null)}
+          accentSoft={getProviderColors(getProviderName(manageSyncPlaylist.provider)).accentSoft}
+          accentText={getProviderColors(getProviderName(manageSyncPlaylist.provider)).text}
+        />
+      )}
+
+      {showCreateModal && (
+        <CreatePlaylistModal
+          platforms={platformsWithAccounts}
+          onClose={() => setShowCreateModal(false)}
+        />
+      )}
     </>
   );
 }

@@ -45,7 +45,7 @@ export const useSnapshotData = ({
   const revertMutation = useMutation({
     mutationFn: (snapshotId: number) =>
       revertToSnapshot(snapshotId, provider, playlist.id, playlist.providerId),
-    onSuccess: (_, snapshotId) => {
+    onSuccess: async (_, snapshotId) => {
       const revertedSnapshot = snapshots.find(s => s.id === snapshotId);
       const snapshotDate = revertedSnapshot
         ? new Date(revertedSnapshot.createdAt).toLocaleString()
@@ -59,11 +59,12 @@ export const useSnapshotData = ({
         icon: false
       });
 
-      queryClient.invalidateQueries({ queryKey: ["tracks", playlist.id] });
-      queryClient.invalidateQueries({
-        queryKey: ["playlist-snapshots", playlist.provider, playlist.id],
-      });
-      queryClient.invalidateQueries({ queryKey: ["playlists"] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["tracks", playlist.id] }),
+        queryClient.invalidateQueries({ queryKey: ["playlist-snapshots", playlist.provider, playlist.id] }),
+        queryClient.invalidateQueries({ queryKey: ["playlists"] })
+      ]);
+
       onRevertSuccess?.();
     },
     onError: () => {

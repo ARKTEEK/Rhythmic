@@ -65,8 +65,6 @@ export function PlaylistTransferModal({
       destinationAccountId: selectedAccountId,
     });
 
-    console.log(getProviderValue(selectedPlatform.name));
-
     setStep(TransferStep.InProgress);
   };
 

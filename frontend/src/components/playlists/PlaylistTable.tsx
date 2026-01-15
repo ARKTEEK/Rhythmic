@@ -1,26 +1,28 @@
 ﻿import {
   Cloud,
+  Crown,
   Disc3,
-  ExternalLink,
-  History,
   Link,
   List,
+  Loader2,
   Music,
-  Scissors,
-  Server,
   SortDesc,
   ToolCase,
-  Trash2
+  Users
 } from "lucide-react";
 import { PlaylistMeta } from "../../hooks/playlists/usePlaylistData.tsx";
+import { PlaylistSyncGroup } from "../../models/PlaylistSync.ts";
 import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
 import { getProviderName } from "../../utils/providerUtils.tsx";
 import PlatformIcon from "../ui/Icon/PlatformIcon.tsx";
+import PlaylistActionsDropdown from "./PlaylistActionsDropdown.tsx";
 
 interface PlaylistTableProps {
   playlists: ProviderPlaylist[];
   visiblePlaylists: ProviderPlaylist[];
   selectedIds: Set<string>;
+  syncGroups?: PlaylistSyncGroup[];
+  syncingGroupIds?: Set<number>;
   handleToggleSelect: (id: string) => void;
   handleOpenModal: (playlist: ProviderPlaylist) => void;
   handleDelete: (playlist: ProviderPlaylist) => void;
@@ -28,6 +30,9 @@ interface PlaylistTableProps {
   handleTransfer: (playlist: ProviderPlaylist) => void;
   handleHistory: (playlist: ProviderPlaylist) => void;
   handleSplit: (playlist: ProviderPlaylist) => void;
+  handleSync: (playlist: ProviderPlaylist) => void;
+  handleConfigureSync?: (playlist: ProviderPlaylist) => void;
+  isSyncing?: boolean;
   getPlaylistMeta: (id: string, fallbackCount: number) => PlaylistMeta;
 }
 
@@ -35,6 +40,8 @@ export function PlaylistTable({
   playlists,
   visiblePlaylists,
   selectedIds,
+  syncGroups = [],
+  syncingGroupIds = new Set(),
   handleToggleSelect,
   handleOpenModal,
   handleDelete,
@@ -42,8 +49,36 @@ export function PlaylistTable({
   handleTransfer,
   handleHistory,
   handleSplit,
+  handleSync,
+  handleConfigureSync,
+  isSyncing = false,
   getPlaylistMeta,
 }: PlaylistTableProps) {
+
+  const getSyncGroupInfo = (playlist: ProviderPlaylist) => {
+    const masterGroup = syncGroups.find(
+      sg => sg.masterPlaylistId === playlist.id &&
+        sg.masterProvider === playlist.provider &&
+        sg.masterProviderAccountId === playlist.providerId
+    );
+
+    if (masterGroup) {
+      return { type: 'master' as const, group: masterGroup };
+    }
+
+    for (const group of syncGroups) {
+      const childMatch = group.children.find(
+        c => c.childPlaylistId === playlist.id &&
+          c.provider === playlist.provider &&
+          c.providerAccountId === playlist.providerId
+      );
+      if (childMatch) {
+        return { type: 'child' as const, group };
+      }
+    }
+
+    return null;
+  };
 
   return (
     <div className="flex-1 overflow-y-auto box-style-md rounded-lg">
@@ -60,7 +95,6 @@ export function PlaylistTable({
         <thead className="bg-[#f3d99c] border-b-4 border-black sticky top-0 z-10">
           <tr className="h-[48px]">
             <th className="px-2 text-center"></th>
-
             <th className="px-2 text-left font-extrabold uppercase tracking-wider">
               <div className="flex items-center gap-1">
                 <Disc3 className="w-4 h-4 text-[#f38ca7]" />
@@ -68,7 +102,6 @@ export function PlaylistTable({
                 <SortDesc className="w-3 h-3 text-xs opacity-70" />
               </div>
             </th>
-
             <th className="px-2 text-center font-extrabold uppercase tracking-wider">
               <div className="flex items-center justify-center gap-1">
                 <List className="w-4 h-4 text-[#5cb973]" />
@@ -76,7 +109,6 @@ export function PlaylistTable({
                 <SortDesc className="w-3 h-3 text-xs opacity-70" />
               </div>
             </th>
-
             <th className="px-2 text-center font-extrabold uppercase tracking-wider">
               <div className="flex items-center justify-center gap-1">
                 <Cloud className="w-4 h-4 text-[#40a8d0]" />
@@ -84,7 +116,6 @@ export function PlaylistTable({
                 <SortDesc className="w-3 h-3 text-xs opacity-70" />
               </div>
             </th>
-
             <th className="px-2 text-left font-extrabold uppercase tracking-wider">
               <div className="flex items-center justify-center gap-1">
                 <Link className="w-4 h-4 text-[#9b88c7]" />
@@ -92,7 +123,6 @@ export function PlaylistTable({
                 <SortDesc className="w-3 h-3 text-xs opacity-70" />
               </div>
             </th>
-
             <th className="px-2 text-center font-extrabold uppercase tracking-wider">
               <div className="flex items-center justify-center gap-1">
                 <ToolCase className="w-4 h-4 text-[#d46a5d]" />
@@ -106,34 +136,32 @@ export function PlaylistTable({
           {visiblePlaylists.map((playlist, i) => {
             const meta = getPlaylistMeta(playlist.id, playlist.itemCount);
             const providerName = getProviderName(playlist.provider);
-            const linkedTitle = playlists.find(
-              p => p.id === playlist.linkedPlaylistId
-            )?.title;
+            const linkedTitle = playlists.find(p => p.id === playlist.linkedPlaylistId)?.title;
             const isSelected = selectedIds.has(playlist.id);
+            const syncInfo = getSyncGroupInfo(playlist);
 
             return (
               <tr
                 key={playlist.id}
                 className={`
-                        transition-all cursor-pointer h-[56px] hover:cursor-pointer
-                        ${i % 2 === 0 ? "bg-[#fffaf0]" : "bg-[#fff3e6]"}
-                        hover:bg-[#ffe9c2]
-                        ${isSelected ? "bg-[#ffe9c2]" : ""}`}>
+                transition-all cursor-pointer h-[56px]
+                ${i % 2 === 0 ? "bg-[#fffaf0]" : "bg-[#fff3e6]"}
+                hover:bg-[#ffe9c2]
+                ${isSelected ? "bg-[#ffe9c2]" : ""}
+              `}>
                 <td className="text-center align-middle">
                   <input
                     type="checkbox"
                     className="accent-[#f38ca7] w-4 h-4"
                     checked={isSelected}
                     onChange={() => handleToggleSelect(playlist.id)}
-                    onClick={e => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
                   />
                 </td>
 
                 <td
                   className="px-2 align-middle cursor-pointer"
-                  onClick={() => {
-                    handleOpenModal(playlist);
-                  }}>
+                  onClick={() => handleOpenModal(playlist)}>
                   <div className="flex items-center gap-3">
                     {playlist.thumbnailUrl ? (
                       <img
@@ -162,69 +190,40 @@ export function PlaylistTable({
 
                 <td className="px-2 text-center align-middle">
                   <div className="flex items-center justify-center">
-                    <PlatformIcon
-                      providerName={providerName}
-                      label={providerName}
-                    />
+                    <PlatformIcon providerName={providerName} label={providerName} />
                   </div>
                 </td>
 
-
                 <td className="text-center text-xs text-gray-700 align-middle">
-                  {linkedTitle || <span className="text-gray-500">N/A</span>}
+                  {syncInfo ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="font-bold text-[#9b88c7]">{syncInfo.group.name}</span>
+                      {syncingGroupIds.has(syncInfo.group.id) && (
+                        <Loader2 className="w-4 h-4 animate-spin text-[#40a8d0]" title="Syncing..." />
+                      )}
+                      {!syncInfo.group.syncEnabled && (
+                        <span className="text-[10px] text-red-500 font-bold">(Disabled)</span>
+                      )}
+                    </div>
+                  ) : linkedTitle ? (
+                    linkedTitle
+                  ) : (
+                    <span className="text-gray-500">N/A</span>
+                  )}
                 </td>
 
                 <td className="px-2 text-center align-middle">
-                  <div className="flex justify-center gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleHistory(playlist);
-                      }}
-                      className="p-1 bg-[#63d079] hover:bg-[#4ec767] border-black box-style-md hover:cursor-pointer"
-                      title="View History">
-                      <History className="w-4 h-4 text-black" />
-                    </button>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSplit(playlist);
-                      }}
-                      className="p-1 bg-[#9b88c7] hover:bg-[#8a77b6] border-black box-style-md hover:cursor-pointer"
-                      title="Split Playlist">
-                      <Scissors className="w-4 h-4 text-black" />
-                    </button>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleFindDuplicates(playlist);
-                      }}
-                      className="p-1 bg-[#ffb74a] hover:bg-[#ffa726] border-black box-style-md hover:cursor-pointer"
-                      title="Find Duplicates">
-                      <ExternalLink className="w-4 h-4 text-black" />
-                    </button>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleTransfer(playlist);
-                      }}
-                      className="p-1 bg-[#40a8d0] hover:bg-[#2f97bf] border-black box-style-md hover:cursor-pointer"
-                      title="Transfer Playlist">
-                      <Server className="w-4 h-4 text-black" />
-                    </button>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(playlist);
-                      }}
-                      className="p-1 bg-[#f26b6b] hover:bg-[#e55d5d] border-black box-style-md hover:cursor-pointer"
-                      title="Delete Playlist">
-                      <Trash2 className="w-4 h-4 text-black" />
-                    </button>
+                  <div className="flex justify-center">
+                    <PlaylistActionsDropdown
+                      playlist={playlist}
+                      onSync={() => handleSync(playlist)}
+                      onHistory={() => handleHistory(playlist)}
+                      onSplit={() => handleSplit(playlist)}
+                      onTransfer={() => handleTransfer(playlist)}
+                      onConfigureSync={() => handleConfigureSync?.(playlist)}
+                      onDelete={() => handleDelete(playlist)}
+                      isSyncing={isSyncing}
+                    />
                   </div>
                 </td>
               </tr>

@@ -5,6 +5,6 @@ export default function createPlaylistsQueryOptions() {
   return queryOptions({
     queryKey: ["playlists"],
     queryFn: () => getPlaylists(),
-    retry: 3
+    retry: 3,
   })
 }

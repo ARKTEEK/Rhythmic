@@ -1,6 +1,6 @@
 ﻿import { useQuery } from "@tanstack/react-query";
-import createPlaylistsQueryOptions from "../../queries/createPlaylistsQueryOptions.ts";
 import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
+import createPlaylistsQueryOptions from "../../queries/createPlaylistsQueryOptions.ts";
 
 export interface PlaylistMeta {
   lengthText: string;

@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Scissors, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -23,6 +23,7 @@ export default function PlaylistSplitModal({
   accentText,
   onSplitSuccess,
 }: PlaylistSplitModalProps) {
+  const queryClient = useQueryClient();
   const [splitType, setSplitType] = useState<PlaylistSplitType>(PlaylistSplitType.InHalf);
   const [splitValue, setSplitValue] = useState<string>("");
   const [baseName, setBaseName] = useState<string>(playlist.title);
@@ -44,7 +45,7 @@ export default function PlaylistSplitModal({
   const splitMutation = useMutation({
     mutationFn: (request: PlaylistSplitRequest) =>
       splitPlaylist(provider, playlist.id, playlist.providerId, destinationAccountId, request),
-    onSuccess: (createdPlaylists) => {
+    onSuccess: async (createdPlaylists) => {
       toast.success(Notification, {
         data: {
           title: "Playlist Split",
@@ -52,6 +53,8 @@ export default function PlaylistSplitModal({
         },
         icon: false,
       });
+      // Invalidate queries to fetch fresh data from server
+      await queryClient.invalidateQueries({ queryKey: ["playlists"] });
       onSplitSuccess?.();
       onClose();
     },

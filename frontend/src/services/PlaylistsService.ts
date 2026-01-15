@@ -1,8 +1,9 @@
 import axios from "axios";
 import { API_BASE_URL } from "../config/Config.ts";
-import { ProviderTrack } from "../models/ProviderTrack.ts";
-import { ProviderPlaylist } from "../models/ProviderPlaylist.ts";
+import { PlaylistCreateRequest } from "../models/PlaylistCreateRequest.ts";
 import { PlaylistUpdateRequest } from "../models/PlaylistUpdateRequest.ts";
+import { ProviderPlaylist } from "../models/ProviderPlaylist.ts";
+import { ProviderTrack } from "../models/ProviderTrack.ts";
 
 export const getPlaylists = async (): Promise<ProviderPlaylist[]> => {
   try {
@@ -64,5 +65,22 @@ export const searchSong = async (
   const response = await axios.get<ProviderTrack[]>(
     `${ API_BASE_URL }/${ provider }/search/${ query }`,
     { params: { providerAccountId } });
+  return response.data;
+};
+
+export const createPlaylist = async (
+  provider: string,
+  providerAccountId: string,
+  request: PlaylistCreateRequest
+): Promise<ProviderPlaylist> => {
+  console.log(request);
+  const response = await axios.post(
+    `${API_BASE_URL}/${provider}/playlists`,
+    request,
+    {
+      params: { providerAccountId },
+    }
+  );
+
   return response.data;
 };

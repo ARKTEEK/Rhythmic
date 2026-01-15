@@ -211,7 +211,7 @@ export default function PlaylistDetailsModal({
             tracks.forEach(t => onRemoveSong(playlist, t));
 
             setDuplicateTracks!(prev =>
-              prev.filter(t => !tracks.some(del => del.id === t.id))
+              prev.filter(t => !tracks.some(del => del.id === t.id && del.position === t.position))
             );
           }}
         />
