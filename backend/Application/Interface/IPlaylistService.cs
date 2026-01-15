@@ -6,7 +6,7 @@ namespace backend.Application.Interface;
 public interface IPlaylistService {
   public Task<ProviderPlaylist> CreatePlaylistAsync(
     OAuthProvider provider,
-    string accessToken,
+    string providerAccountId,
     PlaylistCreateRequest request);
 
   public Task UpdatePlaylistAsync(

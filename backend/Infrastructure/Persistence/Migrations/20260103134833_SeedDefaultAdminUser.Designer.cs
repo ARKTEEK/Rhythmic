@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using backend.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using backend.Infrastructure.Persistence;
 namespace backend.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20260103134833_SeedDefaultAdminUser")]
+    partial class SeedDefaultAdminUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -498,9 +501,6 @@ namespace backend.Infrastructure.Persistence.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
@@ -557,16 +557,15 @@ namespace backend.Infrastructure.Persistence.Migrations
                         {
                             Id = "admin-default-user-id",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "44dc068a-60c7-4917-b7ea-7c699824cbdf",
-                            CreatedAt = new DateTime(2026, 1, 5, 10, 59, 31, 347, DateTimeKind.Utc).AddTicks(6611),
+                            ConcurrencyStamp = "be4b0db7-bbb7-484d-89f7-37d8e7194d56",
                             Email = "admin@rhythmic.local",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@RHYTHMIC.LOCAL",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEBLYcEB5BRw9eTFaGoBKCdONWNQOS5BysUq5tArIcstvVJWwXxfymaTcTf8LvrOYkQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEAEN51NyA6SZ5hyW1jOEOzEdXfsv4nsMyNkM10zoYIQM2dWjSZS5Mo+mrb36nSjKZw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "be4b0db7-bbb7-484d-89f7-37d8e7194d56",
+                            SecurityStamp = "44dc068a-60c7-4917-b7ea-7c699824cbdf",
                             TwoFactorEnabled = false,
                             UserName = "admin"
                         });

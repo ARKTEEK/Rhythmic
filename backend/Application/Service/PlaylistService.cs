@@ -28,9 +28,21 @@ public class PlaylistService : IPlaylistService {
 
   public async Task<ProviderPlaylist> CreatePlaylistAsync(
     OAuthProvider provider,
-    string accessToken,
+    string providerAccountId,
     PlaylistCreateRequest request) {
-    throw new NotImplementedException();
+    AccountToken token = await _tokensService.GetAccountToken(providerAccountId, provider);
+    IPlaylistProviderClient client = _factory.GetClient(provider);
+
+    var createdPlaylist = await client.CreatePlaylistAsync(token, request);
+
+    await _auditService.SaveAuditLog(new AuditLogModal {
+      UserId = token.UserId,
+      Executor = ExecutorType.USER,
+      Type = AuditType.PlaylistCreated,
+      Description = $"Created playlist: {request.Title}"
+    });
+
+    return createdPlaylist;
   }
 
   public async Task UpdatePlaylistAsync(OAuthProvider provider, string providerAccountId,

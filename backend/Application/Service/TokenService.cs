@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using backend.Application.Interface;
 using backend.Domain.Entity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
 namespace backend.Application.Service;
@@ -11,17 +12,26 @@ namespace backend.Application.Service;
 public class TokenService : ITokenService {
   private readonly IConfiguration _config;
   private readonly SymmetricSecurityKey _key;
+  private readonly UserManager<User> _userManager;
 
-  public TokenService(IConfiguration config) {
+  public TokenService(IConfiguration config, UserManager<User> userManager) {
     _config = config;
     _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:SigningKey"]));
+    _userManager = userManager;
   }
 
   public string CreateToken(User user) {
     List<Claim> claims = new() {
       new Claim(JwtRegisteredClaimNames.Email, user.Email),
-      new Claim(JwtRegisteredClaimNames.GivenName, user.UserName)
+      new Claim(JwtRegisteredClaimNames.GivenName, user.UserName),
+      new Claim(ClaimTypes.NameIdentifier, user.Id)
     };
+
+    // Add roles to claims
+    var roles = _userManager.GetRolesAsync(user).Result;
+    foreach (var role in roles) {
+      claims.Add(new Claim(ClaimTypes.Role, role));
+    }
 
     SigningCredentials encryptedKey = new(_key, SecurityAlgorithms.HmacSha512Signature);
 

@@ -17,7 +17,10 @@ using Microsoft.IdentityModel.Tokens;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+  .AddJsonOptions(options => {
+    options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+  });
 builder.Services.AddOpenApi();
 
 MySqlServerVersion mysqlVersion = new(new Version(8, 0, 40));
@@ -76,6 +79,10 @@ builder.Services.AddAuthentication(options => {
     };
   });
 
+builder.Services.AddAuthorization(options => {
+  options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+});
+
 
 builder.Services.AddSignalR();
 
@@ -106,6 +113,14 @@ builder.Services.AddScoped<IAccountProfileService, AccountProfileService>();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<AuthService>();
+
+builder.Services.AddScoped<IUserProfileService, UserProfileService>();
+
+builder.Services.AddScoped<IAdminService, AdminService>();
+
+builder.Services.AddScoped<IPlaylistSyncService, PlaylistSyncService>();
+builder.Services.AddScoped<IScheduledJobService, ScheduledJobService>();
+builder.Services.AddHostedService<PlaylistSyncBackgroundService>();
 
 
 WebApplication app = builder.Build();
