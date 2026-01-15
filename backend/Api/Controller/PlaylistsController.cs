@@ -26,6 +26,31 @@ public class PlaylistsController : ControllerBase {
   }
 
   [Authorize]
+  [HttpPost("{provider}/playlists")]
+  public async Task<IActionResult> CreatePlaylistAsync(
+    OAuthProvider provider,
+    [FromQuery] string providerAccountId,
+    [FromBody] PlaylistCreateRequest request) {
+    User? user = await this.GetCurrentUserAsync(_userManager);
+    if (user == null) {
+      return Unauthorized();
+    }
+
+    if (string.IsNullOrWhiteSpace(providerAccountId)) {
+      return BadRequest("providerAccountId is required.");
+    }
+
+    try {
+      ProviderPlaylist createdPlaylist = await _playlistService.CreatePlaylistAsync(
+        provider, providerAccountId, request);
+
+      return Ok(createdPlaylist);
+    } catch (Exception ex) {
+      return BadRequest(ex.Message);
+    }
+  }
+
+  [Authorize]
   [HttpGet("playlists")]
   public async Task<IActionResult> GetPlaylistsAsync() {
     User? user = await this.GetCurrentUserAsync(_userManager);
