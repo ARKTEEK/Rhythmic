@@ -4,6 +4,7 @@ export interface UserDto {
   email?: string;
   password?: string;
   exp?: number;
+  roles?: string[];
 }
 
 export interface AuthData {
@@ -14,4 +15,14 @@ export interface AuthData {
 
 export interface AuthResponse {
   token: string;
+}
+
+export interface AdminUserDto {
+  id: string;
+  username: string;
+  email: string;
+  roles: string[];
+  createdAt: string;
+  actionsCount: number;
+  tokensCount: number;
 }

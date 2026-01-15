@@ -5,6 +5,13 @@ import { jwtDecode } from "jwt-decode";
 import { ReactNode, useEffect, useState } from "react";
 import { JwtPayload } from "../models/JwtPayload.ts";
 
+interface JwtPayload {
+  email: string;
+  given_name: string;
+  exp?: number;
+  role?: string | string[];
+}
+
 interface AuthProviderProps {
   children: ReactNode;
 }
@@ -24,10 +31,14 @@ export default function AuthProvider({ children }: AuthProviderProps) {
         return;
       }
 
+      // Extract roles from JWT
+      const roles = Array.isArray(rawUser.role) ? rawUser.role : rawUser.role ? [rawUser.role] : [];
+
       const normalizedUser: UserDto = {
         email: rawUser.email,
         username: rawUser.given_name,
         exp: rawUser.exp,
+        roles: roles,
       };
 
       setUser(normalizedUser);
@@ -55,10 +66,14 @@ export default function AuthProvider({ children }: AuthProviderProps) {
         const currentTime = Date.now() / 1000;
 
         if (rawUser.exp && rawUser.exp > currentTime) {
+          // Extract roles from JWT
+          const roles = Array.isArray(rawUser.role) ? rawUser.role : rawUser.role ? [rawUser.role] : [];
+
           const normalizedUser: UserDto = {
             email: rawUser.email,
             username: rawUser.given_name,
             exp: rawUser.exp,
+            roles: roles,
           };
 
           setUser(normalizedUser);

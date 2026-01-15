@@ -1,18 +1,23 @@
-import { AppRoute, AppRoutes } from "../../data/AppRoutes.tsx";
-import Button from "../ui/Button.tsx";
 import { useLocation, useNavigate } from "react-router-dom";
+import { AppRoute, AppRoutes } from "../../data/AppRoutes.tsx";
+import { useAuth } from "../../hooks/useAuth.tsx";
+import Button from "../ui/Button.tsx";
 import Logo from "./Logo.tsx";
 
 export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const navItems = AppRoutes.filter((r) => r.label && !r.publicOnly);
+  const isAdmin = user?.roles?.includes("Admin");
 
-  const homeRoute = navItems.find((r) => r.path === "/dashboard");
-  const otherRoutes = navItems.filter((r) => r.path !== "/dashboard");
+  const navItems = AppRoutes.filter((r) => {
+    if (!r.label || r.publicOnly) return false;
+    if (r.adminOnly && !isAdmin) return false;
+    return true;
+  });
 
-  const categorizedRoutes = otherRoutes.reduce<Record<string, AppRoute[]>>((acc, route) => {
+  const categorizedRoutes = navItems.reduce<Record<string, AppRoute[]>>((acc, route) => {
     if (!route.category) return acc;
     acc[route.category] = acc[route.category] || [];
     acc[route.category].push(route);
@@ -31,20 +36,7 @@ export default function Sidebar() {
           underline/>
       </div>
 
-      <div className="flex-1 overflow-y-auto pt-6 relative z-10">
-        { homeRoute && (
-          <nav className="flex flex-col px-6 space-y-4 mb-6">
-            <Button
-              key={ homeRoute.path }
-              label={ homeRoute.label! }
-              Icon={ homeRoute.icon }
-              variant={ location.pathname === homeRoute.path ? 'active' : 'inactive' }
-              size="small"
-              onClick={ () => navigate(homeRoute.path!) }
-            />
-          </nav>
-        ) }
-
+      <div className="flex-1 overflow-y-auto relative z-10">
         { Object.entries(categorizedRoutes).map(([category, routes]) => (
           <nav
             key={ category }

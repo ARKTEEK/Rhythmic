@@ -11,7 +11,7 @@ export default function PublicRoute({ children }: PublicRouteProps) {
   const location = useLocation();
 
   if (isAuthenticated) {
-    const from = (location.state as any)?.from?.pathname || '/dashboard';
+    const from = (location.state as any)?.from?.pathname || '/playlists';
     return <Navigate
       to={ from }
       replace/>;

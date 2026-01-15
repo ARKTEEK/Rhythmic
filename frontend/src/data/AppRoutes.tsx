@@ -6,12 +6,13 @@ import {
   FaLink,
   FaList,
   FaListAlt,
-  FaQuestionCircle
+  FaQuestionCircle,
+  FaShieldAlt
 } from "react-icons/fa";
 import OAuthCallback from "../pages/oauth/OAuthCallback.tsx";
+import AdminPanelPage from "../pages/private/AdminPanelPage.tsx";
 import AuditLogsPage from "../pages/private/AuditLogsPage.tsx";
 import ConnectionsPage from "../pages/private/ConnectionsPage.tsx";
-import DashboardPage from "../pages/private/DashboardPage.tsx";
 import PlaceholderPage from "../pages/private/PlaceholderPage.tsx";
 import PlaylistsPage from "../pages/private/PlaylistsPage.tsx";
 import UserSettingsPage from "../pages/private/SettingsPage.tsx";
@@ -27,6 +28,7 @@ export interface AppRoute {
   icon?: IconType;
   category?: string;
   noLayout?: boolean;
+  adminOnly?: boolean;
 }
 
 export const AppRoutes: AppRoute[] = [
@@ -40,14 +42,6 @@ export const AppRoutes: AppRoute[] = [
     noLayout: true,
   },
 
-  {
-    path: "/dashboard",
-    element: <DashboardPage />,
-    label: "Dashboard",
-    icon: FaHome,
-    private: true
-  },
-
   // My Library
   {
     path: "/playlists",
@@ -56,6 +50,17 @@ export const AppRoutes: AppRoute[] = [
     private: true,
     icon: FaList,
     category: "My Library",
+  },
+
+  // Admin
+  {
+    path: "/admin",
+    element: <AdminPanelPage />,
+    label: "Admin Panel",
+    private: true,
+    adminOnly: true,
+    icon: FaShieldAlt,
+    category: "Admin",
   },
 
   // Manage
