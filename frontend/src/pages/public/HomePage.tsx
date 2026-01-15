@@ -1,27 +1,24 @@
-import Logo from "../../components/common/Logo.tsx";
-import Window from "../../components/ui/Window.tsx";
 import {
-  FaCompass,
   FaCopy,
   FaExchangeAlt,
-  FaFilter,
-  FaLightbulb,
-  FaShareAlt,
+  FaSearch,
   FaSync
 } from 'react-icons/fa';
-import { FeatureCard } from "../../components/home/FeatureCard.tsx";
-import { MiniFeatureCard } from "../../components/home/MiniFeatureCard.tsx";
+import { FaScissors } from 'react-icons/fa6';
 import { Link } from "react-router-dom";
+import Logo from "../../components/common/Logo.tsx";
+import { FeatureCard } from "../../components/home/FeatureCard.tsx";
+import Window from "../../components/ui/Window.tsx";
 
 export default function HomePage() {
   return (
     <div className="min-h-screen w-full p-4 flex justify-center items-center">
       <div className="max-w-5xl w-full">
         <Window
-          containerClassName="w-full min-h-[600px]"
+          containerClassName="w-full min-h-[500px]"
           windowClassName="bg-stone-50"
           ribbonClassName="bg-stone-200">
-          <div className="p-8 flex flex-col gap-12">
+          <div className="p-8 flex flex-col gap-6">
             <div className="text-center">
               <Logo
                 size="lg"
@@ -54,13 +51,23 @@ export default function HomePage() {
                 iconBg="bg-green-100"
                 iconColor="text-green-600"
               />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <FeatureCard
-                icon={ <FaLightbulb/> }
-                title="Smart Suggestions"
-                description="Get intelligent song recommendations."
+                icon={ <FaScissors/> }
+                title="Split"
+                description="Split large playlists into smaller ones."
                 bgColor="bg-purple-50"
                 iconBg="bg-purple-100"
                 iconColor="text-purple-600"
+              />
+              <FeatureCard
+                icon={ <FaSearch/> }
+                title="Duplicate Finder"
+                description="Find and remove repeat tracks from your playlists."
+                bgColor="bg-orange-50"
+                iconBg="bg-orange-100"
+                iconColor="text-orange-600"
               />
               <FeatureCard
                 icon={ <FaSync/> }
@@ -69,30 +76,6 @@ export default function HomePage() {
                 bgColor="bg-yellow-50"
                 iconBg="bg-yellow-100"
                 iconColor="text-yellow-600"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <MiniFeatureCard
-                icon={ <FaCompass/> }
-                title="Discover"
-                description="Find trending playlists and songs."
-                bgColor="bg-orange-50"
-                iconColor="text-orange-600"
-              />
-              <MiniFeatureCard
-                icon={ <FaShareAlt/> }
-                title="Share"
-                description="Share your music with others."
-                bgColor="bg-cyan-50"
-                iconColor="text-cyan-600"
-              />
-              <MiniFeatureCard
-                icon={ <FaFilter/> }
-                title="Smart Filters"
-                description="Advanced filtering options."
-                bgColor="bg-pink-50"
-                iconColor="text-pink-600"
               />
             </div>
           </div>
