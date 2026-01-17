@@ -209,8 +209,9 @@ export default function PlaylistDetailsModal({
           duplicates={duplicateTracks || []}
           onDeleteSelected={(tracks) => {
             tracks.forEach(t => onRemoveSong(playlist, t));
-
+            // @ts-ignore
             setDuplicateTracks!(prev =>
+              // @ts-ignore
               prev.filter(t => !tracks.some(del => del.id === t.id && del.position === t.position))
             );
           }}
