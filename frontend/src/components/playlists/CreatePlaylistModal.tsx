@@ -4,8 +4,9 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import { PlaylistVisibility } from "../../enums/PlaylistVisibility";
 import { Platform } from "../../models/Connection";
-import { createPlaylist, CreatePlaylistRequest } from "../../services/CreatePlaylistService";
+import { createPlaylist } from "../../services/PlaylistsService";
 import Notification from "../ui/Notification";
+import { PlaylistCreateRequest } from "../../models/PlaylistCreateRequest";
 
 interface CreatePlaylistModalProps {
   platforms: Platform[];
@@ -31,7 +32,7 @@ export default function CreatePlaylistModal({ platforms, onClose }: CreatePlayli
         throw new Error("Platform and account must be selected");
       }
 
-      const request: CreatePlaylistRequest = {
+      const request: PlaylistCreateRequest = {
         title: formData.title,
         description: formData.description || undefined,
         visibility: formData.visibility,

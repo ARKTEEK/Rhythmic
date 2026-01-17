@@ -1,8 +1,8 @@
 import { PlaylistSnapshot, PlaylistSnapshotComparison } from "../models/PlaylistSnapshot.ts";
 
 export const formatSnapshotChange = (snapshot: PlaylistSnapshot) => {
-  const additions = snapshot.addedCount ?? 0;
-  const removals = snapshot.removedCount ?? 0;
+  const additions = snapshot.trackCount ?? 0;
+  const removals = snapshot.trackCount ?? 0;
   return { additions, removals };
 };
 

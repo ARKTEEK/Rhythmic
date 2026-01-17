@@ -1,9 +1,8 @@
-import { UserDto } from "../models/User";
-import { AuthContext, AuthContextType } from "./AuthContext";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { ReactNode, useEffect, useState } from "react";
-import { JwtPayload } from "../models/JwtPayload.ts";
+import { UserDto } from "../models/User";
+import { AuthContext, AuthContextType } from "./AuthContext";
 
 interface JwtPayload {
   email: string;
@@ -31,7 +30,6 @@ export default function AuthProvider({ children }: AuthProviderProps) {
         return;
       }
 
-      // Extract roles from JWT
       const roles = Array.isArray(rawUser.role) ? rawUser.role : rawUser.role ? [rawUser.role] : [];
 
       const normalizedUser: UserDto = {
@@ -44,7 +42,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       setUser(normalizedUser);
       setIsAuthenticated(true);
       localStorage.setItem("token", token);
-      axios.defaults.headers.common["Authorization"] = `Bearer ${ token }`;
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     } catch (error) {
       console.error("Error decoding JWT on login:", error);
       logout();
@@ -66,7 +64,6 @@ export default function AuthProvider({ children }: AuthProviderProps) {
         const currentTime = Date.now() / 1000;
 
         if (rawUser.exp && rawUser.exp > currentTime) {
-          // Extract roles from JWT
           const roles = Array.isArray(rawUser.role) ? rawUser.role : rawUser.role ? [rawUser.role] : [];
 
           const normalizedUser: UserDto = {
@@ -79,7 +76,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
           setUser(normalizedUser);
           setIsAuthenticated(true);
 
-          axios.defaults.headers.common["Authorization"] = `Bearer ${ token }`;
+          axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         } else {
           logout();
         }
@@ -93,8 +90,8 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   const contextValue: AuthContextType = { user, isAuthenticated, isLoading, login, logout };
 
   return (
-    <AuthContext.Provider value={ contextValue }>
-      { children }
+    <AuthContext.Provider value={contextValue}>
+      {children}
     </AuthContext.Provider>
   );
 };

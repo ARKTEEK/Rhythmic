@@ -1,14 +1,12 @@
 ﻿import {
   Cloud,
-  Crown,
   Disc3,
   Link,
   List,
   Loader2,
   Music,
   SortDesc,
-  ToolCase,
-  Users
+  ToolCase
 } from "lucide-react";
 import { PlaylistMeta } from "../../hooks/playlists/usePlaylistData.tsx";
 import { PlaylistSyncGroup } from "../../models/PlaylistSync.ts";
@@ -199,7 +197,7 @@ export function PlaylistTable({
                     <div className="flex items-center justify-center gap-2">
                       <span className="font-bold text-[#9b88c7]">{syncInfo.group.name}</span>
                       {syncingGroupIds.has(syncInfo.group.id) && (
-                        <Loader2 className="w-4 h-4 animate-spin text-[#40a8d0]" title="Syncing..." />
+                        <Loader2 className="w-4 h-4 animate-spin text-[#40a8d0]"/>
                       )}
                       {!syncInfo.group.syncEnabled && (
                         <span className="text-[10px] text-red-500 font-bold">(Disabled)</span>
