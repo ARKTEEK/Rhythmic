@@ -76,6 +76,7 @@ export default function PlaylistDetailsModal({
   useEffect(() => {
     if (!isScanning && duplicateTracks && duplicateTracks.length > 0) {
       setIsDuplicatePanelOpen(true);
+      setIsSearchOpen(false);
     }
   }, [isScanning, duplicateTracks]);
 
@@ -127,12 +128,18 @@ export default function PlaylistDetailsModal({
 
                 <div className="flex gap-2">
                   <button
-                    onClick={() => setIsDuplicatePanelOpen(true)}
+                    onClick={() => {
+                      setIsDuplicatePanelOpen(true);
+                      setIsSearchOpen(false);
+                    }}
                     className="px-2 py-1 bg-[#63d079] hover:bg-[#4ec767] box-style-md uppercase font-extrabold hover:cursor-pointer">
                     <BrushCleaning className="w-4 h-4 inline-block" />
                   </button>
                   <button
-                    onClick={() => setIsSearchOpen(true)}
+                    onClick={() => {
+                      setIsSearchOpen(true);
+                      setIsDuplicatePanelOpen(false);
+                    }}
                     className="px-2 py-1 bg-[#63d079] hover:bg-[#4ec767] box-style-md text-xs uppercase hover:cursor-pointer">
                     <SearchIcon className="w-4 h-4 inline-block" />
                   </button>
