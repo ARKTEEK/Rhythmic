@@ -18,10 +18,8 @@ import PlaylistActionsDropdown from "./PlaylistActionsDropdown.tsx";
 interface PlaylistTableProps {
   playlists: ProviderPlaylist[];
   visiblePlaylists: ProviderPlaylist[];
-  selectedIds: Set<string>;
   syncGroups?: PlaylistSyncGroup[];
   syncingGroupIds?: Set<number>;
-  handleToggleSelect: (id: string) => void;
   handleOpenModal: (playlist: ProviderPlaylist) => void;
   handleDelete: (playlist: ProviderPlaylist) => void;
   handleFindDuplicates: (playlist: ProviderPlaylist) => void;
@@ -37,10 +35,8 @@ interface PlaylistTableProps {
 export function PlaylistTable({
   playlists,
   visiblePlaylists,
-  selectedIds,
   syncGroups = [],
   syncingGroupIds = new Set(),
-  handleToggleSelect,
   handleOpenModal,
   handleDelete,
   handleFindDuplicates,
@@ -82,17 +78,15 @@ export function PlaylistTable({
     <div className="flex-1 overflow-y-auto box-style-md rounded-lg">
       <table className="w-full border-separate border-spacing-0 text-sm">
         <colgroup>
-          <col className="w-[3rem]" />
           <col className="w-[45%]" />
           <col className="w-[10%]" />
           <col className="w-[15%]" />
           <col className="w-[15%]" />
-          <col className="w-[12%]" />
+          <col className="w-[15%]" />
         </colgroup>
 
         <thead className="bg-[#f3d99c] border-b-4 border-black sticky top-0 z-10">
           <tr className="h-[48px]">
-            <th className="px-2 text-center"></th>
             <th className="px-2 text-left font-extrabold uppercase tracking-wider">
               <div className="flex items-center gap-1">
                 <Disc3 className="w-4 h-4 text-[#f38ca7]" />
@@ -135,7 +129,6 @@ export function PlaylistTable({
             const meta = getPlaylistMeta(playlist.id, playlist.itemCount);
             const providerName = getProviderName(playlist.provider);
             const linkedTitle = playlists.find(p => p.id === playlist.linkedPlaylistId)?.title;
-            const isSelected = selectedIds.has(playlist.id);
             const syncInfo = getSyncGroupInfo(playlist);
 
             return (
@@ -145,18 +138,7 @@ export function PlaylistTable({
                 transition-all cursor-pointer h-[56px]
                 ${i % 2 === 0 ? "bg-[#fffaf0]" : "bg-[#fff3e6]"}
                 hover:bg-[#ffe9c2]
-                ${isSelected ? "bg-[#ffe9c2]" : ""}
               `}>
-                <td className="text-center align-middle">
-                  <input
-                    type="checkbox"
-                    className="accent-[#f38ca7] w-4 h-4"
-                    checked={isSelected}
-                    onChange={() => handleToggleSelect(playlist.id)}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </td>
-
                 <td
                   className="px-2 align-middle cursor-pointer"
                   onClick={() => handleOpenModal(playlist)}>

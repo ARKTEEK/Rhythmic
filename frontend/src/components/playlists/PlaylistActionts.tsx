@@ -5,8 +5,6 @@ import { useSetTopNavActions } from "../../context/TopNavActionsContext.tsx";
 import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
 
 interface PlaylistActionsProps {
-  selectedIds: Set<string>;
-  hasSelection: boolean;
   isFetching: boolean;
   playlists: ProviderPlaylist[];
   refetchPlaylists: () => void;
@@ -14,8 +12,6 @@ interface PlaylistActionsProps {
 }
 
 export default function PlaylistActions({
-  selectedIds,
-  hasSelection,
   isFetching,
   playlists,
   refetchPlaylists,
@@ -51,7 +47,7 @@ export default function PlaylistActions({
       buttonClassName: "bg-yellow-200 border border-brown-800",
       textClassName: "text-brown-900",
     },
-  ], [onCreatePlaylist, hasSelection, selectedIds.size, handleSync, isFetching, handleRefresh]);
+  ], [onCreatePlaylist, isFetching, handleRefresh]);
 
   useEffect(() => {
     setTopNavActions(actions);

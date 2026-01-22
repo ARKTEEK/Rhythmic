@@ -16,7 +16,6 @@ import LoadingWindow from "../../components/ui/Window/LoadingWindow.tsx";
 import { JobType } from "../../enums/JobType.ts";
 import { usePlaylistData } from "../../hooks/playlists/usePlaylistData.tsx";
 import { usePlaylistFilter } from "../../hooks/playlists/usePlaylistFilter.tsx";
-import { usePlaylistSelection } from "../../hooks/playlists/usePlaylistSelection.tsx";
 import { usePlaylistSongsManagement } from "../../hooks/playlists/usePlaylistSongsManagement.tsx";
 import { usePlaylistSync } from "../../hooks/playlists/usePlaylistSync.tsx";
 import { useSignalR } from "../../hooks/useSignalR.tsx";
@@ -41,12 +40,6 @@ export default function PlaylistsPage() {
     setSearchQuery,
     filteredPlaylists,
   } = usePlaylistFilter(effectivePlaylists);
-
-  const {
-    selectedIds,
-    hasSelection,
-    handleToggleSelect
-  } = usePlaylistSelection();
 
   const {
     focusedPlaylist,
@@ -191,8 +184,6 @@ export default function PlaylistsPage() {
     <>
       <div className="p-6 font-mono flex flex-col text-black h-full w-full overflow-hidden">
         <PlaylistActions
-          selectedIds={selectedIds}
-          hasSelection={hasSelection}
           isFetching={isFetching}
           playlists={playlists}
           refetchPlaylists={refetch}
@@ -232,10 +223,8 @@ export default function PlaylistsPage() {
               <PlaylistTable
                 playlists={playlists}
                 visiblePlaylists={visiblePlaylists}
-                selectedIds={selectedIds}
                 syncGroups={syncGroups}
                 syncingGroupIds={syncingGroups}
-                handleToggleSelect={handleToggleSelect}
                 handleOpenModal={setFocusedPlaylist}
                 handleDelete={setPlaylistToDelete}
                 handleFindDuplicates={handleFindDuplicates}
