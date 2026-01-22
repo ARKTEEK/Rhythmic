@@ -1,5 +1,5 @@
 ﻿import { BrushCleaning, Music, SearchIcon, Trash2, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ProviderPlaylist } from "../../models/ProviderPlaylist.ts";
 import { ProviderTrack } from "../../models/ProviderTrack.ts";
 import { formatDuration } from "../../utils/playlistUtils.tsx";
@@ -23,7 +23,7 @@ interface PlaylistDetailModalProps {
   isScanning?: boolean;
   currentTrack?: ProviderTrack;
   duplicateTracks?: ProviderTrack[];
-  setDuplicateTracks?: (tracks: ProviderTrack[]) => void;
+  setDuplicateTracks?: React.Dispatch<React.SetStateAction<ProviderTrack[]>>;
   onStartScan?: () => void;
   onCancelScan?: () => void;
 }
@@ -54,6 +54,13 @@ export default function PlaylistDetailsModal({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const tableRef = useRef<HTMLDivElement>(null);
 
+  const handleClose = () => {
+    if (setDuplicateTracks) {
+      setDuplicateTracks([]);
+    }
+    onClose();
+  };
+
   useEffect(() => {
     if (!isScanning || !currentTrack || !tableRef.current) {
       return;
@@ -81,7 +88,7 @@ export default function PlaylistDetailsModal({
               <span className="text-lg">Playlist</span>
             </div>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="p-1.5 bg-[#f26b6b] hover:bg-[#e55d5d] border-2 border-black box-style-md hover:cursor-pointer">
               <X className="w-5 h-5 text-white" />
             </button>
@@ -209,11 +216,9 @@ export default function PlaylistDetailsModal({
           duplicates={duplicateTracks || []}
           onDeleteSelected={(tracks) => {
             tracks.forEach(t => onRemoveSong(playlist, t));
-            // @ts-ignore
-            setDuplicateTracks!(prev =>
-              // @ts-ignore
-              prev.filter(t => !tracks.some(del => del.id === t.id && del.position === t.position))
-            );
+            if (setDuplicateTracks) {
+              setDuplicateTracks([]);
+            }
           }}
         />
       </div>

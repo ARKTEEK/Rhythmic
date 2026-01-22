@@ -271,12 +271,18 @@ export default function PlaylistsPage() {
           isScanning={isRunning}
           currentTrack={currentTrack!}
           duplicateTracks={processedTracksMap[JobType.FindDuplicateTracks]}
-          setDuplicateTracks={(tracks: ProviderTrack[]) => {
+          setDuplicateTracks={(tracksOrUpdater: ProviderTrack[] | ((prev: ProviderTrack[]) => ProviderTrack[])) => {
             if (!activeJobType) return;
-            setProcessedTracksMap(prev => ({
-              ...prev,
-              [activeJobType]: tracks
-            }));
+            setProcessedTracksMap(prev => {
+              const currentTracks = prev[activeJobType] || [];
+              const newTracks = typeof tracksOrUpdater === 'function'
+                ? tracksOrUpdater(currentTracks)
+                : tracksOrUpdater;
+              return {
+                ...prev,
+                [activeJobType]: newTracks
+              };
+            });
           }}
           onStartScan={() => handleFindDuplicates(focusedPlaylist)}
           onCancelScan={() => handleCancelJob()}

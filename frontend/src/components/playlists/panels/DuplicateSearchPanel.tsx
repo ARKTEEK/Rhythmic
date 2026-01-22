@@ -36,7 +36,9 @@ export default function DuplicateSearchPanel({
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    if (open) setSelected(new Set());
+    if (open) {
+      setSelected(new Set());
+    }
   }, [open]);
 
   const sorted = useMemo(
@@ -124,10 +126,11 @@ export default function DuplicateSearchPanel({
             disabled={selected.size === 0}
             onClick={() => {
               onDeleteSelected(selectedTracks);
+              setSelected(new Set());
               onClose();
             }}
             className="px-3 py-1 bg-[#f26b6b] hover:bg-[#e55d5d] border-2 border-black box-style-md
-                       uppercase font-bold flex items-center gap-1 text-sm cursor-ponter
+                       uppercase font-bold flex items-center gap-1 text-sm cursor-pointer
                        disabled:opacity-50 disabled:cursor-not-allowed">
             <Trash2 className="w-4 h-4" />
             Delete Selected ({selected.size})

@@ -86,6 +86,15 @@ export const usePlaylistSongsManagement = (): UsePlaylistSongsManagementResult =
         },
         icon: false,
       });
+
+      queryClient.invalidateQueries({
+        queryKey: ['tracks', playlist.id],
+        refetchType: 'none'
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['playlists'],
+        refetchType: 'none'
+      });
     },
     onError: (err, { playlist }, context) => {
       console.error("Failed to add track to playlist:", err);
@@ -104,10 +113,6 @@ export const usePlaylistSongsManagement = (): UsePlaylistSongsManagementResult =
         },
         icon: false,
       });
-    },
-    onSettled: (_, __, { playlist }) => {
-      queryClient.invalidateQueries({ queryKey: ['tracks', playlist.id] });
-      queryClient.invalidateQueries({ queryKey: ['playlists'] });
     },
   });
 
@@ -136,12 +141,11 @@ export const usePlaylistSongsManagement = (): UsePlaylistSongsManagementResult =
         if (!old) return old;
         return old.filter(t => {
           const compareKey = isGoogle ? t.playlistId : t.id;
-          // Match by both ID and position to only remove the specific track instance
           if (compareKey !== removalKey) return true;
           if (track.position !== undefined && t.position !== undefined) {
             return t.position !== track.position;
           }
-          return false; // Remove if IDs match and positions not available
+          return false;
         });
       });
 
@@ -149,13 +153,22 @@ export const usePlaylistSongsManagement = (): UsePlaylistSongsManagementResult =
 
       return { previousTracks, previousPlaylists, playlist };
     },
-    onSuccess: (_, { track }) => {
+    onSuccess: (_, { track, playlist }) => {
       toast.info(Notification, {
         data: {
           title: "Removed Song",
           content: `Removed "${track.title}" from playlist.`
         },
         icon: false
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ['tracks', playlist.id],
+        refetchType: 'none'
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['playlists'],
+        refetchType: 'none'
       });
     },
     onError: (err, { playlist }, context) => {
@@ -175,10 +188,6 @@ export const usePlaylistSongsManagement = (): UsePlaylistSongsManagementResult =
         },
         icon: false
       });
-    },
-    onSettled: (_, __, { playlist }) => {
-      queryClient.invalidateQueries({ queryKey: ['tracks', playlist.id] });
-      queryClient.invalidateQueries({ queryKey: ['playlists'] });
     },
   });
 
