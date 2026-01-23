@@ -1,4 +1,6 @@
-export const API_BASE_URL = "https://127.0.0.1:7184/api";
+const defaultApiBaseUrl = "https://127.0.0.1:7184/api";
+
+export const API_BASE_URL = import.meta.env.API_BASE_URL ?? defaultApiBaseUrl;
 
 export const googleOAuth = () => {
   window.location.href = `${ API_BASE_URL }/oauth/google/login`;

@@ -25,13 +25,15 @@ builder.Services.AddOpenApi();
 
 MySqlServerVersion mysqlVersion = new(new Version(8, 0, 40));
 
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+
 builder.Services.AddCors(options => {
-  options.AddPolicy("AllowFrontend",
-    b => b
-      .WithOrigins(builder.Configuration["FrontendUrl"])
-      .AllowAnyMethod()
-      .AllowAnyHeader()
-      .AllowCredentials());
+  options.AddPolicy("FrontendPolicy", policy => {
+    policy.WithOrigins(allowedOrigins)
+          .AllowAnyMethod()
+          .AllowAnyHeader()
+          .AllowCredentials();
+  });
 });
 
 builder.Services.AddDbContext<DatabaseContext>(options =>
@@ -125,8 +127,7 @@ builder.Services.AddHostedService<PlaylistSyncBackgroundService>();
 
 WebApplication app = builder.Build();
 
-app.UseHttpsRedirection();
-app.UseCors("AllowFrontend");
+app.UseCors("FrontendPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 

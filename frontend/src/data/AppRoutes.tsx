@@ -106,7 +106,7 @@ export const AppRoutes: AppRoute[] = [
     noLayout: true,
   },
   {
-    path: "/api/oauth/:provider/callback",
+    path: "/oauth-callback/:provider",
     element: <OAuthCallback />,
     noLayout: true,
   },
