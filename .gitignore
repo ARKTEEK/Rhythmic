@@ -1,5 +1,6 @@
 ﻿.idea
 frontend/node_modules
+backend/publish
 backend/bin
 backend/obj
 backend/appsettings.Development.json
