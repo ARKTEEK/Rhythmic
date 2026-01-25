@@ -16,6 +16,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options => {
+  options.IdleTimeout = TimeSpan.FromMinutes(10);
+  options.Cookie.HttpOnly = true;
+  options.Cookie.IsEssential = true;
+  options.Cookie.SameSite = SameSiteMode.Lax;
+});
 
 builder.Services.AddControllers()
   .AddJsonOptions(options => {
@@ -98,12 +107,14 @@ builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 
 builder.Services.AddScoped<IProviderClient, GoogleProviderClient>();
 builder.Services.AddScoped<IProviderClient, SpotifyProviderClient>();
+builder.Services.AddScoped<IProviderClient, SoundCloudProviderClient>();
 
 builder.Services.AddScoped<IProviderFactory, ProviderFactory>();
 builder.Services.AddScoped<IPlaylistProviderFactory, PlaylistProviderFactory>();
 
 builder.Services.AddScoped<IPlaylistProviderClient, GooglePlaylistClient>();
 builder.Services.AddScoped<IPlaylistProviderClient, SpotifyPlaylistClient>();
+builder.Services.AddScoped<IPlaylistProviderClient, SoundCloudPlaylistClient>();
 
 builder.Services.AddScoped<IPlaylistService, PlaylistService>();
 builder.Services.AddScoped<IPlaylistSnapshotService, PlaylistSnapshotService>();
@@ -130,7 +141,7 @@ WebApplication app = builder.Build();
 app.UseCors("FrontendPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseSession();
 app.MapControllers();
 app.MapHub<ProgressHub>("/progressHub");
 

@@ -3,6 +3,7 @@ using backend.Application.Interface;
 using backend.Domain.Entity;
 using backend.Domain.Enum;
 using backend.Infrastructure.Extensions;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,8 +31,7 @@ public class OAuthController : ControllerBase {
   }
 
   [HttpPost("{provider}/callback")]
-  public async Task<IActionResult> Callback([FromRoute] string provider,
-    [FromBody] OAuthLoginRequestDto request) {
+  public async Task<IActionResult> Callback([FromRoute] string provider, [FromBody] OAuthLoginRequestDto request) {
     if (!Enum.TryParse<OAuthProvider>(provider, true, out OAuthProvider providerEnum)) {
       return BadRequest(new { error = "Unsupported provider." });
     }
@@ -41,10 +41,12 @@ public class OAuthController : ControllerBase {
       return Unauthorized();
     }
 
+    HttpContext.Items["returned_state"] = request.State;
+
     OAuthLoginResponseDto result = await _iOAuthService.LoginAsync(
-      user.Id,
-      providerEnum,
-      request.Code
+        user.Id,
+        providerEnum,
+        request.Code
     );
 
     return Ok(result);
