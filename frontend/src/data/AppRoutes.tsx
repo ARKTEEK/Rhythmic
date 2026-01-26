@@ -13,7 +13,7 @@ import OAuthCallback from "../pages/oauth/OAuthCallback.tsx";
 import AdminPanelPage from "../pages/private/AdminPanelPage.tsx";
 import AuditLogsPage from "../pages/private/AuditLogsPage.tsx";
 import ConnectionsPage from "../pages/private/ConnectionsPage.tsx";
-import PlaceholderPage from "../pages/private/PlaceholderPage.tsx";
+import HelpPage from "../pages/private/HelpPage.tsx";
 import PlaylistsPage from "../pages/private/PlaylistsPage.tsx";
 import UserSettingsPage from "../pages/private/SettingsPage.tsx";
 import AuthPage from "../pages/public/AuthPage.tsx";
@@ -92,7 +92,7 @@ export const AppRoutes: AppRoute[] = [
   // Support
   {
     path: "/help",
-    element: <PlaceholderPage />,
+    element: <HelpPage />,
     label: "Help",
     icon: FaQuestionCircle,
     category: "Support",
