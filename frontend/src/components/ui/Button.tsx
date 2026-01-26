@@ -7,6 +7,7 @@ interface ButtonProps {
   disabled?: boolean;
   color?: string;
   textColorClassName?: string;
+  labelClassName?: string;
   type?: 'button' | 'submit' | 'reset';
   size?: 'small' | 'medium' | 'large';
   variant?: 'active' | 'inactive';
@@ -42,6 +43,7 @@ export default function Button({
                                  disabled = false,
                                  color = 'primary',
                                  textColorClassName,
+                                 labelClassName,
                                  type = 'button',
                                  size = 'medium',
                                  variant = 'inactive',
@@ -60,7 +62,7 @@ export default function Button({
       <div className="flex items-center gap-2 relative z-10">
         { Icon &&
             <Icon className={ `flex-shrink-0 ${ iconSize } ${ iconColor }` }/> }
-        <span className={ `text-left font-bold drop-shadow-sm ${ textColorClassName || '' }` }>{ label }</span>
+        <span className={ `text-left font-bold drop-shadow-sm ${ textColorClassName || '' } ${ labelClassName || '' }` }>{ label }</span>
       </div>
     </button>
   );

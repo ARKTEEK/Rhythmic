@@ -10,27 +10,27 @@ interface WindowProps {
 }
 
 export default function Window({
-                                 containerClassName = "h-[300px] w-[400px]",
-                                 ribbonClassName,
-                                 windowClassName,
-                                 children,
-                                 ribbonContent,
-                               }: WindowProps) {
+  containerClassName = "h-[300px] w-[400px]",
+  ribbonClassName,
+  windowClassName,
+  children,
+  ribbonContent,
+}: WindowProps) {
   return (
     <div
-      className={ `box-style-lg transform transition-transform 
-                   duration-300 flex flex-col ${ containerClassName }` }
-      style={ { backgroundColor: windowClassName ? "" : "#fefefe" } }>
-      <Ribbon className={ ribbonClassName }>{ ribbonContent }</Ribbon>
+      className={`box-style-lg transform transition-transform
+                   duration-300 flex flex-col ${containerClassName}`}
+      style={{ backgroundColor: windowClassName ? "" : "#fefefe" }}>
+      <Ribbon className={ribbonClassName}>{ribbonContent}</Ribbon>
       <div
-        className={ `
+        className={`
           p-2 rounded-b-lg flex flex-col flex-grow
-          ${ windowClassName || "bg-brown-100" }` }
-        style={ {
+          ${windowClassName || "bg-brown-100"}`}
+        style={{
           flexGrow: 1,
           overflowY: "auto",
-        } }>
-        { children }
+        }}>
+        {children}
       </div>
     </div>
   );

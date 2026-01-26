@@ -4,5 +4,5 @@ export interface PlaylistCreateRequest {
   title: string;
   description?: string;
   visibility: PlaylistVisibility;
+  trackIds?: string[];
 }
-

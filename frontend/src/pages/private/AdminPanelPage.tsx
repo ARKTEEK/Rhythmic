@@ -38,24 +38,24 @@ export default function AdminPanelPage() {
         onCreateUser={() => setShowCreateUserModal(true)}
       />
 
-      <div className="p-6 font-mono flex flex-col text-black h-full w-full overflow-hidden">
+      <div className="p-2 sm:p-4 md:p-6 font-mono flex flex-col text-black h-full w-full overflow-hidden">
         <Window
           containerClassName="w-full h-full box-style-md overflow-hidden bg-gradient-to-b from-[#fff6e7] to-[#fff3db]"
           ribbonClassName="bg-[#f26b6b] border-b-4 border-black text-white font-extrabold"
           windowClassName="bg-[#fff9ec]"
           ribbonContent={
-            <div className="flex items-center justify-between w-full px-4 py-1">
+            <div className="flex items-center justify-between w-full px-2 sm:px-4 py-1">
               <div className="flex items-center gap-2">
-                <h2 className="text-lg text-white uppercase tracking-wider">
+                <h2 className="text-base sm:text-lg text-white uppercase tracking-wider">
                   Admin Panel
                 </h2>
               </div>
-              <span className="text-sm font-normal text-white/90">
+              <span className="text-xs sm:text-sm font-normal text-white/90">
                 {activeTab === "statistics" ? "System Statistics" : "User Management"}
               </span>
             </div>
           }>
-          <div className="p-4 flex flex-col h-full overflow-hidden">
+          <div className="p-2 sm:p-4 flex flex-col h-full overflow-hidden">
             {activeTab === "statistics" && (
               <div className="flex-1 overflow-y-auto">
                 {isLoadingStats ? (

@@ -40,29 +40,82 @@ export default function UserTable({ users }: UserTableProps) {
   return (
     <>
       <div className="bg-white border-2 border-black box-style-md overflow-hidden h-full flex flex-col">
-        <div className="overflow-auto flex-1">
-          <table className="w-full font-mono">
+        <div className="overflow-auto flex-1 md:hidden space-y-3 p-3">
+          {users.map((user) => (
+            <div
+              key={`m-${user.id}`}
+              className="border-2 border-black rounded box-style-sm bg-[#fffef8] p-3 space-y-2">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="font-bold text-sm">{user.username}</div>
+                  <div className="text-xs text-gray-600 truncate">{user.email}</div>
+                </div>
+                <div className="text-[10px] text-gray-600 text-right">
+                  {new Date(user.createdAt).toLocaleDateString()}
+                </div>
+              </div>
+              <div className="flex gap-1.5 flex-wrap">
+                {user.roles.map((role) => (
+                  <span
+                    key={`m-${user.id}-${role}`}
+                    className={`text-[10px] min-w-[50px] text-center px-2 py-0.5 border border-black box-style-sm font-bold uppercase ${role === "Admin"
+                      ? "bg-[#f26b6b] text-white"
+                      : "bg-[#e0b39c] text-black"
+                      }`}>
+                    {role}
+                  </span>
+                ))}
+              </div>
+              <div className="flex justify-between text-[10px] font-bold uppercase tracking-wide text-gray-700">
+                <span>Actions {user.actionsCount}</span>
+                <span>Tokens {user.tokensCount}</span>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  onClick={() => setEditingUser(user)}
+                  className="cursor-pointer px-2 py-1 bg-[#9b88c7] hover:bg-[#8a77b6] border-2 border-black box-style-md text-[10px] font-bold uppercase">
+                  Roles
+                </button>
+                <button
+                  onClick={() => handleResetPassword(user.id, user.email)}
+                  disabled={resetPasswordMutation.isPending}
+                  className="cursor-pointer px-2 py-1 bg-[#40a8d0] hover:bg-[#3597bd] border-2 border-black box-style-md text-[10px] font-bold uppercase disabled:opacity-50 disabled:cursor-not-allowed">
+                  Reset
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="hidden md:block overflow-auto flex-1">
+          <table className="w-full font-mono table-auto">
             <thead className="bg-[#f3d99c] border-b-2 border-black sticky top-0">
               <tr>
-                <th className="px-4 py-2.5 text-left text-xs font-bold uppercase tracking-wider">
+                <th className="px-2 sm:px-4 py-2 sm:py-2.5 text-left text-[10px] sm:text-xs
+                               font-bold uppercase tracking-wider">
                   User
                 </th>
-                <th className="px-4 py-2.5 text-left text-xs font-bold uppercase tracking-wider">
+                <th className="hidden md:table-cell px-4 py-2.5 text-left text-xs font-bold
+                               uppercase tracking-wider">
                   Email
                 </th>
-                <th className="px-4 py-2.5 text-left text-xs font-bold uppercase tracking-wider">
+                <th className="px-2 sm:px-4 py-2 sm:py-2.5 text-left text-[10px] sm:text-xs
+                               font-bold uppercase tracking-wider">
                   Roles
                 </th>
-                <th className="px-4 py-2.5 text-center text-xs font-bold uppercase tracking-wider">
+                <th className="px-2 sm:px-4 py-2 sm:py-2.5 text-center text-[10px] sm:text-xs
+                               font-bold uppercase tracking-wider">
                   Actions
                 </th>
-                <th className="px-4 py-2.5 text-center text-xs font-bold uppercase tracking-wider">
+                <th className="hidden lg:table-cell px-4 py-2.5 text-center text-xs font-bold
+                               uppercase tracking-wider">
                   Connections
                 </th>
-                <th className="px-4 py-2.5 text-left text-xs font-bold uppercase tracking-wider">
+                <th className="hidden lg:table-cell px-4 py-2.5 text-left text-xs font-bold
+                               uppercase tracking-wider">
                   Joined
                 </th>
-                <th className="px-4 py-2.5 text-center text-xs font-bold uppercase tracking-wider">
+                <th className="px-2 sm:px-4 py-2 sm:py-2.5 text-center text-[10px] sm:text-xs
+                               font-bold uppercase tracking-wider">
                   Manage
                 </th>
               </tr>
@@ -70,18 +123,21 @@ export default function UserTable({ users }: UserTableProps) {
             <tbody className="divide-y-2 divide-gray-200">
               {users.map((user) => (
                 <tr key={user.id} className="hover:bg-[#fffaf5] transition">
-                  <td className="px-4 py-3">
-                    <div className="font-bold text-sm">{user.username}</div>
+                  <td className="px-2 sm:px-4 py-2 sm:py-3">
+                    <div className="font-bold text-xs sm:text-sm">{user.username}</div>
+                    <div className="md:hidden text-[10px] text-gray-600">{user.email}</div>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="hidden md:table-cell px-4 py-3">
                     <div className="text-sm text-gray-700">{user.email}</div>
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-1.5 flex-wrap">
+                  <td className="px-2 sm:px-4 py-2 sm:py-3">
+                    <div className="flex gap-1 sm:gap-1.5 flex-wrap">
                       {user.roles.map((role) => (
                         <span
                           key={role}
-                          className={`text-xs min-w-[60px] max-w-[60px] text-center px-2 py-1 border border-black box-style-sm font-bold uppercase ${role === "Admin"
+                          className={`text-[10px] sm:text-xs min-w-[50px] sm:min-w-[60px] max-w-[50px] sm:max-w-[60px]
+                                     text-center px-1 sm:px-2 py-0.5 sm:py-1 border border-black box-style-sm
+                                     font-bold uppercase ${role === "Admin"
                               ? "bg-[#f26b6b] text-white"
                               : "bg-[#e0b39c] text-black"
                             }`}>
@@ -90,29 +146,35 @@ export default function UserTable({ users }: UserTableProps) {
                       ))}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-center">
-                    <span className="font-bold text-sm">{user.actionsCount}</span>
+                  <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
+                    <span className="font-bold text-xs sm:text-sm">{user.actionsCount}</span>
                   </td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="hidden lg:table-cell px-4 py-3 text-center">
                     <span className="font-bold text-sm">{user.tokensCount}</span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="hidden lg:table-cell px-4 py-3">
                     <div className="text-xs text-gray-600">
                       {new Date(user.createdAt).toLocaleDateString()}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-center">
-                    <div className="flex gap-2 justify-center">
+                  <td className="px-2 sm:px-4 py-2 sm:py-3 text-center">
+                    <div className="flex gap-1 sm:gap-2 justify-center flex-wrap">
                       <button
                         onClick={() => setEditingUser(user)}
-                        className="cursor-pointer px-2.5 py-1.5 bg-[#9b88c7] hover:bg-[#8a77b6] border-2 border-black box-style-md text-xs font-bold uppercase">
+                        className="cursor-pointer px-1.5 sm:px-2.5 py-1 sm:py-1.5 bg-[#9b88c7]
+                                   hover:bg-[#8a77b6] border-2 border-black box-style-md
+                                   text-[10px] sm:text-xs font-bold uppercase">
                         Roles
                       </button>
                       <button
                         onClick={() => handleResetPassword(user.id, user.email)}
                         disabled={resetPasswordMutation.isPending}
-                        className="cursor-pointer px-2.5 py-1.5 bg-[#40a8d0] hover:bg-[#3597bd] border-2 border-black box-style-md text-xs font-bold uppercase disabled:opacity-50 disabled:cursor-not-allowed">
-                        Reset Pass
+                        className="cursor-pointer px-1.5 sm:px-2.5 py-1 sm:py-1.5 bg-[#40a8d0]
+                                   hover:bg-[#3597bd] border-2 border-black box-style-md
+                                   text-[10px] sm:text-xs font-bold uppercase
+                                   disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span className="hidden sm:inline">Reset Pass</span>
+                        <span className="sm:hidden">Reset</span>
                       </button>
                     </div>
                   </td>

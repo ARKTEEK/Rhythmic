@@ -47,11 +47,10 @@ export default function PlaylistActionsDropdown({
   useEffect(() => {
     if (isOpen && buttonRef.current) {
       const buttonRect = buttonRef.current.getBoundingClientRect();
-      const dropdownHeight = 400; // Approximate height of dropdown
+      const dropdownHeight = 400;
       const spaceBelow = window.innerHeight - buttonRect.bottom;
       const spaceAbove = buttonRect.top;
 
-      // Open upward if there's not enough space below but there is above
       if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
         setOpenUpward(true);
       } else {
@@ -73,17 +72,18 @@ export default function PlaylistActionsDropdown({
           e.stopPropagation();
           setIsOpen(!isOpen);
         }}
-        className="px-3 py-1.5 bg-[#f3d99c] hover:bg-[#f1d189] border-2 border-black box-style-md cursor-pointer flex items-center gap-2 font-bold text-sm uppercase tracking-wide"
+        className="px-2 sm:px-3 py-1.5 bg-[#f3d99c] hover:bg-[#f1d189] border-2 border-black
+                   box-style-md cursor-pointer flex items-center gap-2 font-bold text-xs sm:text-sm
+                   uppercase tracking-wide"
         title="Options">
-        <MoreVertical className="w-4 h-4" />
-        Options
-        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+        <MoreVertical className="w-3 h-3 sm:w-4 sm:h-4" />
+        <span className="hidden sm:inline">Options</span>
+        <ChevronDown className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform ${isOpen ? "rotate-180" : ""} hidden sm:inline-block`} />
       </button>
 
       {isOpen && (
-        <div className={`absolute right-0 w-56 bg-[#fff9ec] border-2 border-black box-style-md shadow-lg z-50 ${
-          openUpward ? "bottom-full mb-2" : "top-full mt-2"
-        }`}>
+        <div className={`absolute right-0 w-56 bg-[#fff9ec] border-2 border-black box-style-md shadow-lg z-50 ${openUpward ? "bottom-full mb-2" : "top-full mt-2"
+          }`}>
           <div className="py-1">
             <button
               onClick={(e) => {

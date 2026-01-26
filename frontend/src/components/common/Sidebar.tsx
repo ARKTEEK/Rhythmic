@@ -4,7 +4,12 @@ import { useAuth } from "../../hooks/useAuth.tsx";
 import Button from "../ui/Button.tsx";
 import Logo from "./Logo.tsx";
 
-export default function Sidebar() {
+interface SidebarProps {
+  onClose?: () => void;
+  isMobile?: boolean;
+}
+
+export default function Sidebar({ onClose, isMobile }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -28,36 +33,41 @@ export default function Sidebar() {
     <aside
       className="w-full h-full flex flex-col justify-between py-6 border-r-4 border-black
                  bg-[#e0b39c] relative overflow-hidden z-100">
-      <div className="bg-grid-pattern absolute inset-0 pointer-events-none"/>
+      <div className="bg-grid-pattern absolute inset-0 pointer-events-none" />
 
       <div className="flex justify-center px-6 pb-8 pt-2 relative z-10">
         <Logo
           size="md"
-          underline/>
+          underline />
       </div>
 
       <div className="flex-1 overflow-y-auto relative z-10">
-        { Object.entries(categorizedRoutes).map(([category, routes]) => (
+        {Object.entries(categorizedRoutes).map(([category, routes]) => (
           <nav
-            key={ category }
+            key={category}
             className="flex flex-col px-6 mt-6 space-y-4">
             <div
               className="mb-3 text-sm font-bold tracking-widest text-gray-800 uppercase border-b-2
                          border-dotted border-gray-600 pb-1">
-              { category }
+              {category}
             </div>
-            { routes.map(({ label, path, icon: Icon }) => (
+            {routes.map(({ label, path, icon: Icon }) => (
               <Button
-                key={ path }
-                label={ label! }
-                Icon={ Icon }
-                variant={ location.pathname === path ? 'active' : 'inactive' }
+                key={path}
+                label={label!}
+                Icon={Icon}
+                variant={location.pathname === path ? 'active' : 'inactive'}
                 size="small"
-                onClick={ () => navigate(path!) }
+                onClick={() => {
+                  navigate(path!);
+                  if (isMobile && onClose) {
+                    onClose();
+                  }
+                }}
               />
-            )) }
+            ))}
           </nav>
-        )) }
+        ))}
       </div>
     </aside>
   );

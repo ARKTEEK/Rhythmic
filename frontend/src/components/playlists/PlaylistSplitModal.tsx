@@ -53,7 +53,6 @@ export default function PlaylistSplitModal({
         },
         icon: false,
       });
-      // Invalidate queries to fetch fresh data from server
       await queryClient.invalidateQueries({ queryKey: ["playlists"] });
       onSplitSuccess?.();
       onClose();
