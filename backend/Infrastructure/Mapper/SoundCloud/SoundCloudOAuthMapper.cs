@@ -15,9 +15,10 @@ public static class SoundCloudOAuthMapper {
   public static TokenRefreshInfo ToTokenRefreshInfo(SoundCloudTokenRefreshResponse response) {
     return new TokenRefreshInfo {
       AccessToken = response.AccessToken,
+      RefreshToken = response.RefreshToken,
       TokenType = response.TokenType,
       Scope = response.Scope,
-      ExpiresIn = response.ExpiresIn
+      ExpiresIn = response.ExpiresIn,
     };
   }
 }
