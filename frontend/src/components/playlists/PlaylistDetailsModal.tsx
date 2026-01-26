@@ -83,7 +83,7 @@ export default function PlaylistDetailsModal({
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 font-mono overflow-x-auto">
       <div className="flex items-stretch justify-center w-auto p-2 sm:p-6 md:p-10 transition-all duration-300">
-        <div className="relative w-[98vw] sm:w-[90vw] max-w-4xl max-h-[98vh] sm:max-h-fit min-h-fit 
+        <div className="relative w-[98vw] sm:w-[90vw] max-w-4xl min-h-[70vh] sm:min-h-[75vh] max-h-[95vh] 
                         flex flex-col bg-[#fff9ec] box-style-lg overflow-hidden shrink-0 transition-all">
           <div className={`w-full px-2 sm:px-4 py-2 border-b-4 border-black font-extrabold rounded-t-lg 
                            uppercase tracking-wider flex items-center justify-between ${accentSoft} ${accentText}`}>
