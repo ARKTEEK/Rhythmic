@@ -1,7 +1,9 @@
 ﻿using System.Net.Http.Headers;
 using System.Text.Json;
-using backend.Application.Interface;
-using backend.Application.Model;
+
+using backend.Application.Interface.ExternalProvider;
+using backend.Application.Interface.InternalAuth;
+using backend.Application.Model.Provider;
 using backend.Domain.Enum;
 using backend.Infrastructure.DTO.Google;
 using backend.Infrastructure.Mapper.Google;
@@ -85,7 +87,8 @@ public class GoogleProviderClient : IProviderClient {
 
     if (!response.IsSuccessStatusCode) {
       string error = await response.Content.ReadAsStringAsync();
-      throw new HttpRequestException($"Google refresh failed ({response.StatusCode}): {error}");
+      throw new HttpRequestException(
+        $"Google refresh failed ({response.StatusCode}): {error}");
     }
 
     response.EnsureSuccessStatusCode();
@@ -116,9 +119,7 @@ public class GoogleProviderClient : IProviderClient {
   }
 
   public async Task DisconnectAsync(string refreshToken) {
-    Dictionary<string, string> requestBody = new() {
-      { "token", refreshToken }
-    };
+    Dictionary<string, string> requestBody = new() { { "token", refreshToken } };
 
     HttpResponseMessage response = await _http.PostAsync(
       "https://oauth2.googleapis.com/revoke",

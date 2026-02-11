@@ -9,4 +9,3 @@ public class UserDto {
   public int ActionsCount { get; set; }
   public int TokensCount { get; set; }
 }
-

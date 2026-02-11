@@ -1,6 +1,7 @@
 ﻿using backend.Api.DTO.Auth;
 using backend.Application.Model;
-using backend.Application.Service;
+using backend.Application.Service.InternalAuth;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Api.Controller;
@@ -41,12 +42,13 @@ public class AuthController : ControllerBase {
       return Unauthorized("Invalid login information.");
     }
 
-    Response.Cookies.Append("jwt", authResult.User!.Token, new CookieOptions {
-      HttpOnly = true,
-      Secure = true,
-      SameSite = SameSiteMode.Lax,
-      Expires = DateTimeOffset.UtcNow.AddDays(14)
-    });
+    Response.Cookies.Append("jwt", authResult.User!.Token,
+      new CookieOptions {
+        HttpOnly = true,
+        Secure = true,
+        SameSite = SameSiteMode.Lax,
+        Expires = DateTimeOffset.UtcNow.AddDays(14)
+      });
 
     return Ok(authResult.User);
   }

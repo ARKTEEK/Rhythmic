@@ -1,3 +1,4 @@
+namespace backend.Domain.Enum;
 
 public enum AuditType {
   PlaylistTrasnferred,

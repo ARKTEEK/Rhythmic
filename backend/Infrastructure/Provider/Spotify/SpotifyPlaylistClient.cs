@@ -2,8 +2,9 @@
 using System.Text;
 using System.Text.Json;
 
-using backend.Application.Interface;
-using backend.Application.Model;
+using backend.Application.Interface.ExternalProvider;
+using backend.Application.Model.Playlists.Requests;
+using backend.Application.Model.Provider;
 using backend.Domain.Entity;
 using backend.Domain.Enum;
 using backend.Infrastructure.DTO.Spotify;
@@ -12,6 +13,9 @@ using backend.Infrastructure.Mapper.Spotify;
 namespace backend.Infrastructure.Provider.Spotify;
 
 public class SpotifyPlaylistClient : IPlaylistProviderClient {
+  private static readonly IReadOnlySet<PlaylistVisibility> Visibilities =
+    new HashSet<PlaylistVisibility> { PlaylistVisibility.Public, PlaylistVisibility.Private };
+
   private readonly HttpClient _http;
 
   public SpotifyPlaylistClient(IHttpClientFactory http) {
@@ -19,12 +23,6 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
   }
 
   public OAuthProvider Provider => OAuthProvider.Spotify;
-
-  private static readonly IReadOnlySet<PlaylistVisibility> Visibilities =
-    new HashSet<PlaylistVisibility> {
-      PlaylistVisibility.Public,
-      PlaylistVisibility.Private,
-    };
 
   public IReadOnlySet<PlaylistVisibility> SupportedVisibilities => Visibilities;
 
@@ -39,7 +37,8 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
 
     if (!response.IsSuccessStatusCode) {
       string content = await response.Content.ReadAsStringAsync();
-      throw new HttpRequestException($"Spotify API failed ({response.StatusCode}): {content}");
+      throw new HttpRequestException(
+        $"Spotify API failed ({response.StatusCode}): {content}");
     }
 
     string json = await response.Content.ReadAsStringAsync();
@@ -67,7 +66,7 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
     }
 
     List<Task<List<SpotifyPlaylistTrackItem>>> tasks = new();
-    using var semaphore = new SemaphoreSlim(5);
+    using SemaphoreSlim semaphore = new(5);
 
     for (int i = 1; i < pages; i++) {
       int offset = i * limit;
@@ -77,7 +76,8 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
       tasks.Add(Task.Run(async () => {
         await semaphore.WaitAsync();
         try {
-          var page = await FetchTrackPageAsync(accessToken, url);
+          SpotifyPlaylistTracksResponse
+            page = await FetchTrackPageAsync(accessToken, url);
           return page.Items;
         } finally {
           semaphore.Release();
@@ -86,7 +86,7 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
     }
 
     List<SpotifyPlaylistTrackItem>[] results = await Task.WhenAll(tasks);
-    foreach (var items in results) {
+    foreach (List<SpotifyPlaylistTrackItem> items in results) {
       allTrackItems.AddRange(items);
     }
 
@@ -94,8 +94,8 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
   }
 
   public async Task<ProviderPlaylist> CreatePlaylistAsync(
-      AccountToken accountToken,
-      PlaylistCreateRequest request
+    AccountToken accountToken,
+    PlaylistCreateRequest request
   ) {
     string userId = accountToken.Id;
 
@@ -105,28 +105,30 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
       @public = request.Visibility == PlaylistVisibility.Public
     };
 
-    var createReq = new HttpRequestMessage(
-        HttpMethod.Post,
-        $"https://api.spotify.com/v1/users/{Uri.EscapeDataString(userId)}/playlists"
+    HttpRequestMessage createReq = new(
+      HttpMethod.Post,
+      $"https://api.spotify.com/v1/users/{Uri.EscapeDataString(userId)}/playlists"
     ) {
       Content = new StringContent(
-            JsonSerializer.Serialize(createBody),
-            Encoding.UTF8,
-            "application/json"
-        )
+        JsonSerializer.Serialize(createBody),
+        Encoding.UTF8,
+        "application/json"
+      )
     };
 
     createReq.Headers.Authorization =
-        new AuthenticationHeaderValue("Bearer", accountToken.AccessToken);
+      new AuthenticationHeaderValue("Bearer", accountToken.AccessToken);
 
-    var createRes = await _http.SendAsync(createReq);
+    HttpResponseMessage createRes = await _http.SendAsync(createReq);
     if (!createRes.IsSuccessStatusCode) {
       string err = await createRes.Content.ReadAsStringAsync();
-      throw new HttpRequestException($"Spotify CreatePlaylist failed ({createRes.StatusCode}): {err}");
+      throw new HttpRequestException(
+        $"Spotify CreatePlaylist failed ({createRes.StatusCode}): {err}");
     }
 
     string json = await createRes.Content.ReadAsStringAsync();
-    var created = JsonSerializer.Deserialize<SpotifyCreatePlaylistResponse>(json)!;
+    SpotifyCreatePlaylistResponse created =
+      JsonSerializer.Deserialize<SpotifyCreatePlaylistResponse>(json)!;
 
     return new ProviderPlaylist {
       Id = created.id,
@@ -138,13 +140,13 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
 
   public async Task UpdatePlaylistAsync(string accessToken, PlaylistUpdateRequest request) {
     _http.DefaultRequestHeaders.Authorization =
-        new AuthenticationHeaderValue("Bearer", accessToken);
+      new AuthenticationHeaderValue("Bearer", accessToken);
 
     if (request.ReplaceAll == true && request.AddItems?.Any() == true) {
       List<string> uris = request.AddItems
-          .OrderBy(t => t.Position ?? 0)
-          .Select(SpotifyPlaylistMapper.ToSpotifyUri)
-          .ToList();
+        .OrderBy(t => t.Position ?? 0)
+        .Select(SpotifyPlaylistMapper.ToSpotifyUri)
+        .ToList();
 
       await ReplaceAllTracksAsync(request.Id, uris);
       return;
@@ -152,14 +154,14 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
 
     if (request.AddItems?.Any() == true) {
       List<string> uris = request.AddItems
-          .Select(SpotifyPlaylistMapper.ToSpotifyUri)
-          .ToList();
+        .Select(SpotifyPlaylistMapper.ToSpotifyUri)
+        .ToList();
 
       // Add tracks in batches of 100
       // For new playlists, we don't need positions - tracks are added in order
       for (int i = 0; i < uris.Count; i += 100) {
         List<string> chunk = uris.Skip(i).Take(100).ToList();
-        await AddTracksAsync(request.Id, chunk, position: null);
+        await AddTracksAsync(request.Id, chunk);
       }
     }
 
@@ -169,8 +171,27 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
     }
   }
 
+  public async Task DeletePlaylistAsync(string accessToken, string playlistId) {
+    string url = $"https://api.spotify.com/v1/playlists/{playlistId}/followers";
+    HttpRequestMessage req = new(HttpMethod.Delete, url);
+    req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+    HttpResponseMessage res = await _http.SendAsync(req);
+    if (!res.IsSuccessStatusCode) {
+      string msg = await res.Content.ReadAsStringAsync();
+      throw new HttpRequestException(
+        $"Spotify playlist delete failed ({res.StatusCode}): {msg}");
+    }
+  }
+
+  public Task<Dictionary<string, int>> GetVideoDurationsAsync(string accessToken,
+    List<string> videoIds) {
+    throw new NotImplementedException();
+  }
+
   private async Task ReplaceAllTracksAsync(string playlistId, List<string> uris) {
-    string url = $"https://api.spotify.com/v1/playlists/{Uri.EscapeDataString(playlistId)}/tracks";
+    string url =
+      $"https://api.spotify.com/v1/playlists/{Uri.EscapeDataString(playlistId)}/tracks";
 
     if (uris.Count <= 100) {
       var body = new { uris };
@@ -185,7 +206,8 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
       HttpResponseMessage res = await _http.SendAsync(req);
       if (!res.IsSuccessStatusCode) {
         string err = await res.Content.ReadAsStringAsync();
-        throw new HttpRequestException($"Spotify ReplaceAllTracks failed ({res.StatusCode}): {err}");
+        throw new HttpRequestException(
+          $"Spotify ReplaceAllTracks failed ({res.StatusCode}): {err}");
       }
     } else {
       List<string> firstBatch = uris.Take(100).ToList();
@@ -201,7 +223,8 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
       HttpResponseMessage putRes = await _http.SendAsync(putReq);
       if (!putRes.IsSuccessStatusCode) {
         string err = await putRes.Content.ReadAsStringAsync();
-        throw new HttpRequestException($"Spotify ReplaceAllTracks failed ({putRes.StatusCode}): {err}");
+        throw new HttpRequestException(
+          $"Spotify ReplaceAllTracks failed ({putRes.StatusCode}): {err}");
       }
 
       for (int i = 100; i < uris.Count; i += 100) {
@@ -212,7 +235,8 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
   }
 
   private async Task AddTracksAsync(string playlistId, List<string> uris, int? position = null) {
-    string url = $"https://api.spotify.com/v1/playlists/{Uri.EscapeDataString(playlistId)}/tracks";
+    string url =
+      $"https://api.spotify.com/v1/playlists/{Uri.EscapeDataString(playlistId)}/tracks";
 
     object body = position.HasValue
       ? new { uris, position = position.Value }
@@ -234,7 +258,8 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
   }
 
   private async Task DeleteTracksAsync(string playlistId, object removeBody) {
-    string url = $"https://api.spotify.com/v1/playlists/{Uri.EscapeDataString(playlistId)}/tracks";
+    string url =
+      $"https://api.spotify.com/v1/playlists/{Uri.EscapeDataString(playlistId)}/tracks";
     HttpRequestMessage req = new(HttpMethod.Delete, url) {
       Content = new StringContent(
         JsonSerializer.Serialize(removeBody),
@@ -246,19 +271,8 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
     HttpResponseMessage res = await _http.SendAsync(req);
     if (!res.IsSuccessStatusCode) {
       string err = await res.Content.ReadAsStringAsync();
-      throw new HttpRequestException($"Spotify DeleteTracks failed ({res.StatusCode}): {err}");
-    }
-  }
-
-  public async Task DeletePlaylistAsync(string accessToken, string playlistId) {
-    string url = $"https://api.spotify.com/v1/playlists/{playlistId}/followers";
-    HttpRequestMessage req = new(HttpMethod.Delete, url);
-    req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-    HttpResponseMessage res = await _http.SendAsync(req);
-    if (!res.IsSuccessStatusCode) {
-      string msg = await res.Content.ReadAsStringAsync();
-      throw new HttpRequestException($"Spotify playlist delete failed ({res.StatusCode}): {msg}");
+      throw new HttpRequestException(
+        $"Spotify DeleteTracks failed ({res.StatusCode}): {err}");
     }
   }
 
@@ -279,8 +293,4 @@ public class SpotifyPlaylistClient : IPlaylistProviderClient {
       JsonSerializer.Deserialize<SpotifyPlaylistTracksResponse>(json)!;
     return page;
   }
-
-    public Task<Dictionary<string, int>> GetVideoDurationsAsync(string accessToken, List<string> videoIds) {
-        throw new NotImplementedException();
-    }
 }

@@ -3,8 +3,9 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-using backend.Application.Interface;
-using backend.Application.Model;
+using backend.Application.Interface.ExternalProvider;
+using backend.Application.Model.Playlists.Requests;
+using backend.Application.Model.Provider;
 using backend.Domain.Entity;
 using backend.Domain.Enum;
 using backend.Infrastructure.DTO.Google;
@@ -13,6 +14,11 @@ using backend.Infrastructure.Mapper.Google;
 namespace backend.Infrastructure.Provider.Google;
 
 public class GooglePlaylistClient : IPlaylistProviderClient {
+  private static readonly IReadOnlySet<PlaylistVisibility> Visibilities =
+    new HashSet<PlaylistVisibility> {
+      PlaylistVisibility.Public, PlaylistVisibility.Private, PlaylistVisibility.Unlisted
+    };
+
   private readonly HttpClient _http;
 
   public GooglePlaylistClient(IHttpClientFactory http) {
@@ -20,13 +26,6 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
   }
 
   public OAuthProvider Provider => OAuthProvider.Google;
-
-  private static readonly IReadOnlySet<PlaylistVisibility> Visibilities =
-    new HashSet<PlaylistVisibility> {
-      PlaylistVisibility.Public,
-      PlaylistVisibility.Private,
-      PlaylistVisibility.Unlisted
-    };
 
   public IReadOnlySet<PlaylistVisibility> SupportedVisibilities => Visibilities;
 
@@ -40,7 +39,8 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
 
     if (!response.IsSuccessStatusCode) {
       string content = await response.Content.ReadAsStringAsync();
-      throw new HttpRequestException($"YouTube API failed ({response.StatusCode}): {content}");
+      throw new HttpRequestException(
+        $"YouTube API failed ({response.StatusCode}): {content}");
     }
 
     response.EnsureSuccessStatusCode();
@@ -53,13 +53,14 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
     return GooglePlaylistMapper.ToProviderPlaylists(providerId, responsePlaylist);
   }
 
-  public async Task<List<ProviderTrack>> GetPlaylistTracksAsync(string accessToken, string playlistId) {
+  public async Task<List<ProviderTrack>> GetPlaylistTracksAsync(string accessToken,
+    string playlistId) {
     List<ProviderTrack> tracks = new();
     string? nextPageToken = null;
 
     do {
       string url =
-          $"https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId={playlistId}&maxResults=50";
+        $"https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId={playlistId}&maxResults=50";
       if (!string.IsNullOrEmpty(nextPageToken)) {
         url += $"&pageToken={nextPageToken}";
       }
@@ -72,18 +73,19 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
 
       string json = await response.Content.ReadAsStringAsync();
       GooglePlaylistTracksResponse playlistResponse =
-          JsonSerializer.Deserialize<GooglePlaylistTracksResponse>(json)!;
+        JsonSerializer.Deserialize<GooglePlaylistTracksResponse>(json)!;
 
       tracks.AddRange(GooglePlaylistMapper.ToProviderTracks(playlistResponse));
 
       nextPageToken = playlistResponse.NextPageToken;
     } while (!string.IsNullOrEmpty(nextPageToken));
 
-    var videoIds = tracks.Select(t => t.Id).Where(id => !string.IsNullOrEmpty(id)).ToList();
-    var durations = await GetVideoDurationsAsync(accessToken, videoIds);
+    List<string> videoIds =
+      tracks.Select(t => t.Id).Where(id => !string.IsNullOrEmpty(id)).ToList();
+    Dictionary<string, int> durations = await GetVideoDurationsAsync(accessToken, videoIds);
 
-    foreach (var track in tracks) {
-      if (durations.TryGetValue(track.Id, out var durationMs)) {
+    foreach (ProviderTrack track in tracks) {
+      if (durations.TryGetValue(track.Id, out int durationMs)) {
         track.DurationMs = durationMs;
       }
     }
@@ -91,13 +93,15 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
     return tracks;
   }
 
-  public async Task<Dictionary<string, int>> GetVideoDurationsAsync(string accessToken, List<string> videoIds) {
-    var durations = new Dictionary<string, int>();
+  public async Task<Dictionary<string, int>> GetVideoDurationsAsync(string accessToken,
+    List<string> videoIds) {
+    Dictionary<string, int> durations = new();
     const int batchSize = 50;
 
     for (int i = 0; i < videoIds.Count; i += batchSize) {
-      var batchIds = videoIds.Skip(i).Take(batchSize);
-      string url = $"https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id={string.Join(",", batchIds)}";
+      IEnumerable<string> batchIds = videoIds.Skip(i).Take(batchSize);
+      string url =
+        $"https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id={string.Join(",", batchIds)}";
 
       HttpRequestMessage request = new(HttpMethod.Get, url);
       request.Headers.Add("Authorization", $"Bearer {accessToken}");
@@ -106,10 +110,12 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
       response.EnsureSuccessStatusCode();
 
       string json = await response.Content.ReadAsStringAsync();
-      var videoResponse = JsonSerializer.Deserialize<YouTubeVideosResponse>(json)!;
+      YouTubeVideosResponse videoResponse =
+        JsonSerializer.Deserialize<YouTubeVideosResponse>(json)!;
 
-      foreach (var item in videoResponse.Items) {
-        if (!string.IsNullOrEmpty(item.Id) && !string.IsNullOrEmpty(item.ContentDetails?.Duration)) {
+      foreach (YouTubeVideoItem item in videoResponse.Items) {
+        if (!string.IsNullOrEmpty(item.Id) &&
+            !string.IsNullOrEmpty(item.ContentDetails?.Duration)) {
           durations[item.Id] = ParseYouTubeDurationToMs(item.ContentDetails.Duration);
         }
       }
@@ -118,41 +124,27 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
     return durations;
   }
 
-  private static int ParseYouTubeDurationToMs(string isoDuration) {
-    var match = Regex.Match(isoDuration, @"PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?");
-    int hours = match.Groups[1].Success ? int.Parse(match.Groups[1].Value) : 0;
-    int minutes = match.Groups[2].Success ? int.Parse(match.Groups[2].Value) : 0;
-    int seconds = match.Groups[3].Success ? int.Parse(match.Groups[3].Value) : 0;
-    return ((hours * 3600) + (minutes * 60) + seconds) * 1000;
-  }
-
-  // TODO: Map utils
   public async Task<ProviderPlaylist> CreatePlaylistAsync(
-      AccountToken accountToken,
-      PlaylistCreateRequest request) {
-    using var http = new HttpClient();
+    AccountToken accountToken,
+    PlaylistCreateRequest request) {
+    using HttpClient http = new();
 
     http.DefaultRequestHeaders.Authorization =
-        new AuthenticationHeaderValue("Bearer", accountToken.AccessToken);
+      new AuthenticationHeaderValue("Bearer", accountToken.AccessToken);
 
     var body = new {
-      snippet = new {
-        title = request.Title,
-        description = request.Description
-      },
-      status = new {
-        privacyStatus = "public"
-      }
+      snippet = new { title = request.Title, description = request.Description },
+      status = new { privacyStatus = "public" }
     };
 
-    var response = await http.PostAsJsonAsync(
-        "https://www.googleapis.com/youtube/v3/playlists?part=snippet,status",
-        body);
+    HttpResponseMessage response = await http.PostAsJsonAsync(
+      "https://www.googleapis.com/youtube/v3/playlists?part=snippet,status",
+      body);
 
     response.EnsureSuccessStatusCode();
 
-    var ytResponse = await response.Content
-        .ReadFromJsonAsync<YouTubeCreatePlaylistResponse>();
+    YouTubeCreatePlaylistResponse? ytResponse = await response.Content
+      .ReadFromJsonAsync<YouTubeCreatePlaylistResponse>();
 
     if (ytResponse == null) {
       throw new InvalidOperationException("YouTube playlist creation failed.");
@@ -171,9 +163,11 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
       new AuthenticationHeaderValue("Bearer", accessToken);
 
     if (request.ReplaceAll == true && request.AddItems?.Any() == true) {
-      List<ProviderTrack> currentTracks = await GetPlaylistTracksAsync(accessToken, request.Id);
+      List<ProviderTrack> currentTracks =
+        await GetPlaylistTracksAsync(accessToken, request.Id);
 
-      foreach (var track in currentTracks.OrderByDescending(t => t.Position ?? 0)) {
+      foreach (ProviderTrack? track in
+               currentTracks.OrderByDescending(t => t.Position ?? 0)) {
         if (!string.IsNullOrEmpty(track.PlaylistId)) {
           try {
             await DeleteTracksAsync(track.PlaylistId);
@@ -183,8 +177,7 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
         }
       }
 
-      foreach (var track in request.AddItems.OrderBy(t => t.Position ?? 0)) {
-
+      foreach (ProviderTrack? track in request.AddItems.OrderBy(t => t.Position ?? 0)) {
         string videoId = GooglePlaylistMapper.ToYouTubeUri(track);
         int position = track.Position ?? 0;
         await AddTracksAsync(request.Id, videoId, position: position);
@@ -195,7 +188,7 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
 
     if (request.AddItems != null && request.AddItems.Any()) {
       for (int i = 0; i < request.AddItems.Count; i++) {
-        var track = request.AddItems[i];
+        ProviderTrack track = request.AddItems[i];
         string videoId = GooglePlaylistMapper.ToYouTubeUri(track);
         int? position = track.Position;
         await AddTracksAsync(request.Id, videoId, position: position);
@@ -203,29 +196,49 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
     }
 
     if (request.RemoveItems?.Any() == true) {
-      foreach (var track in request.RemoveItems) {
+      foreach (ProviderTrack track in request.RemoveItems) {
         await DeleteTracksAsync(track.PlaylistId);
       }
     }
+  }
+
+  public async Task DeletePlaylistAsync(string accessToken, string playlistId) {
+    string url = $"https://www.googleapis.com/youtube/v3/playlists?id={playlistId}";
+    HttpRequestMessage req = new(HttpMethod.Delete, url);
+    req.Headers.Add("Authorization", $"Bearer {accessToken}");
+
+    HttpResponseMessage res = await _http.SendAsync(req);
+    if (!res.IsSuccessStatusCode) {
+      string msg = await res.Content.ReadAsStringAsync();
+      throw new HttpRequestException($"YouTube delete failed ({res.StatusCode}): {msg}");
+    }
+  }
+
+  private static int ParseYouTubeDurationToMs(string isoDuration) {
+    Match match = Regex.Match(isoDuration, @"PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?");
+    int hours = match.Groups[1].Success ? int.Parse(match.Groups[1].Value) : 0;
+    int minutes = match.Groups[2].Success ? int.Parse(match.Groups[2].Value) : 0;
+    int seconds = match.Groups[3].Success ? int.Parse(match.Groups[3].Value) : 0;
+    return ((hours * 3600) + (minutes * 60) + seconds) * 1000;
   }
 
   private async Task AddTracksAsync(string playlistId, string videoId,
     string onBehalfOfContentOwner = "", int? position = null) {
     string url = "https://www.googleapis.com/youtube/v3/playlistItems";
 
-    Dictionary<string, string> query = new() {
-      { "part", "snippet" }
-    };
+    Dictionary<string, string> query = new() { { "part", "snippet" } };
 
     if (!string.IsNullOrEmpty(onBehalfOfContentOwner)) {
       query.Add("onBehalfOfContentOwner", onBehalfOfContentOwner);
     }
 
     UriBuilder uriBuilder = new(url) {
-      Query = string.Join("&", query.Select(kvp => $"{kvp.Key}={Uri.EscapeDataString(kvp.Value)}"))
+      Query = string.Join("&",
+        query.Select(kvp => $"{kvp.Key}={Uri.EscapeDataString(kvp.Value)}"))
     };
 
-    var body = GooglePlaylistMapper.CreatePlaylistItemInsertBody(playlistId, videoId, position);
+    object body =
+      GooglePlaylistMapper.CreatePlaylistItemInsertBody(playlistId, videoId, position);
 
     HttpRequestMessage request = new(HttpMethod.Post, uriBuilder.Uri) {
       Content = new StringContent(
@@ -242,23 +255,11 @@ public class GooglePlaylistClient : IPlaylistProviderClient {
   }
 
   private async Task DeleteTracksAsync(string playlistItemId) {
-    var url = $"https://www.googleapis.com/youtube/v3/playlistItems?id={playlistItemId}";
+    string url = $"https://www.googleapis.com/youtube/v3/playlistItems?id={playlistItemId}";
 
-    var request = new HttpRequestMessage(HttpMethod.Delete, url);
-    var response = await _http.SendAsync(request);
+    HttpRequestMessage request = new(HttpMethod.Delete, url);
+    HttpResponseMessage response = await _http.SendAsync(request);
 
     response.EnsureSuccessStatusCode();
-  }
-
-  public async Task DeletePlaylistAsync(string accessToken, string playlistId) {
-    string url = $"https://www.googleapis.com/youtube/v3/playlists?id={playlistId}";
-    HttpRequestMessage req = new(HttpMethod.Delete, url);
-    req.Headers.Add("Authorization", $"Bearer {accessToken}");
-
-    HttpResponseMessage res = await _http.SendAsync(req);
-    if (!res.IsSuccessStatusCode) {
-      string msg = await res.Content.ReadAsStringAsync();
-      throw new HttpRequestException($"YouTube delete failed ({res.StatusCode}): {msg}");
-    }
   }
 }

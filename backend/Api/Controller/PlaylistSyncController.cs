@@ -1,5 +1,6 @@
-using backend.Application.Interface;
-using backend.Application.Model;
+using backend.Application.Interface.Playlist.Sync;
+using backend.Application.Model.Playlists.Requests;
+using backend.Application.Model.Playlists.Sync;
 using backend.Domain.Entity;
 using backend.Infrastructure.Extensions;
 
@@ -31,7 +32,8 @@ public class PlaylistSyncController : ControllerBase {
     }
 
     try {
-      var syncGroup = await _syncService.CreateSyncGroupAsync(user.Id, request);
+      PlaylistSyncGroupDto syncGroup =
+        await _syncService.CreateSyncGroupAsync(user.Id, request);
       return Ok(syncGroup);
     } catch (InvalidOperationException ex) {
       return BadRequest(ex.Message);
@@ -46,7 +48,7 @@ public class PlaylistSyncController : ControllerBase {
       return Unauthorized();
     }
 
-    var syncGroups = await _syncService.GetSyncGroupsAsync(user.Id);
+    List<PlaylistSyncGroupDto> syncGroups = await _syncService.GetSyncGroupsAsync(user.Id);
     return Ok(syncGroups);
   }
 
@@ -58,7 +60,8 @@ public class PlaylistSyncController : ControllerBase {
       return Unauthorized();
     }
 
-    var syncGroup = await _syncService.GetSyncGroupAsync(user.Id, syncGroupId);
+    PlaylistSyncGroupDto? syncGroup =
+      await _syncService.GetSyncGroupAsync(user.Id, syncGroupId);
     if (syncGroup == null) {
       return NotFound();
     }
@@ -77,11 +80,12 @@ public class PlaylistSyncController : ControllerBase {
     }
 
     try {
-      var syncGroup = await _syncService.UpdateSyncGroupAsync(
+      PlaylistSyncGroupDto syncGroup = await _syncService.UpdateSyncGroupAsync(
         user.Id,
         syncGroupId,
         request.Name,
-        request.SyncEnabled);
+        request.SyncEnabled
+      );
       return Ok(syncGroup);
     } catch (InvalidOperationException ex) {
       return BadRequest(ex.Message);
@@ -115,7 +119,8 @@ public class PlaylistSyncController : ControllerBase {
     }
 
     try {
-      var syncGroup = await _syncService.AddChildPlaylistAsync(user.Id, syncGroupId, request);
+      PlaylistSyncGroupDto syncGroup =
+        await _syncService.AddChildPlaylistAsync(user.Id, syncGroupId, request);
       return Ok(syncGroup);
     } catch (InvalidOperationException ex) {
       return BadRequest(ex.Message);
@@ -147,7 +152,7 @@ public class PlaylistSyncController : ControllerBase {
     }
 
     try {
-      var result = await _syncService.SyncGroupAsync(user.Id, syncGroupId, force);
+      SyncResultDto result = await _syncService.SyncGroupAsync(user.Id, syncGroupId, force);
       return Ok(result);
     } catch (InvalidOperationException ex) {
       return BadRequest(ex.Message);
@@ -161,4 +166,3 @@ public class UpdateSyncGroupRequest {
   public string? Name { get; set; }
   public bool? SyncEnabled { get; set; }
 }
-

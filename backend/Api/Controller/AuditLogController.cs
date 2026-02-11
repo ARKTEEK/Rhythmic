@@ -1,10 +1,13 @@
-using backend.Application.Model;
+using backend.Application.Interface;
+using backend.Application.Model.Audit;
 using backend.Domain.Entity;
 using backend.Infrastructure.Extensions;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+
+namespace backend.Api.Controller;
 
 [ApiController]
 [Route("api/logs")]
@@ -19,8 +22,8 @@ public class AuditLogController : ControllerBase {
     _auditService = auditService;
   }
 
-  [Authorize]
   [HttpGet]
+  [Authorize]
   public async Task<IActionResult> GetAuditLogs() {
     User? user = await this.GetCurrentUserAsync(_userManager);
     if (user == null) {

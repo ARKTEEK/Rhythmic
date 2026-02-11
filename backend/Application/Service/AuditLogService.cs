@@ -1,23 +1,21 @@
-using backend.Application.Model;
-using backend.Infrastructure.Persistence;
+using backend.Application.Interface;
+using backend.Application.Model.Audit;
+using backend.Domain.Entity;
+using backend.Domain.Interfaces;
 
-using Microsoft.EntityFrameworkCore;
+namespace backend.Application.Service;
 
 public class AuditLogService : IAuditLogService {
-  private readonly DatabaseContext _db;
+  private readonly IAuditLogRepository _repository;
 
-  public AuditLogService(DatabaseContext database) {
-    _db = database;
+  public AuditLogService(IAuditLogRepository repository) {
+    _repository = repository;
   }
 
   public async Task<List<AuditLogDto>> GetAuditLogs(string userId) {
-    List<AuditLog> auditLogs =
-      await _db.AuditLogs
-      .Where(x => x.UserId == userId)
-      .OrderByDescending(x => x.CreatedAt)
-      .ToListAsync();
+    List<AuditLog> logs = await _repository.GetByUserAsync(userId);
 
-    return auditLogs.Select(log => new AuditLogDto {
+    return logs.Select(log => new AuditLogDto {
       Id = log.Id,
       Executor = log.Executor,
       Type = log.Type,
@@ -27,19 +25,14 @@ public class AuditLogService : IAuditLogService {
   }
 
   public async Task SaveAuditLog(AuditLogModal dto) {
-    if (AuditContext.HasActiveScope) {
-      return;
-    }
-
-    AuditLog log = new AuditLog {
+    AuditLog log = new() {
       UserId = dto.UserId,
       Executor = dto.Executor,
       Type = dto.Type,
-      Description = dto.Description
+      Description = dto.Description,
+      CreatedAt = DateTime.UtcNow
     };
 
-    _db.AuditLogs.Add(log);
-    await _db.SaveChangesAsync();
+    await _repository.AddAsync(log);
   }
-
 }

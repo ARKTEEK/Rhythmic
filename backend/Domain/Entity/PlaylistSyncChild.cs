@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+
 using backend.Domain.Enum;
 
 namespace backend.Domain.Entity;
@@ -17,4 +18,3 @@ public class PlaylistSyncChild {
 
   public DateTime? LastSyncedAt { get; set; }
 }
-

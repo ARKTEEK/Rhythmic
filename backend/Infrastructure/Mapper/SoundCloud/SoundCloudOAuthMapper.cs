@@ -1,4 +1,7 @@
-using backend.Application.Model;
+using backend.Application.Model.Provider;
+using backend.Infrastructure.DTO.SoundCloud;
+
+namespace backend.Infrastructure.Mapper.SoundCloud;
 
 public static class SoundCloudOAuthMapper {
   public static TokenInfo ToTokenInfo(SoundCloudTokenResponse response, string userId) {
@@ -18,7 +21,7 @@ public static class SoundCloudOAuthMapper {
       RefreshToken = response.RefreshToken,
       TokenType = response.TokenType,
       Scope = response.Scope,
-      ExpiresIn = response.ExpiresIn,
+      ExpiresIn = response.ExpiresIn
     };
   }
 }

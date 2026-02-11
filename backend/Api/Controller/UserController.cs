@@ -1,6 +1,7 @@
-using backend.Application.Interface;
-using backend.Application.Model;
+using backend.Application.Interface.InternalAuth;
+using backend.Application.Model.Provider;
 using backend.Infrastructure.Extensions;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,8 +20,8 @@ public class UserController : ControllerBase {
   [HttpPut("profile")]
   public async Task<ActionResult> UpdateProfile([FromBody] UpdateProfileRequest request) {
     try {
-      var userId = User.GetUserIdClaim();
-      var success = await _userProfileService.UpdateProfileAsync(userId, request);
+      string userId = User.GetUserIdClaim();
+      bool success = await _userProfileService.UpdateProfileAsync(userId, request);
 
       if (!success) {
         return NotFound(new { error = "User not found" });
@@ -35,8 +36,8 @@ public class UserController : ControllerBase {
   [HttpPost("change-password")]
   public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordRequest request) {
     try {
-      var userId = User.GetUserIdClaim();
-      var success = await _userProfileService.ChangePasswordAsync(userId, request);
+      string userId = User.GetUserIdClaim();
+      bool success = await _userProfileService.ChangePasswordAsync(userId, request);
 
       if (!success) {
         return NotFound(new { error = "User not found" });
@@ -48,4 +49,3 @@ public class UserController : ControllerBase {
     }
   }
 }
-

@@ -1,21 +1,16 @@
-﻿namespace backend.Infrastructure.DTO.Spotify;
+﻿using System.Text.Json.Serialization;
 
-using System.Text.Json.Serialization;
+namespace backend.Infrastructure.DTO.Spotify;
 
 public class SpotifyPlaylistTracksResponse {
-  [JsonPropertyName("items")]
-  public List<SpotifyPlaylistTrackItem> Items { get; set; }
+  [JsonPropertyName("items")] public List<SpotifyPlaylistTrackItem> Items { get; set; }
 
-  [JsonPropertyName("next")]
-  public string? Next { get; set; }
+  [JsonPropertyName("next")] public string? Next { get; set; }
 
-  [JsonPropertyName("total")]
-  public int Total { get; set; }
+  [JsonPropertyName("total")] public int Total { get; set; }
 
-  [JsonPropertyName("limit")]
-  public int Limit { get; set; }
+  [JsonPropertyName("limit")] public int Limit { get; set; }
 }
-
 
 public class SpotifyPlaylistTrackItem {
   [JsonPropertyName("track")] public SpotifyTrack Track { get; set; }

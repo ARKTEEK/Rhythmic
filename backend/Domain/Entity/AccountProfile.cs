@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+
 using backend.Domain.Enum;
 
 namespace backend.Domain.Entity;

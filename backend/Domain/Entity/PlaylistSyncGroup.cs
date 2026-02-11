@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+
 using backend.Domain.Enum;
 
 namespace backend.Domain.Entity;
@@ -27,4 +28,3 @@ public class PlaylistSyncGroup {
 
   public ICollection<PlaylistSyncChild> Children { get; set; } = new List<PlaylistSyncChild>();
 }
-

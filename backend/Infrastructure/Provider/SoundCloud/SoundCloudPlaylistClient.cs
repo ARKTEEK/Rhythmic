@@ -1,9 +1,14 @@
 using System.Net.Http.Headers;
 
-using backend.Application.Interface;
-using backend.Application.Model;
+using backend.Application.Interface.ExternalProvider;
+using backend.Application.Model.Playlists.Requests;
+using backend.Application.Model.Provider;
 using backend.Domain.Entity;
 using backend.Domain.Enum;
+using backend.Infrastructure.DTO.SoundCloud;
+using backend.Infrastructure.Mapper.SoundCloud;
+
+namespace backend.Infrastructure.Provider.SoundCloud;
 
 public class SoundCloudPlaylistClient : IPlaylistProviderClient {
   private readonly HttpClient _http;
@@ -15,18 +20,20 @@ public class SoundCloudPlaylistClient : IPlaylistProviderClient {
   public OAuthProvider Provider => OAuthProvider.SoundCloud;
 
   public IReadOnlySet<PlaylistVisibility> SupportedVisibilities =>
-      new HashSet<PlaylistVisibility> { PlaylistVisibility.Public, PlaylistVisibility.Private };
+    new HashSet<PlaylistVisibility> { PlaylistVisibility.Public, PlaylistVisibility.Private };
 
-  public async Task<List<ProviderPlaylist>> GetPlaylistsAsync(string providerId, string accessToken) {
-    String url = "https://api.soundcloud.com/me/playlists?linked_partitioning=1";
+  public async Task<List<ProviderPlaylist>> GetPlaylistsAsync(string providerId,
+    string accessToken) {
+    string url = "https://api.soundcloud.com/me/playlists?linked_partitioning=1";
 
-    HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+    HttpRequestMessage request = new(HttpMethod.Get, url);
     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
     HttpResponseMessage response = await _http.SendAsync(request);
     response.EnsureSuccessStatusCode();
 
-    SoundCloudCollectionResponse<SoundCloudPlaylist> data = await response.Content.ReadFromJsonAsync<SoundCloudCollectionResponse<SoundCloudPlaylist>>();
+    SoundCloudCollectionResponse<SoundCloudPlaylist> data = await response.Content
+      .ReadFromJsonAsync<SoundCloudCollectionResponse<SoundCloudPlaylist>>();
 
     if (data == null) {
       return new List<ProviderPlaylist>();
@@ -39,38 +46,46 @@ public class SoundCloudPlaylistClient : IPlaylistProviderClient {
     }).ToList();
   }
 
-  public async Task<List<ProviderTrack>> GetPlaylistTracksAsync(string accessToken, string playlistId) {
-    HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, $"https://api.soundcloud.com/playlists/{playlistId}");
+  public async Task<List<ProviderTrack>> GetPlaylistTracksAsync(string accessToken,
+    string playlistId) {
+    HttpRequestMessage request = new(HttpMethod.Get,
+      $"https://api.soundcloud.com/playlists/{playlistId}");
     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
     HttpResponseMessage response = await _http.SendAsync(request);
     response.EnsureSuccessStatusCode();
 
-    SoundCloudPlaylist playlist = await response.Content.ReadFromJsonAsync<SoundCloudPlaylist>();
+    SoundCloudPlaylist playlist =
+      await response.Content.ReadFromJsonAsync<SoundCloudPlaylist>();
 
     if (playlist?.Tracks == null) {
       return new List<ProviderTrack>();
     }
 
     return playlist.Tracks
-        .Select((track, index) => SoundCloudPlaylistMapper.ToProviderTrack(track, playlist.Urn, index))
-        .ToList();
+      .Select((track, index) =>
+        SoundCloudPlaylistMapper.ToProviderTrack(track, playlist.Urn, index))
+      .ToList();
   }
 
-  public async Task<ProviderPlaylist> CreatePlaylistAsync(AccountToken accountToken, PlaylistCreateRequest request) {
-    SoundCloudPlaylistUpdateRequest createPayload = SoundCloudPlaylistMapper.ToCreateRequest(request);
+  public async Task<ProviderPlaylist> CreatePlaylistAsync(AccountToken accountToken,
+    PlaylistCreateRequest request) {
+    SoundCloudPlaylistUpdateRequest createPayload =
+      SoundCloudPlaylistMapper.ToCreateRequest(request);
 
-    HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Post, "https://api.soundcloud.com/playlists") {
-      Headers = {
-            Authorization = new AuthenticationHeaderValue("Bearer", accountToken.AccessToken)
+    HttpRequestMessage httpRequest =
+      new(HttpMethod.Post, "https://api.soundcloud.com/playlists") {
+        Headers = {
+          Authorization =
+            new AuthenticationHeaderValue("Bearer", accountToken.AccessToken)
         },
-      Content = JsonContent.Create(createPayload)
-    };
+        Content = JsonContent.Create(createPayload)
+      };
 
     HttpResponseMessage response = await _http.SendAsync(httpRequest);
 
     if (!response.IsSuccessStatusCode) {
-      String error = await response.Content.ReadAsStringAsync();
+      string error = await response.Content.ReadAsStringAsync();
       throw new Exception($"SoundCloud Creation Failed: {response.StatusCode} - {error}");
     }
 
@@ -79,13 +94,15 @@ public class SoundCloudPlaylistClient : IPlaylistProviderClient {
   }
 
   public async Task UpdatePlaylistAsync(string accessToken, PlaylistUpdateRequest request) {
-    HttpRequestMessage getRequest = new HttpRequestMessage(HttpMethod.Get, $"https://api.soundcloud.com/playlists/{request.Id}");
+    HttpRequestMessage getRequest = new(HttpMethod.Get,
+      $"https://api.soundcloud.com/playlists/{request.Id}");
     getRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
     HttpResponseMessage getResponse = await _http.SendAsync(getRequest);
     getResponse.EnsureSuccessStatusCode();
 
-    SoundCloudPlaylist current = await getResponse.Content.ReadFromJsonAsync<SoundCloudPlaylist>();
+    SoundCloudPlaylist current =
+      await getResponse.Content.ReadFromJsonAsync<SoundCloudPlaylist>();
     if (current == null) {
       throw new Exception("Could not fetch current playlist.");
     }
@@ -93,17 +110,19 @@ public class SoundCloudPlaylistClient : IPlaylistProviderClient {
     List<string> trackUrns = current.Tracks?.Select(t => t.Urn).ToList() ?? new List<string>();
 
     if (request.ReplaceAll == true) {
-      trackUrns = request.AddItems?.Select(t => t.Id).ToList() ?? new();
+      trackUrns = request.AddItems?.Select(t => t.Id).ToList() ?? new List<string>();
     } else {
       if (request.RemoveItems != null) {
         HashSet<string> idsToRemove = request.RemoveItems.Select(t => t.Id).ToHashSet();
         trackUrns.RemoveAll(id => idsToRemove.Contains(id));
       }
+
       if (request.AddItems != null) {
         trackUrns.AddRange(request.AddItems.Select(t => t.Id));
       }
+
       if (request.Reorder != null) {
-        String itemToMove = trackUrns[request.Reorder.OriginalIndex];
+        string itemToMove = trackUrns[request.Reorder.OriginalIndex];
         trackUrns.RemoveAt(request.Reorder.OriginalIndex);
 
         int targetIndex = Math.Clamp(request.Reorder.NewIndex, 0, trackUrns.Count);
@@ -111,29 +130,34 @@ public class SoundCloudPlaylistClient : IPlaylistProviderClient {
       }
     }
 
-    SoundCloudPlaylistUpdateRequest updatePayload = SoundCloudPlaylistMapper.ToUpdateRequest(current, trackUrns);
+    SoundCloudPlaylistUpdateRequest updatePayload =
+      SoundCloudPlaylistMapper.ToUpdateRequest(current, trackUrns);
 
-    HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Put, $"https://api.soundcloud.com/playlists/{request.Id}");
+    HttpRequestMessage httpRequest = new(HttpMethod.Put,
+      $"https://api.soundcloud.com/playlists/{request.Id}");
     httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
     httpRequest.Content = JsonContent.Create(updatePayload);
 
     HttpResponseMessage response = await _http.SendAsync(httpRequest);
 
     if (!response.IsSuccessStatusCode) {
-      String errorContent = await response.Content.ReadAsStringAsync();
-      throw new Exception($"SoundCloud Update Failed: {response.StatusCode} - {errorContent}");
+      string errorContent = await response.Content.ReadAsStringAsync();
+      throw new Exception(
+        $"SoundCloud Update Failed: {response.StatusCode} - {errorContent}");
     }
   }
 
   public async Task DeletePlaylistAsync(string accessToken, string playlistId) {
-    HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Delete, $"https://api.soundcloud.com/playlists/{playlistId}");
+    HttpRequestMessage httpRequest = new(HttpMethod.Delete,
+      $"https://api.soundcloud.com/playlists/{playlistId}");
     httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
     HttpResponseMessage response = await _http.SendAsync(httpRequest);
     response.EnsureSuccessStatusCode();
   }
 
-  public Task<Dictionary<string, int>> GetVideoDurationsAsync(string accessToken, List<string> videoIds) {
+  public Task<Dictionary<string, int>> GetVideoDurationsAsync(string accessToken,
+    List<string> videoIds) {
     return Task.FromResult(new Dictionary<string, int>());
   }
 }

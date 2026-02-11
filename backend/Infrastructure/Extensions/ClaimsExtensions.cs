@@ -10,6 +10,6 @@ public static class ClaimsExtensions {
 
   public static string GetUserIdClaim(this ClaimsPrincipal user) {
     return user.FindFirst(ClaimTypes.NameIdentifier)?.Value
-      ?? throw new UnauthorizedAccessException("User ID not found in claims");
+           ?? throw new UnauthorizedAccessException("User ID not found in claims");
   }
 }

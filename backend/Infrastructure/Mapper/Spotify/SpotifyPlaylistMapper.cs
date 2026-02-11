@@ -1,4 +1,4 @@
-﻿using backend.Application.Model;
+﻿using backend.Application.Model.Provider;
 using backend.Domain.Enum;
 using backend.Infrastructure.DTO.Spotify;
 
@@ -29,11 +29,13 @@ public static class SpotifyPlaylistMapper {
   }
 
   public static List<ProviderTrack> ToProviderTracks(List<SpotifyPlaylistTrackItem> items) {
-    List<ProviderTrack> tracks = new List<ProviderTrack>();
+    List<ProviderTrack> tracks = new();
 
     for (int i = 0; i < items.Count; i++) {
       SpotifyTrack t = items[i].Track;
-      if (t == null) continue;
+      if (t == null) {
+        continue;
+      }
 
       tracks.Add(new ProviderTrack {
         Id = t.Id,
@@ -53,9 +55,9 @@ public static class SpotifyPlaylistMapper {
 
 
   public static List<ProviderTrack> ToProviderTracksFromSearch(SpotifySearchResult searchResult) {
-    List<ProviderTrack> providerTracks = new List<ProviderTrack>();
+    List<ProviderTrack> providerTracks = new();
 
-    foreach (var item in searchResult.Tracks.Items) {
+    foreach (TrackItem item in searchResult.Tracks.Items) {
       string id = item.Id;
       string title = item.Name;
       string artist = string.Join(", ", item.Artists.Select(a => a.Name));
@@ -80,10 +82,8 @@ public static class SpotifyPlaylistMapper {
 
   public static object ToSpotifyDeleteBody(IEnumerable<ProviderTrack> tracks) {
     return new {
-      tracks = tracks.Select(t => new {
-        uri = ToSpotifyUri(t),
-        positions = new[] { t.Position }
-      }).ToList()
+      tracks = tracks.Select(t => new { uri = ToSpotifyUri(t), positions = new[] { t.Position } })
+        .ToList()
     };
   }
 

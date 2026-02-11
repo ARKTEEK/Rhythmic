@@ -1,8 +1,9 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using backend.Application.Interface;
-using backend.Application.Model;
+
+using backend.Application.Interface.ExternalProvider;
+using backend.Application.Model.Provider;
 using backend.Domain.Enum;
 using backend.Infrastructure.DTO.Spotify;
 using backend.Infrastructure.Mapper.Spotify;
@@ -42,14 +43,11 @@ public class SpotifyProviderClient : IProviderClient {
     string? redirectUri = _configuration["Spotify:RedirectUri"];
 
     FormUrlEncodedContent content = new(new Dictionary<string, string> {
-      ["code"] = code,
-      ["redirect_uri"] = redirectUri!,
-      ["grant_type"] = "authorization_code"
+      ["code"] = code, ["redirect_uri"] = redirectUri!, ["grant_type"] = "authorization_code"
     });
 
-    HttpRequestMessage request = new(HttpMethod.Post, "https://accounts.spotify.com/api/token") {
-      Content = content
-    };
+    HttpRequestMessage request =
+      new(HttpMethod.Post, "https://accounts.spotify.com/api/token") { Content = content };
 
     string encodedAuthorizationCode =
       Convert.ToBase64String(Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}"));
@@ -60,7 +58,8 @@ public class SpotifyProviderClient : IProviderClient {
     response.EnsureSuccessStatusCode();
 
     string json = await response.Content.ReadAsStringAsync();
-    SpotifyTokenResponse tokenResponse = JsonSerializer.Deserialize<SpotifyTokenResponse>(json)!;
+    SpotifyTokenResponse tokenResponse =
+      JsonSerializer.Deserialize<SpotifyTokenResponse>(json)!;
 
     ProviderProfile profile = await GetProfileAsync(tokenResponse.AccessToken);
 
@@ -72,13 +71,11 @@ public class SpotifyProviderClient : IProviderClient {
     string? clientSecret = _configuration["Spotify:ClientSecret"];
 
     FormUrlEncodedContent content = new(new Dictionary<string, string> {
-      ["grant_type"] = "refresh_token",
-      ["refresh_token"] = refreshToken
+      ["grant_type"] = "refresh_token", ["refresh_token"] = refreshToken
     });
 
-    HttpRequestMessage request = new(HttpMethod.Post, "https://accounts.spotify.com/api/token") {
-      Content = content
-    };
+    HttpRequestMessage request =
+      new(HttpMethod.Post, "https://accounts.spotify.com/api/token") { Content = content };
 
     string encodedCredentials =
       Convert.ToBase64String(Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}"));
@@ -88,7 +85,8 @@ public class SpotifyProviderClient : IProviderClient {
 
     if (!response.IsSuccessStatusCode) {
       string error = await response.Content.ReadAsStringAsync();
-      throw new HttpRequestException($"Spotify refresh failed ({response.StatusCode}): {error}");
+      throw new HttpRequestException(
+        $"Spotify refresh failed ({response.StatusCode}): {error}");
     }
 
     string json = await response.Content.ReadAsStringAsync();

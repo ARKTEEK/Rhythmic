@@ -30,4 +30,3 @@ public class ScheduledJob {
 
   public ICollection<JobExecution> Executions { get; set; } = new List<JobExecution>();
 }
-

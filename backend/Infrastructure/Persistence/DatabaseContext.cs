@@ -24,19 +24,13 @@ public class DatabaseContext : IdentityDbContext<User> {
 
     builder.Entity<IdentityRole>().HasData(new List<IdentityRole> {
       new() {
-        Id = "288fd75c-0471-4c64-9d8e-af206019088e",
-        Name = "Admin",
-        NormalizedName = "ADMIN"
+        Id = "288fd75c-0471-4c64-9d8e-af206019088e", Name = "Admin", NormalizedName = "ADMIN"
       },
-      new() {
-        Id = "020d4c18-5d3a-4380-836e-346b7b1a38ff",
-        Name = "User",
-        NormalizedName = "USER"
-      }
+      new() { Id = "020d4c18-5d3a-4380-836e-346b7b1a38ff", Name = "User", NormalizedName = "USER" }
     });
 
-    var hasher = new PasswordHasher<User>();
-    var adminUser = new User {
+    PasswordHasher<User> hasher = new();
+    User adminUser = new() {
       Id = "admin-default-user-id",
       UserName = "admin",
       NormalizedUserName = "ADMIN",
@@ -51,8 +45,7 @@ public class DatabaseContext : IdentityDbContext<User> {
     builder.Entity<User>().HasData(adminUser);
 
     builder.Entity<IdentityUserRole<string>>().HasData(new IdentityUserRole<string> {
-      RoleId = "288fd75c-0471-4c64-9d8e-af206019088e",
-      UserId = "admin-default-user-id"
+      RoleId = "288fd75c-0471-4c64-9d8e-af206019088e", UserId = "admin-default-user-id"
     });
 
     builder.Entity<AccountToken>()

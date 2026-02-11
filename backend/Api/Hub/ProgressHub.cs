@@ -1,8 +1,6 @@
 ﻿namespace backend.Api.Hub;
 
-using Microsoft.AspNetCore.SignalR;
-
-public class ProgressHub : Hub {
+public class ProgressHub : Microsoft.AspNetCore.SignalR.Hub {
   public Task Subscribe(string jobId) {
     return Groups.AddToGroupAsync(Context.ConnectionId, jobId);
   }

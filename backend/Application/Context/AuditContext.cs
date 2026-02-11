@@ -1,23 +1,28 @@
+using backend.Domain.Enum;
+
+namespace backend.Application.Context;
+
 public static class AuditContext {
   private static readonly AsyncLocal<AuditScope?> _current = new();
 
   public static bool HasActiveScope => _current.Value != null;
 
   public static IDisposable BeginScope(AuditType type) {
-    if (_current.Value != null)
+    if (_current.Value != null) {
       return NoopDisposable.Instance;
+    }
 
-    var scope = new AuditScope(type);
+    AuditScope scope = new(type);
     _current.Value = scope;
     return scope;
   }
 
   private sealed class AuditScope : IDisposable {
-    public AuditType Type { get; }
-
     public AuditScope(AuditType type) {
       Type = type;
     }
+
+    public AuditType Type { get; }
 
     public void Dispose() {
       _current.Value = null;

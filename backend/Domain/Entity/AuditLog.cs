@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-using backend.Domain.Entity;
+using backend.Domain.Enum;
+
+namespace backend.Domain.Entity;
 
 public class AuditLog {
   [Key] public int Id { get; set; }

@@ -1,5 +1,9 @@
-using backend.Application.Model;
+using backend.Application.Model.Playlists.Requests;
+using backend.Application.Model.Provider;
 using backend.Domain.Enum;
+using backend.Infrastructure.DTO.SoundCloud;
+
+namespace backend.Infrastructure.Mapper.SoundCloud;
 
 public static class SoundCloudPlaylistMapper {
   public static ProviderPlaylist ToProviderPlaylist(SoundCloudPlaylist sc) {
@@ -19,9 +23,9 @@ public static class SoundCloudPlaylistMapper {
   }
 
   public static ProviderTrack ToProviderTrack(
-      SoundCloudTrack sc,
-      string? playlistId = null,
-      int? position = null) {
+    SoundCloudTrack sc,
+    string? playlistId = null,
+    int? position = null) {
     return new ProviderTrack {
       Id = sc.Urn,
       PlaylistId = playlistId,
@@ -37,8 +41,8 @@ public static class SoundCloudPlaylistMapper {
   }
 
   public static SoundCloudPlaylistUpdateRequest ToUpdateRequest(
-          SoundCloudPlaylist current,
-          List<string> trackUrns) {
+    SoundCloudPlaylist current,
+    List<string> trackUrns) {
     return new SoundCloudPlaylistUpdateRequest {
       Playlist = new SoundCloudPlaylistUpdateData {
         Title = current.Title,

@@ -1,4 +1,4 @@
-﻿using backend.Application.Model;
+﻿using backend.Application.Model.Provider;
 using backend.Domain.Entity;
 using backend.Infrastructure.DTO.Google;
 

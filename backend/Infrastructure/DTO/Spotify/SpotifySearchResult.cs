@@ -1,14 +1,13 @@
-﻿namespace backend.Infrastructure.DTO.Spotify;
+﻿using System.Text.Json.Serialization;
 
-using System.Collections.Generic;
-using System.Text.Json.Serialization;
+namespace backend.Infrastructure.DTO.Spotify;
 
 public class SpotifySearchResult {
-  [JsonPropertyName("tracks")] public TrackCollection Tracks { get; set; } = new TrackCollection();
+  [JsonPropertyName("tracks")] public TrackCollection Tracks { get; set; } = new();
 }
 
 public class TrackCollection {
-  [JsonPropertyName("items")] public List<TrackItem> Items { get; set; } = new List<TrackItem>();
+  [JsonPropertyName("items")] public List<TrackItem> Items { get; set; } = new();
 }
 
 public class TrackItem {
@@ -16,9 +15,9 @@ public class TrackItem {
 
   [JsonPropertyName("name")] public string Name { get; set; } = string.Empty;
 
-  [JsonPropertyName("artists")] public List<Artist> Artists { get; set; } = new List<Artist>();
+  [JsonPropertyName("artists")] public List<Artist> Artists { get; set; } = new();
 
-  [JsonPropertyName("album")] public Album Album { get; set; } = new Album();
+  [JsonPropertyName("album")] public Album Album { get; set; } = new();
 
   [JsonPropertyName("duration_ms")] public int DurationMs { get; set; }
 }
@@ -30,7 +29,7 @@ public class Artist {
 public class Album {
   [JsonPropertyName("name")] public string Name { get; set; } = string.Empty;
 
-  [JsonPropertyName("images")] public List<AlbumImage> Images { get; set; } = new List<AlbumImage>();
+  [JsonPropertyName("images")] public List<AlbumImage> Images { get; set; } = new();
 }
 
 public class AlbumImage {

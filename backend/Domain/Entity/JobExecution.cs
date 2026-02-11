@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json;
 
 namespace backend.Domain.Entity;
 
@@ -19,4 +18,3 @@ public class JobExecution {
 
   public string? Metadata { get; set; }
 }
-

@@ -1,4 +1,5 @@
-using backend.Application.Interface;
+using backend.Application.Interface.Playlist;
+using backend.Application.Model.Playlists.Snapshot;
 using backend.Domain.Entity;
 using backend.Domain.Enum;
 using backend.Infrastructure.Extensions;
@@ -32,7 +33,7 @@ public class PlaylistSnapshotsController : ControllerBase {
       return Unauthorized();
     }
 
-    var snapshots = await _snapshotService.GetSnapshotHistoryAsync(
+    List<PlaylistSnapshotDto> snapshots = await _snapshotService.GetSnapshotHistoryAsync(
       user.Id, provider, playlistId);
 
     return Ok(snapshots);
@@ -55,7 +56,7 @@ public class PlaylistSnapshotsController : ControllerBase {
     }
 
     try {
-      var comparison = await _snapshotService.CompareSnapshotAsync(
+      PlaylistSnapshotComparisonDto comparison = await _snapshotService.CompareSnapshotAsync(
         user.Id, provider, playlistId, providerAccountId, snapshotId);
 
       return Ok(comparison);
@@ -107,4 +108,3 @@ public class PlaylistSnapshotsController : ControllerBase {
     }
   }
 }
-

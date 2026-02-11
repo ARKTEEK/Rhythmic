@@ -1,8 +1,9 @@
 ﻿using backend.Api.DTO;
-using backend.Application.Interface;
+using backend.Application.Interface.ExternalAuth;
 using backend.Application.Mapper;
 using backend.Domain.Entity;
 using backend.Infrastructure.Extensions;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,7 +16,8 @@ public class AccountProfilesController : ControllerBase {
   private readonly IAccountProfileService _accountProfileService;
   private readonly UserManager<User> _userManager;
 
-  public AccountProfilesController(IAccountProfileService accountProfileService,
+  public AccountProfilesController(
+    IAccountProfileService accountProfileService,
     UserManager<User> userManager) {
     _accountProfileService = accountProfileService;
     _userManager = userManager;

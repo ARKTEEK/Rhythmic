@@ -1,5 +1,5 @@
 ﻿using backend.Api.DTO.OAuth;
-using backend.Application.Interface;
+using backend.Application.Interface.ExternalAuth;
 using backend.Domain.Entity;
 using backend.Domain.Enum;
 using backend.Infrastructure.Extensions;
@@ -22,7 +22,7 @@ public class OAuthController : ControllerBase {
 
   [HttpGet("{provider}/login")]
   public IActionResult Login([FromRoute] string provider) {
-    if (!Enum.TryParse<OAuthProvider>(provider, true, out OAuthProvider providerEnum)) {
+    if (!Enum.TryParse(provider, true, out OAuthProvider providerEnum)) {
       return BadRequest(new { error = "Unsupported provider." });
     }
 
@@ -31,8 +31,9 @@ public class OAuthController : ControllerBase {
   }
 
   [HttpPost("{provider}/callback")]
-  public async Task<IActionResult> Callback([FromRoute] string provider, [FromBody] OAuthLoginRequestDto request) {
-    if (!Enum.TryParse<OAuthProvider>(provider, true, out OAuthProvider providerEnum)) {
+  public async Task<IActionResult> Callback([FromRoute] string provider,
+    [FromBody] OAuthLoginRequestDto request) {
+    if (!Enum.TryParse(provider, true, out OAuthProvider providerEnum)) {
       return BadRequest(new { error = "Unsupported provider." });
     }
 
@@ -44,9 +45,9 @@ public class OAuthController : ControllerBase {
     HttpContext.Items["returned_state"] = request.State;
 
     OAuthLoginResponseDto result = await _iOAuthService.LoginAsync(
-        user.Id,
-        providerEnum,
-        request.Code
+      user.Id,
+      providerEnum,
+      request.Code
     );
 
     return Ok(result);
@@ -55,7 +56,7 @@ public class OAuthController : ControllerBase {
   [HttpDelete("{provider}/disconnect")]
   public async Task<IActionResult> Logout([FromRoute] string provider,
     [FromQuery] string providerId) {
-    if (!Enum.TryParse<OAuthProvider>(provider, true, out OAuthProvider providerEnum)) {
+    if (!Enum.TryParse(provider, true, out OAuthProvider providerEnum)) {
       return BadRequest(new { error = "Unsupported provider." });
     }
 

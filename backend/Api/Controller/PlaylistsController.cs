@@ -1,8 +1,10 @@
-﻿using backend.Application.Interface;
-using backend.Application.Model;
+﻿using backend.Application.Interface.Playlist;
+using backend.Application.Model.Playlists.Requests;
+using backend.Application.Model.Provider;
 using backend.Domain.Entity;
 using backend.Domain.Enum;
 using backend.Infrastructure.Extensions;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,15 +15,18 @@ namespace backend.Api.Controller;
 [Route("api")]
 public class PlaylistsController : ControllerBase {
   private readonly IPlaylistService _playlistService;
+  private readonly IPlaylistSplitService _playlistSplitService;
   private readonly IPlaylistSnapshotService _snapshotService;
   private readonly UserManager<User> _userManager;
 
   public PlaylistsController(
     UserManager<User> userManager,
     IPlaylistService playlistService,
+    IPlaylistSplitService playlistSplitService,
     IPlaylistSnapshotService snapshotService) {
     _userManager = userManager;
     _playlistService = playlistService;
+    _playlistSplitService = playlistSplitService;
     _snapshotService = snapshotService;
   }
 
@@ -118,7 +123,7 @@ public class PlaylistsController : ControllerBase {
         provider, playlistId, providerAccountId);
 
       try {
-        await _snapshotService.CreateSnapshotAsync(
+        await _snapshotService.CreateSnapshotIfChangedAsync(
           user.Id, provider, playlistId, providerAccountId, currentTracks);
       } catch {
       }
@@ -197,8 +202,9 @@ public class PlaylistsController : ControllerBase {
     request.DestinationProviderAccountId = destinationAccountId;
 
     try {
-      List<ProviderPlaylist> createdPlaylists = await _playlistService.SplitPlaylistAsync(
-        provider, playlistId, providerAccountId, destinationAccountId, request);
+      List<ProviderPlaylist> createdPlaylists =
+        await _playlistSplitService.SplitPlaylistAsync(
+          provider, playlistId, providerAccountId, destinationAccountId, request);
 
       return Ok(createdPlaylists);
     } catch (Exception ex) {

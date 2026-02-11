@@ -1,4 +1,4 @@
-﻿using backend.Application.Model;
+﻿using backend.Application.Model.Provider;
 using backend.Domain.Enum;
 using backend.Infrastructure.DTO.Google;
 using backend.Infrastructure.Utils;
@@ -97,15 +97,11 @@ public static class GooglePlaylistMapper {
     return track.Id;
   }
 
-  public static object CreatePlaylistItemInsertBody(string playlistId, string videoId, int? position) {
+  public static object CreatePlaylistItemInsertBody(string playlistId, string videoId,
+    int? position) {
     return new {
       snippet = new {
-        playlistId = playlistId,
-        resourceId = new {
-          kind = "youtube#video",
-          videoId = videoId
-        },
-        position = position ?? 0
+        playlistId, resourceId = new { kind = "youtube#video", videoId }, position = position ?? 0
       }
     };
   }

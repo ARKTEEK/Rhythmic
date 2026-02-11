@@ -3,6 +3,5 @@
 public enum OAuthProvider {
   Google,
   Spotify,
-  SoundCloud,
-  Tidle,
+  SoundCloud
 }

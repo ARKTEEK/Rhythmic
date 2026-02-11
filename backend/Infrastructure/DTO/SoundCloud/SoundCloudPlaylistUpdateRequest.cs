@@ -1,25 +1,21 @@
 using System.Text.Json.Serialization;
 
+namespace backend.Infrastructure.DTO.SoundCloud;
+
 public class SoundCloudPlaylistUpdateRequest {
-  [JsonPropertyName("playlist")]
-  public SoundCloudPlaylistUpdateData Playlist { get; set; } = new();
+  [JsonPropertyName("playlist")] public SoundCloudPlaylistUpdateData Playlist { get; set; } = new();
 }
 
 public class SoundCloudPlaylistUpdateData {
-  [JsonPropertyName("title")]
-  public string? Title { get; set; }
+  [JsonPropertyName("title")] public string? Title { get; set; }
 
-  [JsonPropertyName("description")]
-  public string? Description { get; set; }
+  [JsonPropertyName("description")] public string? Description { get; set; }
 
-  [JsonPropertyName("sharing")]
-  public string? Sharing { get; set; }
+  [JsonPropertyName("sharing")] public string? Sharing { get; set; }
 
-  [JsonPropertyName("tracks")]
-  public List<SoundCloudTrackUrn> Tracks { get; set; } = new();
+  [JsonPropertyName("tracks")] public List<SoundCloudTrackUrn> Tracks { get; set; } = new();
 }
 
 public class SoundCloudTrackUrn {
-  [JsonPropertyName("urn")]
-  public string Urn { get; set; } = string.Empty;
+  [JsonPropertyName("urn")] public string Urn { get; set; } = string.Empty;
 }

@@ -10,4 +10,3 @@ public class CreateUserRequest {
 public class UpdateUserRolesRequest {
   public required List<string> Roles { get; set; }
 }
-

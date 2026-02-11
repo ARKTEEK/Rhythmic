@@ -1,7 +1,6 @@
-﻿namespace backend.Infrastructure.Utils;
+﻿using System.Text.RegularExpressions;
 
-using System;
-using System.Text.RegularExpressions;
+namespace backend.Infrastructure.Utils;
 
 public static class MappingUtils {
   private static readonly Regex WhitespaceRegex = new(@"\s+", RegexOptions.Compiled);
@@ -20,30 +19,19 @@ public static class MappingUtils {
   private static readonly string[] Delimiters = { " - ", " – ", " — ", " | ", ":" };
 
   private static readonly string[] BracketedRemovableTags = {
-    "official music video",
-    "official hd music video",
-    "official video",
-    "official audio",
-    "official lyric video",
-    "official visualizer",
-    "visualizer",
-    "visualiser",
-    "lyric video",
-    "lyrics",
-    "audio",
-    "hd music video",
-    "video",
-    "official"
+    "official music video", "official hd music video", "official video", "official audio",
+    "official lyric video", "official visualizer", "visualizer", "visualiser", "lyric video",
+    "lyrics", "audio", "hd music video", "video", "official"
   };
 
   private static readonly string[] StandaloneSuffixes = {
-    "official music video",
-    "official video",
-    "official audio"
+    "official music video", "official video", "official audio"
   };
 
   public static (string Artist, string Track) ParseAndClean(string title) {
-    if (string.IsNullOrWhiteSpace(title)) return (string.Empty, string.Empty);
+    if (string.IsNullOrWhiteSpace(title)) {
+      return (string.Empty, string.Empty);
+    }
 
     (string artist, string track) = SplitArtistTrack(title);
 
@@ -82,7 +70,9 @@ public static class MappingUtils {
   }
 
   public static string CleanArtist(string artist) {
-    if (string.IsNullOrWhiteSpace(artist)) return string.Empty;
+    if (string.IsNullOrWhiteSpace(artist)) {
+      return string.Empty;
+    }
 
     string cleaned = TopicRegex.Replace(artist, "");
 
@@ -90,16 +80,18 @@ public static class MappingUtils {
   }
 
   private static (string CleanedTrack, string FeatArtist) ExtractFeaturingInfo(string track) {
-    if (string.IsNullOrWhiteSpace(track)) return (string.Empty, string.Empty);
+    if (string.IsNullOrWhiteSpace(track)) {
+      return (string.Empty, string.Empty);
+    }
 
-    var bracketMatch = BracketedFeaturingRegex.Match(track);
+    Match bracketMatch = BracketedFeaturingRegex.Match(track);
     if (bracketMatch.Success) {
       string featArtist = bracketMatch.Groups["artist"].Value.Trim();
       string cleanedTrack = track.Replace(bracketMatch.Value, " ");
       return (cleanedTrack, featArtist);
     }
 
-    var unbracketedMatch = UnbracketedFeaturingRegex.Match(track);
+    Match unbracketedMatch = UnbracketedFeaturingRegex.Match(track);
     if (unbracketedMatch.Success) {
       string featArtist = unbracketedMatch.Groups["artist"].Value.Trim();
       string cleanedTrack = track.Substring(0, unbracketedMatch.Index);
@@ -110,14 +102,16 @@ public static class MappingUtils {
   }
 
   private static string CleanTrackTags(string track) {
-    if (string.IsNullOrWhiteSpace(track)) return string.Empty;
+    if (string.IsNullOrWhiteSpace(track)) {
+      return string.Empty;
+    }
 
     string cleaned = track.Trim();
 
     bool suffixRemoved;
     do {
       suffixRemoved = false;
-      foreach (var suffix in StandaloneSuffixes) {
+      foreach (string suffix in StandaloneSuffixes) {
         if (cleaned.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)) {
           cleaned = cleaned.Substring(0, cleaned.Length - suffix.Length).Trim();
           suffixRemoved = true;
@@ -135,7 +129,10 @@ public static class MappingUtils {
   }
 
   private static string NormalizeWhitespace(string input) {
-    if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+    if (string.IsNullOrWhiteSpace(input)) {
+      return string.Empty;
+    }
+
     return WhitespaceRegex.Replace(input, " ").Trim();
   }
 
@@ -145,16 +142,21 @@ public static class MappingUtils {
     return track;
   }
 
-  private static string RemoveTrailingGroup(string track, char open, char close, ref bool removed) {
+  private static string
+    RemoveTrailingGroup(string track, char open, char close, ref bool removed) {
     int end = track.LastIndexOf(close);
-    if (end < 0) return track;
+    if (end < 0) {
+      return track;
+    }
 
     int start = track.LastIndexOf(open, end);
-    if (start < 0 || end < start) return track;
+    if (start < 0 || end < start) {
+      return track;
+    }
 
     string inner = track.Substring(start + 1, end - start - 1).Trim().ToLowerInvariant();
 
-    foreach (var tag in BracketedRemovableTags) {
+    foreach (string tag in BracketedRemovableTags) {
       if (inner.Contains(tag)) {
         removed = true;
         return track[..start];

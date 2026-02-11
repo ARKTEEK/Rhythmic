@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+
 using backend.Domain.Enum;
 
 namespace backend.Domain.Entity;
@@ -19,4 +20,3 @@ public class PlaylistSnapshot {
 
   public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
-

@@ -1,4 +1,4 @@
-﻿using backend.Application.Model;
+﻿using backend.Application.Model.Provider;
 using backend.Infrastructure.DTO.Spotify;
 
 namespace backend.Infrastructure.Mapper.Spotify;
