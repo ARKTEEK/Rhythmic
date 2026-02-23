@@ -10,7 +10,7 @@ A web application for managing and organizing music playlists across multiple pl
 Users can create, version, split, and synchronize playlists while identifying duplicate tracks.
 <br />
 <br />
-<a href="https://github.com/ARKTEEK/Rhythmic"><strong>View Demo »</strong></a>
+<a href="https://www.youtube.com/watch?v=u5hVYthbdV8"><strong>View Demo »</strong></a>
 </p>
 
 </div>
